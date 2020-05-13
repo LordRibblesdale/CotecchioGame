@@ -1,4 +1,4 @@
-#include <rapidxml_utils.hpp>
+#include <fstream>
 #include "Graphics/GL_Loader.h"
 #include "rapidxml.hpp"
 
@@ -7,7 +7,7 @@ int main(int argc, char** argv) {
    // Creazione input buffer
    std::ifstream file("text.xml");
 
-   if (!file.fail()) {
+   if (file.is_open()) {
       // Creazione documento
       rapidxml::xml_document<> document;
       // Creazione nodo iniziale per lettura file
@@ -32,7 +32,9 @@ int main(int argc, char** argv) {
       }
 
       return initialise();
+   } else {
+      std::cout << "Error XML_FILE_INPUT: no default file has been loaded.";
    }
 
-   return 1;
+   return EXIT_FAILURE;
 }
