@@ -10,7 +10,7 @@
 #include <vector>
 
 //In coordinate NDC da inviare allo shader
-std::vector<Float3> array;
+std::vector<float> vertices;
 
 //Vertex buffer, Element buffer per la topologia
 // Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
@@ -61,6 +61,7 @@ void pollInput(GLFWwindow *window) {
  * - Preparazione tipi di dati da leggere
  * - Chiamata del program con glUseProgram per chiamare i vari shader
  */
+
 
 static int initialise() {
    // Inzializzazione di OpenGL per il render
@@ -165,18 +166,6 @@ static int initialise() {
    GLuint vbo; // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
    GLuint vao; // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
 
-   //TODO optimise here
-   float vertices[9];
-
-   int j = 0;
-   for (const Float3& f : array) {
-      for (int i = 0; i < f.get_size(); ++i) {
-         vertices[j*3 + i] = f.get_vector().get()[i];
-         std::cout << vertices[j*3 + i];
-      }
-      ++j;
-   }
-
    // Genera il Vertex Array Object
    glGenVertexArrays(1, &vao);
    // Genera il Vertex Buffer Object
@@ -189,7 +178,7 @@ static int initialise() {
    // Copia dati nell'array, inizializzando la memoria nel punto bindato del buffer (prima solo indice, VBO)
    // GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
    // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL

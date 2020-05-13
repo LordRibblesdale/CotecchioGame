@@ -5,7 +5,7 @@
 // Argument as XML file importer
 int main(int argc, char** argv) {
    // Creazione input buffer
-   std::ifstream file("text.xml");
+   std::ifstream file("C:\\Users\\Green\\CLionProjects\\CotecchioGame\\test.xml");
 
    if (file.is_open()) {
       // Creazione documento
@@ -24,10 +24,9 @@ int main(int argc, char** argv) {
       // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
       for (rapidxml::xml_node<>* position = rootNode->first_node("Float3"); position; position = position->next_sibling()) {
          for (rapidxml::xml_node<>* coordinates = position->first_node("Positions"); coordinates; coordinates = coordinates->next_sibling()) {
-            array[std::stoi(position->first_attribute("point")->value())]
-                    = std::move(Float3(std::stof(coordinates->first_attribute("x")->value()),
-                                       std::stof(coordinates->first_attribute("y")->value()),
-                                       std::stof(coordinates->first_attribute("z")->value())));
+            vertices.push_back(std::stof(coordinates->first_attribute("x")->value()));
+            vertices.push_back(std::stof(coordinates->first_attribute("y")->value()));
+            vertices.push_back(std::stof(coordinates->first_attribute("z")->value()));
          }
       }
 
