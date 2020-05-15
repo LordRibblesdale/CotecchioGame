@@ -72,7 +72,6 @@ void pollInput(GLFWwindow *window) {
  * - Chiamata del program con glUseProgram per chiamare i vari shader
  */
 
-
 static int initialise() {
    // Inzializzazione di OpenGL per il render
    glfwInit();
