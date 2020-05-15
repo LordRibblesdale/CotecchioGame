@@ -2,15 +2,25 @@
 #define GL_LOADER_H
 
 #include "glad.h"
+
+#ifdef _WIN32
 #include "glfw3.h"
+#endif
+
+#ifdef linux
+#include <GLFW/glfw3.h>
+#endif
+
 #include "Shaders.h"
 #include "../Vector/Float3.h"
 
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 //In coordinate NDC da inviare allo shader
 std::vector<float> vertices;
+std::vector<float> colors;
 
 //Vertex buffer, Element buffer per la topologia
 // Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
@@ -165,6 +175,10 @@ static int initialise() {
 
    GLuint vbo; // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
    GLuint vao; // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
+   // E' possibile attribuire durante il ciclo il colore, tramite l'uniform vec4
+   // Gathering variabile uniform del pixel shader che risiede nel programma, ma non si accede tramite puntatore
+   //    -> Accesso tramite  (poichè puntatore non generato nello shader)
+   GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "color");  // Puntatore alla variabile
 
    // Genera il Vertex Array Object
    glGenVertexArrays(1, &vao);
@@ -189,7 +203,12 @@ static int initialise() {
     * Offset di memoria, ovvero punto zona di memoria per leggere i dati, poichè a priori non nota (potrebbero esserci dati in piu da non dover leggere
     * x y z u v  x y ... offset 2
     */
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3* sizeof(float), (GLvoid*)0);
+   // DEFINITA nella scrittura dello shader
+   // Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
+   // Il valore 3 dice quanti vertici
+   //TODO work here
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (GLvoid*) (3*sizeof(float)));
+   //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), 3*sizeof(float));
    // Abilita gli attributi passatigli
    glEnableVertexAttribArray(0);
 
@@ -211,23 +230,18 @@ static int initialise() {
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
       glUseProgram(shaderProgram);
+
+      // Scrivere nella location della variabile i valori del colore da assegnare al pixel;
+      // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
+      // Quindi attenzione al posizionamento delle chiamate di modifica stato
+      float newColor = sinf(glfwGetTime());
+      // Funzione per modificare colore, o vertici
+      glUniform4f(colorUniformLocation, newColor, 1.0f, 0.0f, 1.0f);
+
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
       // Chamata di disegno della primitiva
       glDrawArrays(GL_TRIANGLES, 0, 3);
-
-      /*
-      j = 0;
-      for (Float3& f : array) {
-         f = std::move(Rotation::axisZRotateVertex3(f, 10));
-
-         for (int i = 0; i < f.get_size(); ++i) {
-            vertices[j*3 + i] = f.get_vector().get()[i];
-            std::cout << vertices[j*3 + i];
-         }
-         ++j;
-      }
-      */
 
       //Necessità di modificare il buffer prima di inviarlo
       // prima, modifica il buffer B (sul successivo)

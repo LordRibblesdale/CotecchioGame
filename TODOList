@@ -1,3 +1,5 @@
+vector resize (
+
 -> Check all exceptions and noexcept(false) declarations
 -> Correct all names based on code styles
 -> Add matrix conversion in upper dimension (example: projective-4)

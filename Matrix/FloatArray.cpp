@@ -30,7 +30,7 @@ FloatArray::FloatArray(const FloatArray &floatArray) {
    }
 }
 
-FloatArray::FloatArray(FloatArray &&floatArray) {
+FloatArray::FloatArray(FloatArray&& floatArray) {
    //TODO test const_cast here
    array_ = move(std::unique_ptr<float>((const_cast<std::unique_ptr<float>&>(floatArray.getArray())).release()));
    rows_ = floatArray.getRows();

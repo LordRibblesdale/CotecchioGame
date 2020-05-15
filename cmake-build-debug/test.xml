@@ -2,11 +2,14 @@
 <SimpleTriangle>
     <Float3>
         <Positions x="-0.5" y="-0.5" z="0"/>
+        <Colors r="1.0f" g="0.0f" b="0.0f"/>
     </Float3>
     <Float3>
         <Positions x="0.5" y="-0.5" z="0"/>
+        <Colors r="0.0f" g="1.0f" b="0.0f"/>
     </Float3>
     <Float3>
         <Positions x="0" y="0.5" z="0"/>
+        <Colors r="0.0f" g="0.0f" b="1.0f"/>
     </Float3>
 </SimpleTriangle>
