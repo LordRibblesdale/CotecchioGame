@@ -25,7 +25,6 @@ add_executable(${PROJECT_NAME}
         ${XMLFolder}
         ${MainFile})
 
-
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")
 target_include_directories(${PROJECT_NAME} PRIVATE "IO/rapidxml-1.13")
@@ -33,15 +32,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE "IO/rapidxml-1.13")
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glfw-3.3.2.bin.WIN64/include/GLFW")
     target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/glfw-3.3.2.bin.WIN64/lib-mingw-w64/libglfw3.a")
-
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS -Wl,--stack,10000000)
 endif()
 
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES})
     target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libdl.so")
-
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS -Wl,--main-stacksize,10000000)
-
 endif()
 

@@ -20,29 +20,28 @@ int main(int argc, char** argv) {
       document.parse<0>(&buffer[0]);
       // Ricerca del primo nodo
       rootNode = document.first_node("SimpleTriangle");
-      // Iterazioni tra i nodi
-      // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
 
+      //
       unsigned int resizeIndex = 0;
       for (rapidxml::xml_node<>* position = rootNode->first_node("Float3"); position; position = position->next_sibling()) {
          ++resizeIndex;
       }
 
-      vertices.resize(3*resizeIndex);
-      colors.resize(3*resizeIndex);
+      attributes.resize(6 * resizeIndex);
 
+      // Iterazioni tra i nodi
+      // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
+      auto i = 0;
       for (rapidxml::xml_node<>* position = rootNode->first_node("Float3"); position; position = position->next_sibling()) {
          for (rapidxml::xml_node<>* coordinates = position->first_node("Positions"); coordinates; coordinates = coordinates->next_sibling()) {
-            std::string type(std::string(coordinates->first_attribute("type")->value()));
-            if (type == "pos") {
-               vertices.push_back(std::stof(coordinates->first_attribute("x")->value()));
-               vertices.push_back(std::stof(coordinates->first_attribute("y")->value()));
-               vertices.push_back(std::stof(coordinates->first_attribute("z")->value()));
-            } else if (type == "col") {
-
-            }
-
+            attributes[i++] = (std::stof(coordinates->first_attribute("x")->value()));
+            attributes[i++] = (std::stof(coordinates->first_attribute("y")->value()));
+            attributes[i++] = (std::stof(coordinates->first_attribute("z")->value()));
          }
+      }
+
+      for (float f : attributes) {
+         std::cout << f << std::endl;
       }
 
       file.close();
