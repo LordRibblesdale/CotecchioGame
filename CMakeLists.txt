@@ -23,7 +23,7 @@ add_executable(${PROJECT_NAME}
         ${GladLibraries}
         ${GLFWLibraries}
         ${XMLFolder}
-        ${MainFile} Graphics/Shaders.h)
+        ${MainFile})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")
