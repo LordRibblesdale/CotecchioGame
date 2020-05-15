@@ -5,7 +5,7 @@
 // Argument as XML file importer
 int main(int argc, char** argv) {
    // Creazione input buffer
-   std::ifstream file("C:\\Users\\Green\\CLionProjects\\CotecchioGame\\test.xml");
+   std::ifstream file("test.xml");
 
    if (file.is_open()) {
       // Creazione documento

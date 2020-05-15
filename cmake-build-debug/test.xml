@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SimpleTriangle>
+    <Float3>
+        <Positions x="-0.5" y="-0.5" z="0"/>
+    </Float3>
+    <Float3>
+        <Positions x="0.5" y="-0.5" z="0"/>
+    </Float3>
+    <Float3>
+        <Positions x="0" y="0.5" z="0"/>
+    </Float3>
+</SimpleTriangle>
