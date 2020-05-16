@@ -79,7 +79,7 @@ static int initialise() {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __APPLE
+#ifdef __APPLE__
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
@@ -190,6 +190,7 @@ static int initialise() {
    // Copia dati nell'array, inizializzando la memoria nel punto bindato del buffer (prima solo indice, VBO)
    // GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * attributes.size(), attributes.data(), GL_DYNAMIC_DRAW);
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
@@ -206,10 +207,11 @@ static int initialise() {
    // Il valore 3 dice quanti vertici
    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (GLvoid*) 0);
    // Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
-   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (GLvoid*) (3*sizeof(float)));
-   //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), 3*sizeof(float));
    // Abilita gli attributi passatigli
    glEnableVertexAttribArray(0);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (GLvoid*) (3*sizeof(float)));
+   //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), 3*sizeof(float));
+   glEnableVertexAttribArray(1);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -233,9 +235,11 @@ static int initialise() {
       // Scrivere nella location della variabile i valori del colore da assegnare al pixel;
       // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
-      float newColor = sinf(glfwGetTime());
+
+      // Aggiornamento del colore da modificare
       // Funzione per modificare colore, o vertici
-      glUniform3f(colorUniformLocation, newColor, 0.0f, 0.0f);
+      glUniform3f(colorUniformLocation, sinf(glfwGetTime()), 0.0f, 0.0f);
+
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
       // Chamata di disegno della primitiva

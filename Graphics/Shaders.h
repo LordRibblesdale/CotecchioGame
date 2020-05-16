@@ -17,13 +17,16 @@
 
 // Impostazione linguaggio GLSL - scrittura direzionalità e tipo di dato
 const char* vsSource = "#version 330 core\n"
+
                        "layout (location = 0) in vec3 position;\n" // Variabile in ingresso di 3 float (vettore), layout da posizione sulla memoria
                        "layout (location = 1) in vec3 vertexColor;\n"
+
                        "out vec3 vertexColor2;\n"
-                       "uniform vec3 color;\n"  // Da definire per ottenere informazioni dolore per vertice
+
                        "void main() {\n"
+                       // gl_Position attribuisce la posizione al vertice
                        "   gl_Position = vec4(position.x, position.y, position.z, 1.0f);\n"
-                       "   vertexColor2 = vertexColor*color;\n"   // Salvare colore vertici
+                       "   vertexColor2 = vertexColor;\n"   // Salvare colore vertici
                        //"   gl_Position = MVP*position\n"  // Posizione in Clip Space/NDC
                        "}\n\0";
 //"layout (location = 1) in vec3 normal;\n" // Definiamo più attributi su piu indici
@@ -32,12 +35,15 @@ const char* vsSource = "#version 330 core\n"
 //"vec3 pos1 = position.xxx"; // Inizializzazione con accesso a variabili position.xyz con x y z generici
 // Attributi: dati
 
-// Fragment -> Pixel (out per ogni pixel, 4 float definiscono il colore in questo caso
+// Fragment -> Pixel  (out per ogni pixel, 4 float definiscono il colore in questo caso RGBA)
 const char* fsSource = "#version 330 core\n"
+
                        "in vec3 vertexColor;\n" // Input colore da Vertex Shader
                        "out vec4 fragColor;\n"  // Colore da rappresentare (visualizzato con interpolazione)
+                       "uniform vec3 color;\n"  // Da definire per ottenere informazioni dolore per vertice
+
                        "void main() {\n"
-                       "   fragColor = vec4(vertexColor, 1.0f);\n" // Colore [0,1] RGBA
+                       "   fragColor = vec4(vertexColor*color , 1.0f);\n" // Colore [0,1] RGBA
                        "}\n\0";
 
 #endif //GLSL_H

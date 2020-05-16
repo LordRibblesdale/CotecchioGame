@@ -40,10 +40,6 @@ int main(int argc, char** argv) {
          }
       }
 
-      for (float f : attributes) {
-         std::cout << f << std::endl;
-      }
-
       file.close();
 
       return initialise();
