@@ -112,35 +112,35 @@ void Float4::normalize() {
 }
 
 float Float4::getX() const {
-   return get_vector().get()[0];
+   return getVector().get()[0];
 }
 
 float Float4::getY() const {
-   return get_vector().get()[1];
+   return getVector().get()[1];
 }
 
 float Float4::getZ() const {
-   return get_vector().get()[2];
+   return getVector().get()[2];
 }
 
 float Float4::getW() const {
-   return get_vector().get()[3];
+   return getVector().get()[3];
 }
 
 void Float4::setX(const float &x) {
-   get_vector().get()[0] = x;
+   getVector().get()[0] = x;
 }
 
 void Float4::setY(const float &y) {
-   get_vector().get()[1] = y;
+   getVector().get()[1] = y;
 }
 
 void Float4::setZ(const float &z) {
-   get_vector().get()[2] = z;
+   getVector().get()[2] = z;
 }
 
 void Float4::setW(const float &w) {
-   get_vector().get()[3] = w;
+   getVector().get()[3] = w;
 }
 
 Float3 Float4::getProjectionQuotient() {

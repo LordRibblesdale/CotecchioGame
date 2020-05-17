@@ -35,6 +35,12 @@ Float3 &Float3::operator=(Float3 &&point) {
    return *this;
 }
 
+/*
+const float* Float3::operator*() {
+   return vector_.get();
+}
+ */
+
 Float3 Float3::operator+(const Float3 &point) {
    return Float3(getX() + point.getX(), getY() + point.getY(), getZ() + point.getZ());
 }
@@ -108,25 +114,26 @@ void Float3::normalize() {
 }
 
 float Float3::getX() const {
-   return get_vector().get()[0];
+   return getVector().get()[0];
 }
 
 float Float3::getY() const {
-   return get_vector().get()[1];
+   return getVector().get()[1];
 }
 
 float Float3::getZ() const {
-   return get_vector().get()[2];
+   return getVector().get()[2];
 }
 
 void Float3::setX(const float &x) {
-   get_vector().get()[0] = x;
+   getVector().get()[0] = x;
 }
 
 void Float3::setY(const float &y) {
-   get_vector().get()[1] = y;
+   getVector().get()[1] = y;
 }
 
 void Float3::setZ(const float &z) {
-   get_vector().get()[2] = z;
+   getVector().get()[2] = z;
 }
+

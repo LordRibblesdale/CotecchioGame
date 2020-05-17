@@ -99,19 +99,19 @@ void Float2::normalize() {
 }
 
 float Float2::getX() const {
-   return get_vector().get()[0];
+   return getVector().get()[0];
 }
 
 float Float2::getY() const {
-   return get_vector().get()[1];
+   return getVector().get()[1];
 }
 
 void Float2::setX(const float& x) {
-   get_vector().get()[0] = x;
+   getVector().get()[0] = x;
 }
 
 void Float2::setY(const float& y) {
-   get_vector().get()[1] = y;
+   getVector().get()[1] = y;
 }
 
 Float2 Float2::axisRotateVertex2(const Float2 &vector, const float& angle) {

@@ -8,7 +8,6 @@ struct FloatVector {
    unsigned int size_;
 
 public:
-   //TODO fix different sizes: data and size
    FloatVector(unsigned int size, const std::initializer_list<float>& data) {
       vector_ = move(std::unique_ptr<float>(new float[size]));
       FloatVector::size_ = size;
@@ -21,40 +20,41 @@ public:
    }
 
    FloatVector(const FloatVector& floatVector) {
-      vector_ = std::unique_ptr<float>(new float[floatVector.get_size()]);
-      FloatVector::size_ = floatVector.get_size();
+      vector_ = std::unique_ptr<float>(new float[floatVector.getSize()]);
+      FloatVector::size_ = floatVector.getSize();
 
       for (int i = 0; i < size_; ++i) {
-         vector_.get()[i] = floatVector.get_vector().get()[i];
+         vector_.get()[i] = floatVector.getVector().get()[i];
       }
    }
 
    FloatVector(FloatVector&& floatVector) {
       //TODO test const_cast here
       //USED in: Matrix::multiplyVector()
-      vector_ = move(std::unique_ptr<float>((const_cast<std::unique_ptr<float>&>(floatVector.get_vector())).release()));
-      size_ = floatVector.get_size();
+      vector_ = move(std::unique_ptr<float>((const_cast<std::unique_ptr<float>&>(floatVector.getVector())).release()));
+      size_ = floatVector.getSize();
    }
 
    ~FloatVector() {
+      vector_.reset();
       size_ = 0;
    }
 
    //TODO add all operators and functions
 
-   const unsigned int& get_size() const {
+   const unsigned int& getSize() const {
       return size_;
    }
 
-   const std::unique_ptr<float>& get_vector() const {
+   const std::unique_ptr<float>& getVector() const {
       return vector_;
    }
 
-   std::string to_string() const {
+   std::string toString() const {
       std::string s;
 
-      for (auto i = 0; i < get_size(); ++i) {
-         s.append("[").append(std::to_string(get_vector().get()[i])).append("]\n");
+      for (auto i = 0; i < getSize(); ++i) {
+         s.append("[").append(std::to_string(getVector().get()[i])).append("]\n");
       }
 
       return s;

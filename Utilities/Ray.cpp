@@ -8,10 +8,10 @@ bool Ray::isIntersecting(const Box &box) const {
    float tFar = std::numeric_limits<float>::max();
 
    for (int i = 0; i < 3; ++i) {
-      float inverseDirection = 1/direction_.get_vector().get()[i];
+      float inverseDirection = 1/ direction_.getVector().get()[i];
       //TODO     -V- check this minus sign (tFar < 0?)
-      float t1 = -(box.getInitialPoint().get_vector().get()[i] - origin_.get_vector().get()[i])*inverseDirection;
-      float t2 = -(box.getFinalPoint().get_vector().get()[i] - origin_.get_vector().get()[i])*inverseDirection;
+      float t1 = -(box.getInitialPoint().getVector().get()[i] - origin_.getVector().get()[i]) * inverseDirection;
+      float t2 = -(box.getFinalPoint().getVector().get()[i] - origin_.getVector().get()[i]) * inverseDirection;
 
       if (t1 > t2) {
          std::swap(t1, t2);

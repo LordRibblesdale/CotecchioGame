@@ -13,13 +13,17 @@
 
 #include "Shaders.h"
 #include "../Vector/Float3.h"
+#include "../Utilities/Color.h"
 
 #include <iostream>
 #include <vector>
 #include <cmath>
 
 //In coordinate NDC da inviare allo shader
-std::vector<float> attributes;
+//TODO check public/private access
+//TODO optimise memory with 3 arrays (find alternative way of using 2+merge)
+std::vector<Float3> vertices;
+std::vector<Color> colors;
 
 //Vertex buffer, Element buffer per la topologia
 // Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
@@ -191,7 +195,21 @@ static int initialise() {
    // GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * attributes.size(), attributes.data(), GL_DYNAMIC_DRAW);
+   //TODO check resize and memory allocation
+   std::vector<GLfloat> attributes;
+   for (auto i = 0; i < vertices.size(); ++i) {
+      auto pointer = vertices.at(i).getVector().get();
+      attributes.insert(attributes.end(), pointer, pointer+3);
+
+      pointer = colors.at(i).getVector().get();
+      attributes.insert(attributes.end(), pointer, pointer+3);
+   }
+
+   for (float f : attributes) {
+      std::cout << f << std::endl;
+   }
+
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * attributes.size(), attributes.data(), GL_DYNAMIC_DRAW);
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
    // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL

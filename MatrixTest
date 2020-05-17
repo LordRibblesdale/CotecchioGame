@@ -23,7 +23,7 @@
    //cout << (matrix2.multiply_vector(vector1)).to_string() << endl << endl;
 
    //cout << (matrix1.multiplyVector(vector0)).to_string() << endl << endl;
-   //cout << (Matrix::createSubmatrix(matrix1, 3, 3)).to_string() << endl << endl;
+   //cout << (Matrix::createSubmatrix(matrix1, 3, 3)).toString() << endl << endl;
 
       Float4 point(0.7, 0.5, 0, 1);
       Float4 direction(0, 0, 1, 1);

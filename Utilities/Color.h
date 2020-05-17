@@ -5,7 +5,15 @@
 
 class Color : public FloatVector {
 public:
+   Color();
    Color(float r, float g, float b);
+   Color(float& r, float& g, float& b);
+   Color(const Color& color);
+   Color(Color&& color);
+   ~Color();
+
+   Color& operator=(const Color& color);
+   Color& operator=(Color&& color);
 
    const float& getRed() const;
    const float& getGreen() const;

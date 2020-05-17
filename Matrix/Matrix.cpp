@@ -188,24 +188,24 @@ Matrix Matrix::createSubmatrix(const Matrix &matrix, unsigned int rowIndex, unsi
 }
 
 FloatVector Matrix::multiplyVector(const FloatVector& vector) const noexcept(false) {
-   if (getColumns() == vector.get_size()) {
+   if (getColumns() == vector.getSize()) {
       FloatVector newData(getRows(), {});
 
       for (int i = 0; i < getRows(); ++i) {
          float value = 0;
 
          for (int j = 0; j < getColumns(); ++j) {
-            value += getArray()[i * getColumns() + j] * vector.get_vector().get()[j];
+            value += getArray()[i * getColumns() + j] * vector.getVector().get()[j];
          }
 
-         newData.get_vector().get()[i] = value;
+         newData.getVector().get()[i] = value;
       }
 
       return move(newData);
    } else {
       string s = "Exception NO_MATCH_LENGTH: matrix and vector_ do not have correct size_. ";
       s.append("Matrix columns_: ").append(std::to_string(getColumns())).append("!= Vector size_: ")
-         .append(std::to_string(vector.get_size())).append("\n");
+         .append(std::to_string(vector.getSize())).append("\n");
 
       throw ExceptionNotifier(s.c_str());
    }

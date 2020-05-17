@@ -12,10 +12,10 @@ SquareMatrix Camera::world2ViewMatrix() {
 
    SquareMatrix view2WorldMatrix(4, {});
 
-   for (int i = 0; i < xView.get_size(); ++i) {
-      view2WorldMatrix.getArray()[i * view2WorldMatrix.getDimension()] = xView.get_vector().get()[i];
-      view2WorldMatrix.getArray()[i * view2WorldMatrix.getDimension() + 1] = yView.get_vector().get()[i];
-      view2WorldMatrix.getArray()[i * view2WorldMatrix.getDimension() + 2] = zView.get_vector().get()[i];
+   for (int i = 0; i < xView.getSize(); ++i) {
+      view2WorldMatrix.getArray()[i * view2WorldMatrix.getDimension()] = xView.getVector().get()[i];
+      view2WorldMatrix.getArray()[i * view2WorldMatrix.getDimension() + 1] = yView.getVector().get()[i];
+      view2WorldMatrix.getArray()[i * view2WorldMatrix.getDimension() + 2] = zView.getVector().get()[i];
    }
 
    view2WorldMatrix.getArray()[view2WorldMatrix.getDimension() * view2WorldMatrix.getDimension() - 1] = 1;
