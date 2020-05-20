@@ -89,6 +89,10 @@ Float3& Float3::operator*=(const float &scalar) {
    return *this;
 }
 
+const float *Float3::operator*() {
+   return getVector().get();
+}
+
 float Float3::dotProduct(const Float3 &point) const {
    return getX() * point.getX() + getY() * point.getY() + getZ() * point.getZ();
 }
