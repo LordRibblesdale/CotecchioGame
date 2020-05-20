@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
       // Ricerca del primo nodo
       rootNode = document.first_node("SimpleTriangle");
 
-      //
+      // Conteggio dei vertici per calibrare nella memoria la lunghezza dei vari array
       unsigned int resizeIndex = 0;
       for (rapidxml::xml_node<>* position = rootNode->first_node("Float3"); position; position = position->next_sibling()) {
          ++resizeIndex;

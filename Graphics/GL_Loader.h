@@ -118,8 +118,17 @@ static int initialise() {
    int report;
    char infoLog[512];
 
+   //TODO optimise here
+   std::string source;
+   loadShader(source, "Graphics/vertex.glsl");
+   char* charSource(const_cast<char *>(source.c_str()));
+
+   if (!charSource) {
+      std::cout << "Error VERTEX_FILE_IMPORT" << std::endl;
+   }
+
    // Assegnazione codice allo shader (handle), assegnazione char* (codice GLSL da compilare)
-   glShaderSource(vertexShader, 1, &vsSource, nullptr);
+   glShaderSource(vertexShader, 1, &charSource, nullptr);
    // Compilazione shader
    glCompileShader(vertexShader);
 
@@ -131,13 +140,20 @@ static int initialise() {
       // Errore nella compilazione
       glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
 
-      std::cout << "Error INFOLOG_COMPILE_VERTEX: " << infoLog << std::endl;
+      std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
+   }
+
+   loadShader(source, "Graphics/fragment.glsl");
+   charSource = const_cast<char *>(source.c_str());
+
+   if (!charSource) {
+      std::cout << "Error FRAGMENT_FILE_IMPORT" << std::endl;
    }
 
    // FRAGMENT SHADER
    // Restituisce GL unsigned int, indice dell'oggetto fragment shader creato dalla GPU
    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragmentShader, 1, &fsSource, nullptr);
+   glShaderSource(fragmentShader, 1, &charSource, nullptr);
    glCompileShader(fragmentShader);
 
    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &report);
@@ -196,6 +212,7 @@ static int initialise() {
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
    //TODO check resize and memory allocation
+   //TODO optimise multiple array usage
    std::vector<GLfloat> attributes;
    for (auto i = 0; i < vertices.size(); ++i) {
       auto pointer = vertices.at(i).getVector().get();
@@ -223,12 +240,11 @@ static int initialise() {
    // DEFINITA nella scrittura dello shader
    // Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
    // Il valore 3 dice quanti vertici
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6* sizeof(GLfloat), (GLvoid*) 0);
    // Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
    // Abilita gli attributi passatigli
    glEnableVertexAttribArray(0);
-   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (GLvoid*) (3*sizeof(float)));
-   //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), 3*sizeof(float));
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
@@ -256,7 +272,8 @@ static int initialise() {
 
       // Aggiornamento del colore da modificare
       // Funzione per modificare colore, o vertici
-      glUniform3f(colorUniformLocation, sinf(glfwGetTime()), 0.0f, 0.0f);
+      float sin = sinf(glfwGetTime());
+      glUniform4f(colorUniformLocation, sin, 1.0f, 1.0f, 1.0f);
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
