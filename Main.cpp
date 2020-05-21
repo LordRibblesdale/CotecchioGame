@@ -27,26 +27,23 @@ int main(int argc, char** argv) {
          ++resizeIndex;
       }
 
-      vertices.resize(resizeIndex);
-      colors.resize(resizeIndex);
+      vertices.reserve(resizeIndex);
+      colors.reserve(resizeIndex);
 
       // Iterazioni tra i nodi
       // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
-      auto i = 0;
       for (rapidxml::xml_node<>* position = rootNode->first_node("Float3"); position; position = position->next_sibling()) {
          for (rapidxml::xml_node<>* coordinates = position->first_node("Positions"); coordinates; coordinates = coordinates->next_sibling()) {
             if (std::string(coordinates->first_attribute("type")->value()) == "pos") {
-               vertices[i] = std::move(Float3(std::stof(coordinates->first_attribute("x")->value()),
+               vertices.emplace_back(std::move(Float3(std::stof(coordinates->first_attribute("x")->value()),
                                         std::stof(coordinates->first_attribute("y")->value()),
-                                        std::stof(coordinates->first_attribute("z")->value())));
+                                        std::stof(coordinates->first_attribute("z")->value()))));
             } else if (std::string(coordinates->first_attribute("type")->value()) == "col") {
-               colors[i] = Color(std::stof(coordinates->first_attribute("x")->value()),
+               colors.emplace_back(Color(std::stof(coordinates->first_attribute("x")->value()),
                                       std::stof(coordinates->first_attribute("y")->value()),
-                                      std::stof(coordinates->first_attribute("z")->value()));
+                                      std::stof(coordinates->first_attribute("z")->value())));
             }
          }
-
-         ++i;
       }
 
       file.close();
