@@ -2,14 +2,17 @@
 <SimpleTriangle>
     <Float3>
         <Positions type="pos" x="-0.5" y="-0.5" z="0"/>
-        <Positions type="col" x="1.0f" y="0" z="0"/>
+        <Positions type="col" r="1.0f" g="0" b="0" a="1"/>
+        <Positions type="texture" u="1.0f" v="0"/>
     </Float3>
     <Float3>
         <Positions type="pos" x="0.5" y="-0.5" z="0"/>
-        <Positions type="col" x="0" y="1.0f" z="0"/>
+        <Positions type="col" r="0" g="1.0f" b="0" a="1"/>
+        <Positions type="texture" u="0" v="1.0f"/>
     </Float3>
     <Float3>
         <Positions type="pos" x="0" y="0.5" z="0"/>
-        <Positions type="col" x="0" y="0" z="1.0f"/>
+        <Positions type="col" r="0" g="0" b="1.0f" a="1"/>
+        <Positions type="texture" u="0" v="0"/>
     </Float3>
 </SimpleTriangle>

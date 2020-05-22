@@ -11,7 +11,12 @@
 #include <GLFW/glfw3.h>
 #endif
 
+#include "../Utilities/stb-master/stb_image.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "Shaders.h"
+#include "../Vector/Float2.h"
 #include "../Vector/Float3.h"
 #include "../Utilities/Color.h"
 
@@ -21,9 +26,10 @@
 
 //In coordinate NDC da inviare allo shader
 //TODO check public/private access
-//TODO optimise memory with 3 arrays (find alternative way of using 2+merge)
 std::vector<Float3> vertices;
 std::vector<Color> colors;
+// Coordinate di unwrap
+std::vector<Float2> textureUnwrap;
 
 //Vertex buffer, Element buffer per la topologia
 // Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
@@ -119,6 +125,7 @@ static int initialise() {
    char infoLog[512];
 
    //TODO optimise here
+   // Attenzione al puntatore, da eliminare appena utilizzato, andrà sempre cancellato
    std::string source;
    loadShader(source, "Graphics/vertex.glsl");
    char* charSource(const_cast<char *>(source.c_str()));
@@ -220,6 +227,9 @@ static int initialise() {
 
       pointer = colors.at(i).getVector().get();
       attributes.insert(attributes.end(), pointer, pointer+3);
+
+      pointer = textureUnwrap.at(i).getVector().get();
+      attributes.insert(attributes.end(), pointer, pointer+2);
    }
 
    for (float f : attributes) {
@@ -227,6 +237,9 @@ static int initialise() {
    }
 
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * attributes.size(), attributes.data(), GL_DYNAMIC_DRAW);
+
+   // Pulizia della memoria, fine dello scope
+   attributes.clear();
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
    // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL
@@ -240,18 +253,61 @@ static int initialise() {
    // DEFINITA nella scrittura dello shader
    // Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
    // Il valore 3 dice quanti vertici
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6* sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8* sizeof(GLfloat), (GLvoid*) 0);
    // Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
    // Abilita gli attributi passatigli
    glEnableVertexAttribArray(0);
-   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8* sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
+
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8* sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
+   glEnableVertexAttribArray(2);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
    // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
    glBindVertexArray(0);
+
+   // Creazione texture
+   GLuint texture1;
+   // Creazione allocazione memoria texture
+   glGenTextures(1, &texture1);
+   // Bind della texture
+   glBindTexture(GL_TEXTURE_2D, texture1);
+   // Impostare come applicare texture su s e t
+   // Impostare come comportarsi con dimensioni più o meno piccole in base alla distanza (es usando mipmap)
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+
+   // Acquisizione texture
+   int width, height, channels;
+   // Ottenimento matrice dei pixel (1 byte, 8 bit) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
+   // ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
+   // Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
+   stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
+   unsigned char* data = stbi_load("file.img", &width, &height, &channels, 0);
+   if (data) {
+      // Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
+      //   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
+      //   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+      // Creazione della mipmap della texture bindata
+      glGenerateMipmap(GL_TEXTURE_2D);
+   } else {
+      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+   }
+
+   stbi_image_free(data);
+
+   // Richiesta della posizione della texture
+   glUseProgram(shaderProgram);
+
+   GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
+   // Assegnazione valore della texture a uno specifico canale di OpenGL
+   // Canali limitati, massimo un certo numero di texture contemporaneamente
+   glUniform1i(textureUniform, 0);
+   glUseProgram(0);
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -266,14 +322,20 @@ static int initialise() {
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
       glUseProgram(shaderProgram);
 
+      glBindTexture(GL_TEXTURE_2D, texture1);
+      // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture
+      glActiveTexture(GL_TEXTURE0);
+
       // Scrivere nella location della variabile i valori del colore da assegnare al pixel;
       // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
 
       // Aggiornamento del colore da modificare
       // Funzione per modificare colore, o vertici
+      /*
       float sin = sinf(glfwGetTime());
       glUniform4f(colorUniformLocation, sin, 1.0f, 1.0f, 1.0f);
+       */
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
