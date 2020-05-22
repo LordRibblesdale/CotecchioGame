@@ -16,8 +16,9 @@ float SpotLight::getIrradiance(float angle) {
       falloff = 0;
    } else if (angle <= maxAngle && angle > midAngle) {
       //TODO optimise cos usage
-      float num = cosf(angle) - cosf(midAngle);
-      float den = 1/(cosf(maxAngle) - cosf(midAngle));
+      float cosMidAngle = cosf(midAngle);
+      float num = cosf(angle) - cosMidAngle;
+      float den = 1/(cosf(maxAngle) - cosMidAngle);
 
       falloff = num * den;
    } else {

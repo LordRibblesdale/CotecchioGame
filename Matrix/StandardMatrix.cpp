@@ -52,6 +52,47 @@ Float4 Rotation::quaternionAxisRotateVertex4(const Float4 &vector, Float4 &direc
    return newVector;
 }
 
+SquareMatrix Rotation::rotationXAxisMatrix(const float &angleX) {
+   float cosAngle = cosf(angleX);
+   float sinAngle = sinf(angleX);
+
+   return SquareMatrix(3, {1, 0, 0, 0, cosAngle, -sinAngle, 0, sinAngle, cosAngle});
+}
+
+SquareMatrix Rotation::rotationYAxisMatrix(const float &angleY) {
+   float cosAngle = cosf(angleY);
+   float sinAngle = sinf(angleY);
+
+   return SquareMatrix(3, {cosAngle, 0, sinAngle, 0, 1, 0, -sinAngle, 0, cosAngle});
+}
+
+SquareMatrix Rotation::rotationZAxisMatrix(const float &angleZ) {
+   float cosAngle = cosf(angleZ);
+   float sinAngle = sinf(angleZ);
+   return SquareMatrix(3, {cosAngle, -sinAngle, 0, sinAngle, cosAngle, 0, 0, 0, 1});
+}
+
+SquareMatrix Rotation::rotationByQuaternion(Float4 direction, const float &angle) {
+   if (direction.l2Norm() != 0 && remainder(angle, 2 * M_PI) != 0) {
+      float sin = sinf(angle*0.5);
+      float q1 = direction.getX() * sin;
+      float q2 = direction.getY() * sin;
+      float q3 = direction.getZ() * sin;
+      float q4 = direction.getW() * cosf(angle * 0.5);
+      //TODO check division here
+      float s = 2/(q1*q1 + q2*q2 + q3*q3 + q4*q4);
+
+      return SquareMatrix(4, {1-s*(q2*q2 + q3*q3),   s*(q1*q2 - q4*q3),   s*(q1*q3 + q4*q2),   0,
+                                        s*(q1*q2 + q4*q3),   1-s*(q1*q1 + q3*q3), s*(q2*q3 - q4*q1),   0,
+                                        s*(q1*q3 - q4*q2),   s*(q2*q3 + q4*q1),   1-s*(q1*q1 + q2*q2), 0,
+                                        0,                   0,                   0,                   1});
+
+   }
+
+   //TODO check here
+   return SquareMatrix(4, {});
+}
+
 SquareMatrix Transform::scaleTransform(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ) {
    std::unique_ptr<float> newData(new float[matrix.getDimension() * matrix.getDimension()]);
 

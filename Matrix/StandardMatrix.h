@@ -8,6 +8,11 @@
 //TODO implement in-class methods from this header
 
 namespace Rotation {
+   SquareMatrix rotationXAxisMatrix(const float& angleX);
+   SquareMatrix rotationYAxisMatrix(const float& angleY);
+   SquareMatrix rotationZAxisMatrix(const float& angleZ);
+   SquareMatrix rotationByQuaternion(Float4 direction, const float& angle);
+
    Float3 axisXRotateVertex3(const Float3 &vector, const float& angleX);
    Float3 axisYRotateVertex3(const Float3 &vector, const float& angleY);
    Float3 axisZRotateVertex3(const Float3 &vector, const float& angleZ);
