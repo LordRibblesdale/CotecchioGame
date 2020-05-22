@@ -2,9 +2,9 @@
 
 Color::Color() : FloatVector(4, {0, 0, 0, 1}) {}
 
-Color::Color(float& r, float& g, float& b) : FloatVector(4, {r, g, b, 1}) {}
+Color::Color(float r, float g, float b) : FloatVector(4, {r, g, b, 1}) {}
 
-Color::Color(float &r, float& g, float& b, float& a) : FloatVector(4, {r, g, b, a}) {}
+Color::Color(float r, float g, float b, float a) : FloatVector(4, {r, g, b, a}) {}
 
 Color::Color(const Color &color) : FloatVector(color) {}
 

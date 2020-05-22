@@ -336,7 +336,7 @@ enum
    STBI_rgb_alpha  = 4
 };
 
-#include <stdlib.h>
+#include <c++/stdlib.h>
 typedef unsigned char stbi_uc;
 typedef unsigned short stbi_us;
 

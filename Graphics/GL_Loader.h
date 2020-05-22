@@ -11,9 +11,8 @@
 #include <GLFW/glfw3.h>
 #endif
 
-#include "../Utilities/stb-master/stb_image.h"
-
 #define STB_IMAGE_IMPLEMENTATION
+#include "../IO/stb-master/stb_image.h"
 
 #include "Shaders.h"
 #include "../Vector/Float2.h"

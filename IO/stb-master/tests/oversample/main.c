@@ -16,8 +16,8 @@
 #define APIENTRY    __stdcall
 #endif
 
-#include <gl/gl.h>
-#include <gl/glu.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #define GL_FRAMEBUFFER_SRGB_EXT           0x8DB9
 
