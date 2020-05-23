@@ -21,7 +21,8 @@ namespace Rotation {
 }
 
 namespace Transform {
-   SquareMatrix scaleTransform(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ);
+   SquareMatrix scaleMatrix4(float scaleX, float scaleY, float scaleZ);
+   SquareMatrix scaleTransform3(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ);
 }
 
 namespace Projection {

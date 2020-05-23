@@ -10,7 +10,7 @@ class Camera {
    Float3 up;
 
 public:
-   Camera(Float3& eye, Float3& lookAt);
+   Camera(Float3 eye, Float3 lookAt);
 
    SquareMatrix world2ViewMatrix();
 };

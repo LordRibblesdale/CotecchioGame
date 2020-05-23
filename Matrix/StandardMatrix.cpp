@@ -93,7 +93,11 @@ SquareMatrix Rotation::rotationByQuaternion(Float4 direction, const float &angle
    return SquareMatrix(4, {});
 }
 
-SquareMatrix Transform::scaleTransform(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ) {
+SquareMatrix Transform::scaleMatrix4(float scaleX, float scaleY, float scaleZ) {
+   return SquareMatrix(4, {scaleX, 0, 0, 0, 0, scaleY, 0, 0, 0, 0, scaleZ, 0, 0, 0, 0, 1});
+}
+
+SquareMatrix Transform::scaleTransform3(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ) {
    std::unique_ptr<float> newData(new float[matrix.getDimension() * matrix.getDimension()]);
 
    newData.get()[0] *= scaleX;

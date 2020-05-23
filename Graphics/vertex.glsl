@@ -8,13 +8,13 @@ layout (location = 2) in vec2 textureCoordinates;
 out vec2 outTextCoord;
 out vec4 inColor;
 
-uniform mat3 matrix;
+uniform mat4 matrix;
 
 void main() {
     // gl_Position attribuisce la posizione al vertice
     //"   gl_Position = MVP*position\n"  // Posizione in Clip Space/NDC
     // TODO applicazione delle matrici per le trasformazioni
-    gl_Position = vec4(matrix * position, 1.0f);
+    gl_Position = matrix * vec4(position, 1.0f);
 
     inColor = vertexColor;   // Salvare colore vertici
     outTextCoord = textureCoordinates;

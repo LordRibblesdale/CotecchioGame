@@ -139,16 +139,15 @@ Matrix Matrix::operator*(Matrix &matrix) noexcept(false) {
    std::unique_ptr<float> newData(new float[getRows() * matrix.getColumns()]);
 
    if (getColumns() == matrix.getRows()) {
-
       for (unsigned int r = 0; r < getRows(); ++r) {
-         for (unsigned int c = 0; c < getColumns(); ++c) {
+         for (unsigned int c = 0; c < matrix.getColumns(); ++c) {
             for (unsigned int i = 0; i < getColumns(); ++i) {
-               newData.get()[r * getColumns() + c] += data_[r * getColumns() + i] * matrix.getData()[getColumns() * i + c];
+               newData.get()[r * matrix.getColumns() + c] += data_[r * getColumns() + i] * matrix.getData()[i * matrix.getColumns() + c];
             }
          }
       }
    } else {
-      string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
+      std::string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
       s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");
 
       throw ExceptionNotifier(s.c_str());

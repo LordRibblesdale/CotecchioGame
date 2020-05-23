@@ -1,5 +1,6 @@
 #include "SquareMatrix.h"
 #include "memory"
+#include "../Exception/ExceptionNotifier.h"
 #include <iostream>
 #include <cmath>
 
@@ -12,6 +13,141 @@ SquareMatrix::SquareMatrix(const SquareMatrix &matrix) : Matrix(matrix) {}
 SquareMatrix::SquareMatrix(SquareMatrix &&matrix) : Matrix(std::move(matrix)) {}
 
 SquareMatrix::~SquareMatrix() {}
+
+SquareMatrix &SquareMatrix::operator=(const SquareMatrix &matrix) {
+   data_ = FloatArray(matrix.getData());
+
+   return *this;
+}
+
+SquareMatrix &SquareMatrix::operator=(SquareMatrix && matrix) {
+   data_ = FloatArray(matrix.getData());
+
+   matrix.deleteMatrix();
+
+   return *this;
+}
+
+//TODO fix repeated functions
+//TODO return Matrix results and cast them
+SquareMatrix SquareMatrix::operator+(const SquareMatrix &matrix) noexcept(false) {
+   unsigned int dim = getDimension();
+   std::unique_ptr<float> newData(new float[dim * dim]);
+
+   if (dim == matrix.getDimension()) {
+      for (int i = 0; i < dim*dim; ++i) {
+         newData.get()[i] = data_[i] + matrix.getData()[i];
+      }
+   } else {
+      std::string s = "Exception: dimensions do not correspond.";
+      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
+              .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
+                      matrix.getColumns())).append(")\n");
+      // (row, columns_) != (matrix.getRows(), matrix.getColumns()
+
+      throw ExceptionNotifier(s.c_str());
+   }
+
+   return SquareMatrix(dim, newData.release());
+}
+
+//TODO fix repeated functions
+SquareMatrix &SquareMatrix::operator+=(const SquareMatrix &matrix) noexcept(false) {
+   if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
+      for (int i = 0; i < getRows() * getColumns(); ++i) {
+         data_[i] += matrix.getData()[i];
+      }
+   } else {
+      string s = "Exception: dimensions do not correspond.";
+      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
+              .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
+                      matrix.getColumns())).append(")\n");
+      // (row, columns_) != (matrix.getRows(), matrix.getColumns()
+
+      throw ExceptionNotifier(s.c_str());
+   }
+
+   return *this;
+}
+
+SquareMatrix SquareMatrix::operator-(const SquareMatrix &matrix) noexcept(false) {
+   std::unique_ptr<float> newData(new float[getRows() * getColumns()]);
+
+   if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
+      for (int i = 0; i < getRows() * getColumns(); ++i) {
+         newData.get()[i] = data_[i] - matrix.getData()[i];
+      }
+   } else {
+      string s = "Exception: dimensions do not correspond.";
+      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
+              .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
+                      matrix.getColumns())).append(")\n");
+      // (row, columns_) != (matrix.getRows(), matrix.getColumns()
+
+      throw ExceptionNotifier(s.c_str());
+   }
+
+   return SquareMatrix(getDimension(), newData.release());
+}
+
+SquareMatrix &SquareMatrix::operator-=(const SquareMatrix &matrix) noexcept(false) {
+   if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
+      for (int i = 0; i < getRows() * getColumns(); ++i) {
+         data_[i] -= matrix.getData()[i];
+      }
+   } else {
+      string s = "Exception COPY_CONSTRUCTOR: dimensions do not correspond. ";
+      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
+              .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
+                      matrix.getColumns())).append(")\n");
+      // (row, columns_) != (matrix.getRows(), matrix.getColumns()
+
+      throw ExceptionNotifier(s.c_str());
+   }
+
+   return *this;
+}
+
+SquareMatrix SquareMatrix::operator*(float scalar) {
+   unique_ptr<float> newData(new float[getRows() * getColumns()]);
+
+   for (int i = 0; i < getRows() * getColumns(); ++i) {
+      newData.get()[i] = data_[i] * scalar;
+   }
+
+   return SquareMatrix(getRows(), newData.release());
+}
+
+SquareMatrix& SquareMatrix::operator*=(float scalar) {
+   for (int i = 0; i < getRows() * getColumns(); ++i) {
+      data_[i] *= scalar;
+   }
+
+   return *this;
+}
+
+//TODO fix repeated functions
+SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) noexcept(false) {
+   std::unique_ptr<float> newData(new float[getRows() * matrix.getColumns()]);
+
+   if (getColumns() == matrix.getRows()) {
+      for (unsigned int r = 0; r < getRows(); ++r) {
+         for (unsigned int c = 0; c < matrix.getColumns(); ++c) {
+            for (unsigned int i = 0; i < getColumns(); ++i) {
+               newData.get()[r * matrix.getColumns() + c] += data_[r * getColumns() + i] * matrix.getData()[i * matrix.getColumns() + c];
+            }
+         }
+      }
+   } else {
+      string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
+      s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");
+
+      throw ExceptionNotifier(s.c_str());
+   }
+
+   return SquareMatrix(getRows(), newData.release());
+}
+
 
 void SquareMatrix::transpose() {
    Matrix transposed = Matrix::transpose(*this);

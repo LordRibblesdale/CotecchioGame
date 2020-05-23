@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <SimpleTriangle>
     <Float3>
-        <XPos>-0.5</XPos>
-        <YPos>-0.5</YPos>
+        <XPos>0</XPos>
+        <YPos>0</YPos>
         <ZPos>0</ZPos>
         <Red>1</Red>
         <Green>0</Green>
@@ -12,8 +12,8 @@
         <VCoord>0</VCoord>
     </Float3>
     <Float3>
-        <XPos>0.5</XPos>
-        <YPos>-0.5</YPos>
+        <XPos>3</XPos>
+        <YPos>0</YPos>
         <ZPos>0</ZPos>
         <Red>0</Red>
         <Green>1</Green>
@@ -23,9 +23,9 @@
         <VCoord>0</VCoord>
     </Float3>
     <Float3>
-        <XPos>0</XPos>
-        <YPos>0.5</YPos>
-        <ZPos>0</ZPos>
+        <XPos>1.5</XPos>
+        <YPos>0</YPos>
+        <ZPos>3</ZPos>
         <Red>0</Red>
         <Green>0</Green>
         <Blue>1</Blue>

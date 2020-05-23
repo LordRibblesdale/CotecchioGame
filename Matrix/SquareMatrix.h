@@ -12,6 +12,16 @@ public:
    SquareMatrix(SquareMatrix&& matrix);
    ~SquareMatrix();
 
+   SquareMatrix& operator=(const SquareMatrix& matrix);
+   SquareMatrix& operator=(SquareMatrix&& matrix);
+   SquareMatrix operator+(const SquareMatrix& matrix);
+   SquareMatrix& operator+=(const SquareMatrix& matrix);
+   SquareMatrix operator-(const SquareMatrix& matrix);
+   SquareMatrix& operator-=(const SquareMatrix& matrix);
+   SquareMatrix operator*(float scalar);
+   SquareMatrix& operator*=(float scalar);
+   SquareMatrix operator*(const SquareMatrix& matrix);
+
    void transpose();
    static SquareMatrix transpose(const SquareMatrix& matrix);
 
