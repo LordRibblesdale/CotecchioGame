@@ -318,10 +318,6 @@ static int initialise() {
    glUniform1i(textureUniform, 0);
    glUseProgram(0);
 
-   SquareMatrix rotation = Rotation::rotationZAxisMatrix(degree2Radiants(10));
-   std::cout << rotation.multiplyVector(FloatVector(3, {-0.5, -0.5, 0})).toString() << std::endl;
-   glUniformMatrix3fv(matrixUniform, 1, GL_FALSE, rotation.getArray());
-
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
    while (!glfwWindowShouldClose(window)) { // semmai la finestra dovesse chiudersi
@@ -344,6 +340,7 @@ static int initialise() {
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
 
       // TODO check other matrix usages
+      glUniformMatrix3fv(matrixUniform, 1, GL_FALSE, SquareMatrix::transpose(Rotation::rotationYAxisMatrix(degree2Radiants(20*glfwGetTime()))).getArray());
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);

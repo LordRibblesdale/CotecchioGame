@@ -11,7 +11,7 @@ out vec4 inColor;
 uniform mat3 matrix;
 
 void main() {
-// gl_Position attribuisce la posizione al vertice
+    // gl_Position attribuisce la posizione al vertice
     //"   gl_Position = MVP*position\n"  // Posizione in Clip Space/NDC
     // TODO applicazione delle matrici per le trasformazioni
     gl_Position = vec4(matrix * position, 1.0f);
