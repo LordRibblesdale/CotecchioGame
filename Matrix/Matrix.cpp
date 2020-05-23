@@ -1,6 +1,4 @@
-#include <iostream>
 #include "Matrix.h"
-#include "../Exception/ExceptionNotifier.h"
 
 Matrix::Matrix(unsigned int rows, unsigned int columns, const initializer_list<float>& data) {
    data_ = FloatArray(rows, columns, data);
@@ -20,11 +18,7 @@ Matrix::Matrix(Matrix &&matrix) {
    matrix.deleteMatrix();
 }
 
-Matrix::~Matrix() {
-   for (int i = 0; i < getRows() * getColumns(); ++i) {
-      data_[i] = 0;
-   }
-}
+Matrix::~Matrix() {}
 
 Matrix &Matrix::operator=(const Matrix &matrix) {
    data_ = FloatArray(matrix.getData());

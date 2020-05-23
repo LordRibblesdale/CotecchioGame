@@ -19,6 +19,8 @@ public:
    ~FloatArray() {
       rows_ = 0;
       columns_ = 0;
+
+      array_.release();
    }
 
    FloatArray& operator=(const FloatArray& floatArray);
