@@ -6,7 +6,7 @@
 
 class Matrix {
 protected:
-   FloatArray data_ = FloatArray(0, 0, {});
+   std::unique_ptr<FloatArray> data_;
 
 public:
    Matrix(unsigned int rows, unsigned int columns, const std::initializer_list<float>& data);
@@ -18,35 +18,35 @@ public:
    Matrix& operator=(const Matrix& matrix);
    Matrix& operator=(Matrix&& matrix);
    Matrix operator+(const Matrix& matrix);
-   Matrix& operator+=(const Matrix& matrix);
+   void operator+=(const Matrix& matrix);
    Matrix operator-(const Matrix& matrix);
-   Matrix& operator-=(const Matrix& matrix);
+   void operator-=(const Matrix& matrix);
    //TODO complete operator functions
    //Matrix& operator+(Matrix&& matrix);
-   Matrix operator*(float scalar);
-   Matrix& operator*=(float scalar);
-   Matrix operator*(Matrix& matrix);
+   Matrix operator*(const float& scalar);
+   void operator*=(const float& scalar);
+   Matrix operator*(const Matrix& matrix);
 
    static Matrix transpose(const Matrix& matrix);
 
-   static Matrix createSubmatrix(const Matrix& matrix, unsigned int rowIndex, unsigned int columnIndex);
+   static Matrix createSubmatrix(const Matrix& matrix, const unsigned int& rowIndex, const unsigned int& columnIndex);
 
    FloatVector multiplyVector(const FloatVector& vector) const;
 
-   inline FloatArray getData() const {
+   inline const std::unique_ptr<FloatArray>& getData() const {
       return data_;
    }
 
    inline float* getArray() const {
-      return data_.getArray().get();
+      return data_->getArray().get();
    }
 
    inline unsigned int getRows() const {
-      return data_.getRows();
+      return data_->getRows();
    }
 
    inline unsigned int getColumns() const {
-      return data_.getColumns();
+      return data_->getColumns();
    }
 
    void deleteMatrix();

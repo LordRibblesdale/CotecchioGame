@@ -5,7 +5,7 @@
 #include "SquareMatrix.h"
 #include <cmath>
 
-//TODO implement in-class methods from this header
+//TODO add Identity and Translation
 
 namespace Rotation {
    SquareMatrix rotationXAxisMatrix(const float& angleX);
@@ -41,13 +41,13 @@ namespace Projection {
 }
 
 static float degree2Radiants(float degree) {
-   float inv = 1.0/180;
+   float inv = 1.0f/180;
 
    return degree * inv * M_PI;
 }
 
 static float radiants2Degree(float radiants) {
-   return radiants * 180 * M_1_PI;
+   return radiants * 180.0f * M_1_PI;
 }
 
 

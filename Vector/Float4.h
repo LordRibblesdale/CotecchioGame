@@ -9,8 +9,10 @@ public:
    Float4();
    Float4(const float& x, const float& y, const float& z, const float& w);
    Float4(const Float4& point);
-   Float4(Float4&& point);
    Float4(const Float3& float3, bool isPoint);
+   Float4(Float4&& point);
+   Float4(const FloatVector& point);
+   Float4(FloatVector&& point);
    ~Float4();
 
    Float4& operator=(const Float4& point);

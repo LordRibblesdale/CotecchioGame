@@ -23,6 +23,21 @@ Float2::Float2(Float2&& point) : FloatVector(2, {point.getX(), point.getY()}) {
    point.setY(0);
 }
 
+Float2::Float2(const FloatVector &point) : FloatVector(point) {
+   if (point.getSize() != 2) {
+      //TODO fix generic exception
+      throw (std::exception());
+   }
+}
+
+Float2::Float2(FloatVector &&point) : FloatVector(std::move(point)) {
+   if (point.getSize() != 2) {
+      //TODO fix generic exception
+      throw (std::exception());
+   }
+}
+
+
 Float2::~Float2() {}
 
 //TODO missing "+=" e "-=" operators
@@ -118,9 +133,8 @@ Float2 Float2::axisRotateVertex2(const Float2 &vector, const float& angle) {
    float cosAngle = cosf(angle);
    float sinAngle = sinf(angle);
    SquareMatrix rotation(4, {cosAngle, -sinAngle, sinAngle, cosAngle});
-   FloatVector rotatedVertex(move(rotation.multiplyVector(vector)));
 
-   return Float2(*static_cast<Float2*>(&rotatedVertex));
+   return Float2(std::move(move(rotation.multiplyVector(vector))));
 }
 
 ostream& operator<<(ostream& stream, const Float2& point) {

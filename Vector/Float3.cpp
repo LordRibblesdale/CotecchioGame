@@ -13,6 +13,20 @@ Float3::Float3(Float3 &&point) : FloatVector(3, {point.getX(), point.getY(), poi
    point.setZ(0);
 }
 
+Float3::Float3(const FloatVector &point) : FloatVector(point) {
+   if (point.getSize() != 3) {
+      //TODO fix generic exception
+      throw (std::exception());
+   }
+}
+
+Float3::Float3(FloatVector &&point) : FloatVector(std::move(point)) {
+   if (point.getSize() != 3) {
+      //TODO fix generic exception
+      throw (std::exception());
+   }
+}
+
 Float3::~Float3() {}
 
 Float3 &Float3::operator=(const Float3 &point) {
@@ -140,4 +154,3 @@ void Float3::setY(const float &y) {
 void Float3::setZ(const float &z) {
    getVector().get()[2] = z;
 }
-

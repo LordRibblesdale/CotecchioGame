@@ -20,7 +20,7 @@ public:
       rows_ = 0;
       columns_ = 0;
 
-      array_.release();
+      array_.reset(nullptr);
    }
 
    FloatArray& operator=(const FloatArray& floatArray);

@@ -42,6 +42,7 @@ public:
    }
 
    //TODO add all operators and functions
+
    FloatVector& operator=(const FloatVector& vector) {
       vector_ = std::unique_ptr<float>(new float[vector.getSize()]);
       FloatVector::size_ = vector.getSize();

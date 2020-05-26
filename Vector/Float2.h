@@ -18,6 +18,8 @@ public:
     Float2(const float& x, const float& y);
     Float2(const Float2& point);
     Float2(Float2&& point);
+    Float2(const FloatVector& point);
+    Float2(FloatVector&& point);
     ~Float2();
 
     Float2& operator=(const Float2& point);

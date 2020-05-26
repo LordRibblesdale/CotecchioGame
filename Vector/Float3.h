@@ -9,6 +9,8 @@ public:
    Float3(const float& x, const float& y, const float& z);
    Float3(const Float3& point);
    Float3(Float3&& point);
+   Float3(const FloatVector& point);
+   Float3(FloatVector&& point);
    ~Float3();
 
    Float3& operator=(const Float3& point);

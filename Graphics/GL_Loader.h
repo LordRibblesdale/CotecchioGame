@@ -320,7 +320,9 @@ static int initialise() {
    glUseProgram(0);
 
    //TODO move variable from here
-   Camera cam(Float3(0, -5, 2), Float3(0, 1, 0));
+   Camera cam(std::move(Float3(0, -10, 2)), std::move(Float3(0, 1, 0)));
+
+   bool isApplied = false;
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -344,16 +346,17 @@ static int initialise() {
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
 
       // TODO check other matrix usages
-      //SquareMatrix rotation = SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 1, 0, 1), degree2Radiants(20*glfwGetTime())));
-      SquareMatrix p = Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 1, 5);
-      p.transpose();
-      SquareMatrix v(cam.world2ViewMatrix());
-      v.transpose();
+      //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 1, 0, 1), degree2Radiants(20*glfwGetTime())))));
+      //SquareMatrix p = Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0, 1);
+      //SquareMatrix v(cam.world2ViewMatrix());
+      //v.transpose();
+      //p.transpose();
 
-      SquareMatrix mvp(p * v);
-      mvp.transpose();
+      //SquareMatrix mvp(p * v);
+      //mvp.transpose();
 
-      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, mvp.getArray());
+      //glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, mvp.getArray());
+      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);

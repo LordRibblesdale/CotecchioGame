@@ -20,6 +20,20 @@ Float4::Float4(const Float3& float3, bool isPoint) : FloatVector(4, {float3.getX
    }
 }
 
+Float4::Float4(const FloatVector &point) : FloatVector(point) {
+   if (point.getSize() != 4) {
+      //TODO fix generic exception
+      throw (std::exception());
+   }
+}
+
+Float4::Float4(FloatVector &&point) : FloatVector(std::move(point)) {
+   if (point.getSize() != 4) {
+      //TODO fix generic exception
+      throw (std::exception());
+   }
+}
+
 Float4::~Float4() {}
 
 Float4 &Float4::operator=(const Float4 &point) {
