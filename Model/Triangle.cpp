@@ -5,7 +5,7 @@
 Triangle::Triangle(Float3 &p0, Float3 &p1, Float3 &p2) {
    //TODO check move (if necessary or duplicate needed)
    //TODO optimise point to vector edit
-   points = std::make_unique<Float3[]>(3);
+   points = std::move(std::make_unique<Float3[]>(3));
    points.get()[0] = std::move(p0);
    points.get()[1] = std::move(p1);
    points.get()[2] = std::move(p2);

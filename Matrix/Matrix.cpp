@@ -1,6 +1,6 @@
 #include "Matrix.h"
 
-Matrix::Matrix(unsigned int rows, unsigned int columns, const initializer_list<float>& data) {
+Matrix::Matrix(unsigned int rows, unsigned int columns, const std::initializer_list<float>& data) {
    data_ = std::move(std::make_unique<FloatArray>(rows, columns, data));
 }
 
@@ -43,7 +43,7 @@ Matrix Matrix::operator+(const Matrix &matrix) noexcept(false) {
          newData.get()[i] = data_->operator[](i) + matrix.getData()->operator[](i);
       }
    } else {
-      string s = "Exception: dimensions do not correspond.";
+      std::string s = "Exception: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
          .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
                       matrix.getColumns())).append(")\n");
@@ -61,7 +61,7 @@ void Matrix::operator+=(const Matrix &matrix) noexcept(false) {
          data_->operator[](i) += matrix.getData()->operator[](i);
       }
    } else {
-      string s = "Exception: dimensions do not correspond.";
+      std::string s = "Exception: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
               .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
                       matrix.getColumns())).append(")\n");
@@ -79,7 +79,7 @@ Matrix Matrix::operator-(const Matrix &matrix) noexcept(false) {
          newData.get()[i] = data_->operator[](i) - matrix.getData()->operator[](i);
       }
    } else {
-      string s = "Exception: dimensions do not correspond.";
+      std::string s = "Exception: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
               .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
                       matrix.getColumns())).append(")\n");
@@ -97,7 +97,7 @@ void Matrix::operator-=(const Matrix &matrix) noexcept(false) {
          data_->operator[](i) -= matrix.getData()->operator[](i);
       }
    } else {
-      string s = "Exception COPY_CONSTRUCTOR: dimensions do not correspond. ";
+      std::string s = "Exception COPY_CONSTRUCTOR: dimensions do not correspond. ";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
               .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
                       matrix.getColumns())).append(")\n");
@@ -108,7 +108,7 @@ void Matrix::operator-=(const Matrix &matrix) noexcept(false) {
 }
 
 Matrix Matrix::operator*(const float& scalar) {
-   unique_ptr<float> newData(new float[getRows() * getColumns()]);
+   std::unique_ptr<float> newData(new float[getRows() * getColumns()]);
 
    for (int i = 0; i < getRows() * getColumns(); ++i) {
       newData.get()[i] = data_->operator[](i) * scalar;
@@ -145,7 +145,7 @@ Matrix Matrix::operator*(const Matrix &matrix) noexcept(false) {
 }
 
 Matrix Matrix::transpose(const Matrix &matrix) {
-   unique_ptr<float> newData(new float[matrix.getRows() * matrix.getColumns()]);
+   std::unique_ptr<float> newData(new float[matrix.getRows() * matrix.getColumns()]);
 
    for (int i = 0; i < matrix.getColumns(); ++i) {
       for (int j = 0; j < matrix.getRows(); ++j) {
@@ -188,9 +188,9 @@ FloatVector Matrix::multiplyVector(const FloatVector& vector) const noexcept(fal
          newData.getVector().get()[i] = value;
       }
 
-      return move(newData);
+      return std::move(newData);
    } else {
-      string s = "Exception NO_MATCH_LENGTH: matrix and vector_ do not have correct size_. ";
+      std::string s = "Exception NO_MATCH_LENGTH: matrix and vector_ do not have correct size_. ";
       s.append("Matrix columns_: ").append(std::to_string(getColumns())).append("!= Vector size_: ")
          .append(std::to_string(vector.getSize())).append("\n");
 
@@ -205,7 +205,7 @@ void Matrix::deleteMatrix() {
 }
 
 std::string Matrix::toString() const {
-   string s;
+   std::string s;
 
    for (auto i = 0; i < getRows(); ++i) {
       s.append("[");

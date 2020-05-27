@@ -1,7 +1,7 @@
 #include "FloatArray.h"
 
 FloatArray::FloatArray(unsigned short rows, unsigned short columns, const std::initializer_list<float> &data) : rows_(rows), columns_(columns) {
-   array_ = move(std::unique_ptr<float>(new float[rows*columns]));
+   array_ = std::move(std::unique_ptr<float>(new float[rows*columns]));
    rows_ = rows;
    columns_ = columns;
 
@@ -15,7 +15,7 @@ FloatArray::FloatArray(unsigned short rows, unsigned short columns, const std::i
 FloatArray::FloatArray(unsigned short dimension, const std::initializer_list<float> &data) : FloatArray(dimension, dimension, data) {}
 
 FloatArray::FloatArray(unsigned short rows, unsigned short columns, float*& data) {
-   array_ = move(std::unique_ptr<float>(data));
+   array_ = std::move(std::unique_ptr<float>(data));
    rows_ = rows;
    columns_ = columns;
 }

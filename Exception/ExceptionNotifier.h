@@ -4,9 +4,7 @@
 #include <exception>
 #include <string>
 
-using namespace std;
-
-class ExceptionNotifier : public exception {
+class ExceptionNotifier : public std::exception {
 private:
    const char* s_;
 

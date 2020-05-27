@@ -23,6 +23,8 @@ public:
       array_.reset(nullptr);
    }
 
+   //TODO add all operators
+
    FloatArray& operator=(const FloatArray& floatArray);
 
    FloatArray& operator=(FloatArray&& floatArray);

@@ -74,7 +74,7 @@ void SquareMatrix::operator+=(const SquareMatrix &matrix) noexcept(false) {
          data_->operator[](i) += matrix.getData()->operator[](i);
       }
    } else {
-      string s = "Exception SUM_SQUARE: dimensions do not correspond.";
+      std::string s = "Exception SUM_SQUARE: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
               .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
                       matrix.getColumns())).append(")\n");
@@ -116,7 +116,7 @@ void SquareMatrix::operator-=(const SquareMatrix &matrix) noexcept(false) {
          data_->operator[](i) -= matrix.getData()->operator[](i);
       }
    } else {
-      string s = "Exception DIFF_SQUARE: dimensions do not correspond.";
+      std::string s = "Exception DIFF_SQUARE: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
               .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
                       matrix.getColumns())).append(")\n");
