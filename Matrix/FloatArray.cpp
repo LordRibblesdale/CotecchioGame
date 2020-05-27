@@ -1,12 +1,13 @@
+#include <iostream>
 #include "FloatArray.h"
 
 FloatArray::FloatArray(unsigned short rows, unsigned short columns, const std::initializer_list<float> &data) : rows_(rows), columns_(columns) {
-   array_ = std::move(std::unique_ptr<float>(new float[rows*columns]));
+   array_ = std::move(std::unique_ptr<float>(new float[rows*columns] {0}));
    rows_ = rows;
    columns_ = columns;
 
    auto iterator = data.begin();
-   for (int i = 0; i < rows_*columns_; ++i) {
+   for (int i = 0; i < rows_*columns_ && i < data.size(); ++i) {
       array_.get()[i] = *iterator;
       ++iterator;
    }

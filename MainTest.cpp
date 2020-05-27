@@ -7,14 +7,20 @@
 using namespace std;
 
 int main() {
-   Matrix matrix0(3, 5, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
-   Matrix matrix2(3, 5, {-1, 2, -3, 4, -5, 6, -7, 8, -9, 10, -11, 12, -13, 14, -15});
-   SquareMatrix matrix1(4, {3, -1, 0, -1, -1, 3, -1, 0, 0, -1 , 3, -1, -1, 0, -1, 3});
-   SquareMatrix matrix3(std::move(SquareMatrix::calculateInverse(matrix1)));
+   //Matrix matrix0(3, 5, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
+   //Matrix matrix2(3, 5, {-1, 2, -3, 4, -5, 6, -7, 8, -9, 10, -11, 12, -13, 14, -15});
+   //SquareMatrix matrix1(4, {3, -1, 0, -1, -1, 3, -1, 0, 0, -1 , 3, -1, -1, 0, -1, 3});
+   //SquareMatrix matrix3(std::move(SquareMatrix::calculateInverse(matrix1)));
 
-   Matrix vector0(4, 1, {1, 6, 5, 4});
-   Matrix vector1(1, 4, {0, 5, 10, 100});
+   //Matrix vector0(4, 1, {1, 6, 5, 4});
+   //Matrix vector1(1, 4, {0, 5, 10, 100});
    //Matrix vector1(1, 4, {0, 5, 10, 100, 96});
+
+   Matrix matrixNew(3, 4, {1});
+   Matrix matrixNew2(2, 1, {1, 6, 4});
+
+   cout << matrixNew.toString() << endl;
+   cout << matrixNew2.toString() << endl;
 
    //cout << matrix0.toString() << endl;
    //cout << matrix2.toString() << endl;
@@ -23,7 +29,7 @@ int main() {
 
    //cout << vector0.toString() << endl;
    //cout << vector1.toString() << endl;
-   cout << (vector0 * vector1).toString() << endl;
+   //cout << (vector0 * vector1).toString() << endl;
 
    //cout << (matrix0.multiply_vector(vector1)).to_string() << endl;
 

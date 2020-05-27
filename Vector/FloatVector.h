@@ -10,11 +10,11 @@ struct FloatVector {
 
 public:
    FloatVector(unsigned int size, const std::initializer_list<float>& data) {
-      vector_ = move(std::unique_ptr<float>(new float[size]));
+      vector_ = move(std::unique_ptr<float>(new float[size] {0}));
       FloatVector::size_ = size;
 
       auto iterator = data.begin();
-      for (int i = 0; i < size; ++i) {
+      for (int i = 0; i < size && i < data.size(); ++i) {
          vector_.get()[i] = *iterator;
          ++iterator;
       }
