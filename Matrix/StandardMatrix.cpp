@@ -70,7 +70,7 @@ SquareMatrix Rotation::rotationZAxisMatrix(const float &angleZ) {
    return SquareMatrix(3, {cosAngle, -sinAngle, 0, sinAngle, cosAngle, 0, 0, 0, 1});
 }
 
-SquareMatrix Rotation::rotationByQuaternion(Float4 direction, const float &angle) {
+SquareMatrix Rotation::rotationByQuaternion(const Float4& direction, const float &angle) {
    if (direction.l2Norm() != 0 && remainder(angle, 2 * M_PI) != 0) {
       float sin = sinf(angle*0.5);
       float q1 = direction.getX() * sin;

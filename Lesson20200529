@@ -1,0 +1,115 @@
+Creazione shader
+Creazione VertexArray e VertexBuffer
+!! VertexArray -> legato al concetto di "oggetto", array che contiene i vertici dell'oggetto
+
+(VA1 e VA2, VBO1 VBO2) per multipli oggetti
+
+Creazione Projection
+Creazione View
+Assegnate nella uniform singolarmente
+Clear
+Assegniamo shading
+Creiamo matrici e le modifichiamo,
+Le inviamo la matrice
+
+Per disegnare due triangoli
+    -> Due array di vertici
+    -> Un array usato due volte
+
+Uso 2 vertici per i vertici
+Uso uniform model matrix, view e projection
+    -> projection * view * model * vec4
+
+Uso normali: per essere trasformata normale, si usa la matrice (trasposta dell'inversa)
+    -> Conviene avere matrici separate per alcune moltiplicazioni specifiche
+    -> Trasformazioni coordinate (esempio tangent space, effetti visivi)
+
+GPU:
+    -> Passare informazioni è molto ingente (esempio tramite uniform)
+    -> 3 separate per calcoli di performance su GPU accelerate
+    -> Tenerle in CPU dipende dai casi (esempio numero di passaggio matrici)
+
+Inserire matrici nel ciclo, e da ricreare e modificare nel ciclo
+
+AspectRatio nella projectionMatrix
+
+Per la CAMERA VIEW
+Camera -> view Matrix, calcolando sistema di riferimento, con i 3 vettori a partire dalla camera
+    -> Calcola automaticamente, non richiederà parametri
+    -> Gestione Yaw e Pitch, per visuale verso DX e SX, in Alto e in Basso
+    -> Aggiornare vettore Up, variando anche x, y, z della camera quando necessario)
+    -> Uso angoli di Eulero per variare i punti x, y, z nel riferimento locale della camera
+        - Update di tutti i vettori
+        - Attenzione a cosa cambiare se lookAt e eye (variando i vari angoli e applicandogli le coordinate
+        - Uso coppia angoli e quindi definisco la direzione del punto di vista
+        - Uso prodotti vettoriali per ricalcolarli
+ATTENZIONE ai sistemi lefthanded per la cameraView
+
+FOV (rltb, alpha/2), che modifica la PERSPECTIVE (non la View)
+
+(Attenzione: potrebbero cambiare nel tempo tramite callBacks vari parametri, matrici (esempio visuale))
+    -> Esempio callback con posizione cursore, e lo assegna alla camera, cambiando la viewMatrix
+
+Per modifiche degli oggetti, chiamo direttamente la matrice e la modifico in tempo reale nel ciclo
+
+Oggetto come MODELLO: ottica di VAO come il modello inserito nella scena
+    -> Contiene vertici con le relative proprietà
+    -> ElementBufferObject per la topologia
+
+    -> VAO come vertici, UV e colori
+    -> Element come Connettività vertici, creando la mesh analoga
+
+VAO come OGGETTO/MODELLO
+
+Aggiunta di più modelli
+    -> Riusare una matrice per ristampare lo stesso triangolo
+    -> Richiamare draw con le varie modifiche per disegnare multipli
+
+    -> Differenza tra DEEP COPY (duplicazione della mesh), e SHALLOW COPY (rilettura della mesh, condivise modifiche)
+
+Modello carta: riutilizzare stesso modello per tutte, e chiamato multiple volte con multiple trasformazioni (ognuna con le sue trasformazioni)
+    -> PER PROPRIETà DI MACCHINA DI STATO
+Se ho 2 modelli differenti, si aggiungono multipli buffer
+
+Ordine di Rendering viene fatto per MATERIALE:
+    -> creazione lista oggetti raggruppata per materiale per limitare chiamate degli shader
+    -> ogni shader per un tipo di materiale
+    -> ciclo per materiali e per oggetti
+
+Materiale e Modello di Materiale sono diversi, ma simili:
+    -> Un tipo di shader program per il modello teorico del materiale
+    -> Modificato di volta in volta gli si assegna uno uniform diverso
+    -> Per ridurre a livello di macchina di stato delle performance
+    -> Materiale (modello)
+    -> Istanza del materiale (variazione del materiale dell'oggetto)
+
+Coordinate locali + Normali ai vertici (per esempio per Gouraud shading)
+    -> Per interpolazioni varie
+
+glDrawTriangles(0 indice memoria, N numero triangoli)
+
+Implementazione Lambert
+    -> layout con location e input con vec3 normal
+    -> out del vec3 normal
+        -> con normal = trasposta dell'inversa di ...
+    -> Necessità di selezionare posizione per calcolare la direzione della luce per il fragment shader
+    -> L (posizione luce) - P (punto sulla superficie, posizione di ciò che si guarda nel sistema di
+        riferimento globale)
+
+        out pos -> pos = model * vec4(aPos) ovvero vertice nel sistema di riferimento globale
+        Necessità per il fragment shader, che prenderà in input la normale e la posizione
+        Uniform servirà per la posizione della luce, per il colore della luce, per il KD (coefficiente di diffusione)
+
+        => Normale come vec3 della normalizzazione "normalize(normal)" (per stabilità numerica, sempre da usare)
+        => Light direction come normalize di LightPosition - Pos
+        => L = vec4 di max(0, (coseno dell'angolo) dot(normal, light))*kd (kd è un vec3)
+
+Impostazione del sistema in termini di profondità, ovvero tramite un controllo di profondità sui triangoli
+Abilitazione del glEnable(GL_DEPTH_TEST) !! Da usare dopo il loader di OpenGL (GLAD)
+    -> Richiede anche il Clear del GL_DEPTH_BUFFER_BIT
+    -> TODO Analizzare Depth Test teoricamente
+    -> Utilità di abilitare e disabilitare il depth test per disegnare in sovrimpressione altre informazioni
+        (Es: UI e applicazione effetti)
+
+
+Preparazione teorica del BackCulling Faces

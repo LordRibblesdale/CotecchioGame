@@ -41,21 +41,21 @@ TriangleIntersection& Ray::getTriangleIntersection(const Triangle &triangle) con
    std::unique_ptr<TriangleIntersection> intersection = std::make_unique<TriangleIntersection>(false, nullptr, nullptr);
 
    //TODO optimise memory?
-   Float3 q(direction_.crossProduct(triangle.getPoint2() - triangle.getPoint0()));
-   float determinant = q.dotProduct(triangle.getPoint1());
+   Float3 q(direction_.crossProduct(triangle.getPoints()[2] - triangle.getPoints()[0]));
+   float determinant = q.dotProduct(triangle.getPoints()[1]);
 
    if (determinant != 0 || (determinant > -EPSILON && determinant < EPSILON)) {
-      Float3 s(origin_ - triangle.getPoint0());
+      Float3 s(origin_ - triangle.getPoints()[2]);
       float a = 1 / determinant;
 
       float u = a*(q.dotProduct(s));
 
       if (u >= 0) {
-         Float3 r(s.crossProduct(triangle.getPoint1() - triangle.getPoint0()));
+         Float3 r(s.crossProduct(triangle.getPoints()[1] - triangle.getPoints()[0]));
          float v = a*(r.dotProduct(direction_));
 
          if (v >= 0 && (u+v) <= 1) {
-            float t = a*(r.dotProduct(triangle.getPoint2() - triangle.getPoint0()));
+            float t = a*(r.dotProduct(triangle.getPoints()[2] - triangle.getPoints()[0]));
 
             intersection = std::make_unique<TriangleIntersection>(true, new Float3(origin_ + t*direction_), new Float3(t, u, v));
          }
@@ -66,7 +66,7 @@ TriangleIntersection& Ray::getTriangleIntersection(const Triangle &triangle) con
 }
 
 Ray Ray::getReflectionOn(const Triangle &triangle, const TriangleIntersection &intersection) {
-   return Ray(intersection.getIntersectedPoint(), direction_ - 2 * direction_.dotProduct(triangle.getNormal()) * triangle.getNormal());
+   return Ray(intersection.getIntersectedPoint(), direction_ - 2 * direction_.dotProduct(intersection.getBarycentricCoordinates()) * intersection.getBarycentricCoordinates());
 }
 
 Ray Ray::getRefractionOn(const Triangle &triangle, const TriangleIntersection &intersection) {

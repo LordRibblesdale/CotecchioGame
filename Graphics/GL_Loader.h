@@ -306,21 +306,25 @@ static int initialise() {
       std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
    }
 
-
    stbi_image_free(data);
 
    // Richiesta della posizione della texture
-   glUseProgram(shaderProgram);
+   // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
 
    GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
    GLuint matrixUniform = glGetUniformLocation(shaderProgram, "matrix");
+
+   // Assegnazione e modifica uniform a prescindere
+   // Uso glUseProgram per assegnare texture
+   glUseProgram(shaderProgram);
    // Assegnazione valore della texture a uno specifico canale di OpenGL
    // Canali limitati, massimo un certo numero di texture contemporaneamente
    glUniform1i(textureUniform, 0);
+
    glUseProgram(0);
 
    //TODO move variable from here
-   Camera cam(std::move(Float3(0, -10, 2)), std::move(Float3(0, 1, 0)));
+   Camera cam(std::move(Float3(0, -10, 2)), std::move(Float3(0, -1, 0)));
 
    bool isApplied = false;
 
