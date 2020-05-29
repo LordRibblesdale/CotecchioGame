@@ -98,17 +98,37 @@ SquareMatrix Transform::scaleMatrix4(float scaleX, float scaleY, float scaleZ) {
 SquareMatrix Transform::scaleTransform3(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ) {
    std::unique_ptr<float> newData(new float[matrix.getDimension() * matrix.getDimension()]);
 
-   newData.get()[0] *= scaleX;
-   newData.get()[matrix.getDimension()] *= scaleY;
-   newData.get()[matrix.getDimension() * 2] *= scaleZ;
+   unsigned int dim = matrix.getDimension();
+   short j = 1;
+
+   for (int i = 0; i < dim * dim; ++i) {
+      if (i == j * dim) {
+         ++j;
+      }
+
+      if (j == 1) {
+         matrix.getArray()[i] = matrix.getArray()[i] * scaleX;
+      } else if (j == 2) {
+         matrix.getArray()[i] = matrix.getArray()[i] * scaleY;
+      } else if (j == 3) {
+         matrix.getArray()[i] = matrix.getArray()[i] * scaleZ;
+      }
+   }
 
    return SquareMatrix(matrix.getDimension(), newData.release());
 }
 
 SquareMatrix Transform::translateMatrix4(float x, float y, float z) {
-   return SquareMatrix(4, {0, 0, 0, x,
-                           0, 0, 0, y,
-                           0, 0, 0, z,
+   return SquareMatrix(4, {1, 0, 0, x,
+                           0, 1, 0, y,
+                           0, 0, 1, z,
+                           0, 0, 0, 1});
+}
+
+SquareMatrix Transform::tranScalaRotoMatrix4(float xTransl, float yTransl, float zTransl, float xScale, float yScale, float zScale) {
+   return SquareMatrix(4, {xScale, 0, 0, xTransl,
+                           0, yScale, 0, yTransl,
+                           0, 0, zScale, zTransl,
                            0, 0, 0, 1});
 }
 
@@ -145,7 +165,7 @@ SquareMatrix Projection::orthogonalProjection(const float &right, const float &l
 SquareMatrix Projection::onAxisOrthogonalProjection(const float& right, const float& top, const float& near, const float& far) {
    float invFN = 1/(far-near);
    return SquareMatrix(4, {1/right, 0, 0, 0,
-                           0, near/top, 0, 0,
-                           0, 0, -(far+near)*invFN, 2*far*near*invFN,
-                           0, 0, -1,                0});
+                           0, 1/top, 0, 0,
+                           0, 0, -2*invFN, -(far + near)*invFN,
+                           0, 0, 0, 1});
 }

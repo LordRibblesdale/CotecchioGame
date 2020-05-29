@@ -24,10 +24,10 @@ class Object {
    float zScale;
 
 public:
-   Object(std::initializer_list<Triangle>& triangles, std::initializer_list<Color>& colors_, std::initializer_list<Float3>& unwrap);
+   Object(const std::initializer_list<Triangle>& triangles, const std::initializer_list<Color>& colors_, const std::initializer_list<Float2>& unwrap);
 
    //TODO check reference here
-   float* getWorldCoordinates();
+   //float* getWorldCoordinates();
 
    const float& getXTranslation() const;
 

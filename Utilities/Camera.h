@@ -11,8 +11,9 @@ class Camera {
 
 public:
    //TODO add constructor w/ up vector
-   //TODO check if reference is necessary
    Camera(Float3 eye, Float3 lookAt);
+
+   //TODO add Yaw and Pitch
 
    SquareMatrix world2ViewMatrix();
 };

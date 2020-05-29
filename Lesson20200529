@@ -20,7 +20,7 @@ Uso 2 vertici per i vertici
 Uso uniform model matrix, view e projection
     -> projection * view * model * vec4
 
-Uso normali: per essere trasformata normale, si usa la matrice (trasposta dell'inversa)
+Uso normali: per essere trasformata normale, si usa la matrice (trasposta dell'inversa di ...TODO find)
     -> Conviene avere matrici separate per alcune moltiplicazioni specifiche
     -> Trasformazioni coordinate (esempio tangent space, effetti visivi)
 
@@ -31,7 +31,7 @@ GPU:
 
 Inserire matrici nel ciclo, e da ricreare e modificare nel ciclo
 
-AspectRatio nella projectionMatrix
+AspectRatio nella projectionMatrix?
 
 Per la CAMERA VIEW
 Camera -> view Matrix, calcolando sistema di riferimento, con i 3 vettori a partire dalla camera
@@ -86,7 +86,7 @@ Materiale e Modello di Materiale sono diversi, ma simili:
 Coordinate locali + Normali ai vertici (per esempio per Gouraud shading)
     -> Per interpolazioni varie
 
-glDrawTriangles(0 indice memoria, N numero triangoli)
+glDrawTriangles(0 indice memoria, N numero vertici) (es: cubo ha 6 facce * 2 triangoli ciascuno * 3 vertici ognuno = 36)
 
 Implementazione Lambert
     -> layout con location e input con vec3 normal
@@ -104,6 +104,7 @@ Implementazione Lambert
         => Light direction come normalize di LightPosition - Pos
         => L = vec4 di max(0, (coseno dell'angolo) dot(normal, light))*kd (kd è un vec3)
 
+**DONE
 Impostazione del sistema in termini di profondità, ovvero tramite un controllo di profondità sui triangoli
 Abilitazione del glEnable(GL_DEPTH_TEST) !! Da usare dopo il loader di OpenGL (GLAD)
     -> Richiede anche il Clear del GL_DEPTH_BUFFER_BIT

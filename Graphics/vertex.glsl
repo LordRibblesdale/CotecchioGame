@@ -8,13 +8,18 @@ layout (location = 2) in vec2 textureCoordinates;
 out vec2 outTextCoord;
 out vec4 inColor;
 
-uniform mat4 matrix;
+// Projection Matrix
+uniform mat4 projection;
+// View Matrix
+uniform mat4 view;
+// Model Matrix
+uniform mat4 model;
 
 void main() {
     // gl_Position attribuisce la posizione al vertice
     //"   gl_Position = MVP*position\n"  // Posizione in Clip Space/NDC
     // TODO applicazione delle matrici per le trasformazioni
-    gl_Position = matrix * vec4(position, 1.0f);
+    gl_Position = projection * view * model * vec4(position, 1.0f);
 
     inColor = vertexColor;   // Salvare colore vertici
     outTextCoord = textureCoordinates;

@@ -113,7 +113,7 @@ float Float3::dotProduct(const Float3 &point) const {
 
 Float3 Float3::crossProduct(const Float3& point) const {
    return Float3(getY() * point.getZ() - getZ() * point.getY(),
-                 -(getX() * point.getZ() - getZ() * point.getX()),
+                 -(getX() * point.getZ()) + getZ() * point.getX(),
                  getX() * point.getY() - getY() * point.getX());
 }
 

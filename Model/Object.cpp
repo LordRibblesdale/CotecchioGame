@@ -1,9 +1,10 @@
 #include "Object.h"
 #include "../Matrix/SquareMatrix.h"
-#include "../Matrix/StandardMatrix.h"
 
-Object::Object(std::initializer_list<Triangle> &triangles, std::initializer_list<Color> &colors_,
-               std::initializer_list<Float3> &unwrap)  {
+Object::Object(const std::initializer_list<Triangle> &triangles, const std::initializer_list<Color> &colors_,
+               const std::initializer_list<Float2> &unwrap)  {
+   //TODO fix here
+   /*
    vertices.reserve(triangles.size());
    colors.reserve(colors_.size());
    textureUnwrap.reserve(unwrap.size());
@@ -12,8 +13,10 @@ Object::Object(std::initializer_list<Triangle> &triangles, std::initializer_list
    vertices.insert(vertices.end(), triangles.begin(), triangles.end());
    colors.insert(colors.end(), colors_.begin(), colors_.end());
    textureUnwrap.insert(textureUnwrap.end(), unwrap.begin(), unwrap.end());
+    */
 }
 
+/*
 float* Object::getWorldCoordinates() {
    // x y z r g b u v
    std::unique_ptr<float> vctArray(new float[vertices.size() + colors.size() + textureUnwrap.size()] {0});
@@ -44,7 +47,7 @@ float* Object::getWorldCoordinates() {
 
    return vctArray.release();
 }
-
+*/
 
 const float& Object::getXTranslation() const {
    return xTranslation;

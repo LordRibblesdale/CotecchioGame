@@ -37,8 +37,8 @@ std::vector<Float2> textureUnwrap;
 // Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
 //  ovvero i vertici sono inseriti in verso antiorario, come vertici (non come valori)
 
-const unsigned int WIDTH = 640;
-const unsigned int HEIGHT = 480;
+const unsigned int WIDTH = 960;
+const unsigned int HEIGHT = 540;
 
 void refreshWindowSize(GLFWwindow *vindow, int width, int height) {
    // La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
@@ -310,9 +310,7 @@ static int initialise() {
 
    // Richiesta della posizione della texture
    // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
-
    GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-   GLuint matrixUniform = glGetUniformLocation(shaderProgram, "matrix");
 
    // Assegnazione e modifica uniform a prescindere
    // Uso glUseProgram per assegnare texture
@@ -323,10 +321,12 @@ static int initialise() {
 
    glUseProgram(0);
 
-   //TODO move variable from here
-   Camera cam(std::move(Float3(0, -10, 2)), std::move(Float3(0, -1, 0)));
+   // Collezione indici per inviare dati allo shader
+   GLuint projectionMatrixUniform = glGetUniformLocation(shaderProgram, "projection");
+   GLuint viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
+   GLuint modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
-   bool isApplied = false;
+   Camera cam(std::move(Float3(0, 10, 10)), std::move(Float3(0, 0, 0)));
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -335,8 +335,12 @@ static int initialise() {
       // In base all'ordine dei comandi, modifica lo stato del sistema corrente o successivo
       pollInput(window);
 
-      glClearColor(0.2f, 0.4f, 0.1f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
+      glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+      // Pulizia buffer colore e depth
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
+
+      // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
+      glEnable(GL_DEPTH_TEST);
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
       glUseProgram(shaderProgram);
@@ -350,20 +354,23 @@ static int initialise() {
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
 
       // TODO check other matrix usages
-      SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 1, 0, 1), degree2Radiants(20*glfwGetTime())))));
+      //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(20*glfwGetTime())))));
 
-      SquareMatrix p = Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 1, 10);
-      SquareMatrix v(cam.world2ViewMatrix());
+      SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.5, 100)));
+      SquareMatrix v(std::move(cam.world2ViewMatrix()));
+      SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.3, 0.3, 0.3)));
 
-      SquareMatrix mvp(Matrix::transpose(p * v));
-
-      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, mvp.getArray());
-      //glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
+      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_FALSE, p.getArray());
+      glUniformMatrix4fv(viewMatrixUniform, 1, GL_FALSE, v.getArray());
+      glUniformMatrix4fv(modelMatrixUniform, 1, GL_FALSE, m.getArray());
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
       // Chamata di disegno della primitiva
       glDrawArrays(GL_TRIANGLES, 0, 3);
+
+      // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
+      glDisable(GL_DEPTH_TEST);
 
       //Necessità di modificare il buffer prima di inviarlo
       // prima, modifica il buffer B (sul successivo)
