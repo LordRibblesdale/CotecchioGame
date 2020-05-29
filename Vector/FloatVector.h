@@ -27,7 +27,7 @@ public:
    }
 
    FloatVector(const FloatVector& floatVector) {
-      vector_ = std::unique_ptr<float>(new float[floatVector.getSize()]);
+      vector_ = std::unique_ptr<float>(new float[floatVector.getSize()] {0});
       FloatVector::size_ = floatVector.getSize();
 
       for (int i = 0; i < size_; ++i) {
@@ -50,7 +50,7 @@ public:
    //TODO add all operators and functions
 
    FloatVector& operator=(const FloatVector& vector) {
-      vector_ = std::unique_ptr<float>(new float[vector.getSize()]);
+      vector_ = std::unique_ptr<float>(new float[vector.getSize()] {0});
       FloatVector::size_ = vector.getSize();
 
       for (int i = 0; i < size_; ++i) {
@@ -70,7 +70,7 @@ public:
    }
 
    FloatVector operator+(const FloatVector& vector) {
-      std::unique_ptr<float> newData(new float[size_]);
+      std::unique_ptr<float> newData(new float[size_] {0});
 
       if (size_ == vector.getSize()) {
          for (int i = 0; i < size_; ++i) {
@@ -113,7 +113,7 @@ public:
    }
 
    FloatVector operator-(const FloatVector& vector) {
-      std::unique_ptr<float> newData(new float[size_]);
+      std::unique_ptr<float> newData(new float[size_] {0});
 
       if (size_ == vector.getSize()) {
          for (int i = 0; i < size_; ++i) {

@@ -245,7 +245,7 @@ void SquareMatrix::invert() {
 SquareMatrix SquareMatrix::calculateInverse(const SquareMatrix &matrix) {
    unsigned int dimension = matrix.getDimension();
    float determinant = matrix.calculateDeterminant();
-   std::unique_ptr<float> newData(new float[dimension*dimension]);
+   std::unique_ptr<float> newData(new float[dimension*dimension] {0});
 
    if (determinant != 0) {
       float scalar = std::abs(1 / determinant);

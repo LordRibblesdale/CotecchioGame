@@ -36,7 +36,7 @@ Matrix &Matrix::operator=(Matrix && matrix) {
 
 //TODO fix repeated functions
 Matrix Matrix::operator+(const Matrix &matrix) noexcept(false) {
-   std::unique_ptr<float> newData(new float[getRows() * getColumns()]);
+   std::unique_ptr<float> newData(new float[getRows() * getColumns()] {0});
 
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
       for (int i = 0; i < getRows() * getColumns(); ++i) {
@@ -72,7 +72,7 @@ void Matrix::operator+=(const Matrix &matrix) noexcept(false) {
 }
 
 Matrix Matrix::operator-(const Matrix &matrix) noexcept(false) {
-   std::unique_ptr<float> newData(new float[getRows() * getColumns()]);
+   std::unique_ptr<float> newData(new float[getRows() * getColumns()] {0});
 
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
       for (int i = 0; i < getRows() * getColumns(); ++i) {
@@ -108,7 +108,7 @@ void Matrix::operator-=(const Matrix &matrix) noexcept(false) {
 }
 
 Matrix Matrix::operator*(const float& scalar) {
-   std::unique_ptr<float> newData(new float[getRows() * getColumns()]);
+   std::unique_ptr<float> newData(new float[getRows() * getColumns()] {0});
 
    for (int i = 0; i < getRows() * getColumns(); ++i) {
       newData.get()[i] = data_->operator[](i) * scalar;
@@ -124,7 +124,7 @@ void Matrix::operator*=(const float& scalar) {
 }
 
 Matrix Matrix::operator*(const Matrix &matrix) noexcept(false) {
-   std::unique_ptr<float> newData(new float[getRows() * matrix.getColumns()]);
+   std::unique_ptr<float> newData(new float[getRows() * matrix.getColumns()] {0});
 
    if (getColumns() == matrix.getRows()) {
       for (unsigned int r = 0; r < getRows(); ++r) {
@@ -145,7 +145,7 @@ Matrix Matrix::operator*(const Matrix &matrix) noexcept(false) {
 }
 
 Matrix Matrix::transpose(const Matrix &matrix) {
-   std::unique_ptr<float> newData(new float[matrix.getRows() * matrix.getColumns()]);
+   std::unique_ptr<float> newData(new float[matrix.getRows() * matrix.getColumns()] {0});
 
    for (int i = 0; i < matrix.getColumns(); ++i) {
       for (int j = 0; j < matrix.getRows(); ++j) {
@@ -158,7 +158,7 @@ Matrix Matrix::transpose(const Matrix &matrix) {
 }
 
 Matrix Matrix::createSubmatrix(const Matrix &matrix, const unsigned int& rowIndex, const unsigned int& columnIndex) {
-   std::unique_ptr<float> newData(new float[(matrix.getRows() - 1) * (matrix.getColumns() - 1)]);
+   std::unique_ptr<float> newData(new float[(matrix.getRows() - 1) * (matrix.getColumns() - 1)] {0});
 
    unsigned int index = 0;
    for (int i = 0; i < matrix.getRows(); ++i) {

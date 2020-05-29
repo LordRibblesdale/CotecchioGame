@@ -96,7 +96,7 @@ SquareMatrix Transform::scaleMatrix4(float scaleX, float scaleY, float scaleZ) {
 }
 
 SquareMatrix Transform::scaleTransform3(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ) {
-   std::unique_ptr<float> newData(new float[matrix.getDimension() * matrix.getDimension()]);
+   std::unique_ptr<float> newData(new float[matrix.getDimension() * matrix.getDimension()] {0});
 
    unsigned int dim = matrix.getDimension();
    short j = 1;

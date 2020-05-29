@@ -326,7 +326,9 @@ static int initialise() {
    GLuint viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
    GLuint modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
-   Camera cam(std::move(Float3(0, 10, 10)), std::move(Float3(0, 0, 0)));
+   Camera cam(std::move(Float3(0, 9, 10)), std::move(Float3(0, 0, 0)));
+
+   bool test = false;
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -362,6 +364,13 @@ static int initialise() {
       v.transpose();
       SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.3, 0.3, 0.3)));
       m.transpose();
+
+      if (!test) {
+         std::cout << v.toString() << std::endl << std::endl;
+         std::cout << (p*v*m).toString() << std::endl << std::endl;
+
+         test = true;
+      }
 
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_FALSE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_FALSE, v.getArray());
