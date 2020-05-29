@@ -10,6 +10,8 @@ class Camera {
    Float3 up;
 
 public:
+   //TODO add constructor w/ up vector
+   //TODO check if reference is necessary
    Camera(Float3 eye, Float3 lookAt);
 
    SquareMatrix world2ViewMatrix();

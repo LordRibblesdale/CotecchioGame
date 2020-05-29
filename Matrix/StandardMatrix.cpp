@@ -105,6 +105,13 @@ SquareMatrix Transform::scaleTransform3(const SquareMatrix &matrix, float scaleX
    return SquareMatrix(matrix.getDimension(), newData.release());
 }
 
+SquareMatrix Transform::translateMatrix4(float x, float y, float z) {
+   return SquareMatrix(4, {0, 0, 0, x,
+                           0, 0, 0, y,
+                           0, 0, 0, z,
+                           0, 0, 0, 1});
+}
+
 SquareMatrix Projection::view2ClipProjection(const float& right, const float& left, const float &near, const float &far,
                                              const float &top, const float &bottom) {
    float invRL = 1/(right-left);

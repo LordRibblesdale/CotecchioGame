@@ -8,18 +8,16 @@ class Triangle {
    //TODO check color add here or directly reading a XML file
    //TODO add normal reading via interpolation
    std::unique_ptr<Float3[]> points;
-   Float3 normal;
+   std::unique_ptr<Float3[]> normals;
 
 public:
    Triangle(Float3& p0, Float3& p1, Float3& p2);
 
+   const std::unique_ptr<Float3[]>& getPoints() const;
+   const std::unique_ptr<Float3[]>& getNormals() const;
+
    Float3 getPoint(float u, float v) const;
-
-   const Float3& getPoint0() const;
-   const Float3& getPoint1() const;
-   const Float3& getPoint2() const;
-
-   const Float3& getNormal() const;
+   Float3 getNormal(float u, float v) const;
 };
 
 #endif //TRIANGLE_H

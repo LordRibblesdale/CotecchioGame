@@ -9,6 +9,12 @@ struct FloatVector {
    unsigned int size_;
 
 public:
+   //TODO add move constructor
+   FloatVector(unsigned int size, float* data) {
+      FloatVector::size_ = size;
+      vector_.reset(data);
+   }
+
    FloatVector(unsigned int size, const std::initializer_list<float>& data) {
       vector_ = move(std::unique_ptr<float>(new float[size] {0}));
       FloatVector::size_ = size;
@@ -64,6 +70,23 @@ public:
    }
 
    FloatVector operator+(const FloatVector& vector) {
+      std::unique_ptr<float> newData(new float[size_]);
+
+      if (size_ == vector.getSize()) {
+         for (int i = 0; i < size_; ++i) {
+            newData.get()[i] = vector_.get()[i] + vector.getVector().get()[i];
+         }
+      } else {
+         std::string s = "Exception VECTOR_SUM: dimensions do not correspond. ";
+         s.append("(").append(std::to_string(size_)).append(", ").append(std::to_string(vector.getSize())).append(")\n");
+
+         throw (ExceptionNotifier(std::to_string(size_).c_str()));
+      }
+
+      return FloatVector(size_, newData.release());
+   }
+
+   void operator+=(const FloatVector& vector) {
       if (size_ == vector.getSize()) {
          for (int i = 0; i < size_; ++i) {
             vector_.get()[i] += vector.getVector().get()[i];
@@ -76,7 +99,7 @@ public:
       }
    }
 
-   FloatVector operator-(const FloatVector& vector) {
+   void operator-=(const FloatVector& vector) {
       if (size_ == vector.getSize()) {
          for (int i = 0; i < size_; ++i) {
             vector_.get()[i] -= vector.getVector().get()[i];
@@ -87,6 +110,23 @@ public:
 
          throw (ExceptionNotifier(std::to_string(size_).c_str()));
       }
+   }
+
+   FloatVector operator-(const FloatVector& vector) {
+      std::unique_ptr<float> newData(new float[size_]);
+
+      if (size_ == vector.getSize()) {
+         for (int i = 0; i < size_; ++i) {
+            newData.get()[i] = vector_.get()[i] - vector.getVector().get()[i];
+         }
+      } else {
+         std::string s = "Exception VECTOR_SUM: dimensions do not correspond. ";
+         s.append("(").append(std::to_string(size_)).append(", ").append(std::to_string(vector.getSize())).append(")\n");
+
+         throw (ExceptionNotifier(std::to_string(size_).c_str()));
+      }
+
+      return FloatVector(size_, newData.release());
    }
 
    const unsigned int& getSize() const {

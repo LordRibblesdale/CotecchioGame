@@ -346,17 +346,15 @@ static int initialise() {
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
 
       // TODO check other matrix usages
-      //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 1, 0, 1), degree2Radiants(20*glfwGetTime())))));
-      //SquareMatrix p = Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0, 1);
-      //SquareMatrix v(cam.world2ViewMatrix());
-      //v.transpose();
-      //p.transpose();
+      SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 1, 0, 1), degree2Radiants(20*glfwGetTime())))));
 
-      //SquareMatrix mvp(p * v);
-      //mvp.transpose();
+      SquareMatrix p = Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 1, 10);
+      SquareMatrix v(cam.world2ViewMatrix());
 
-      //glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, mvp.getArray());
-      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
+      SquareMatrix mvp(Matrix::transpose(p * v));
+
+      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, mvp.getArray());
+      //glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
