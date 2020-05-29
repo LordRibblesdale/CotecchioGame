@@ -357,8 +357,11 @@ static int initialise() {
       //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(20*glfwGetTime())))));
 
       SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.5, 100)));
+      p.transpose();
       SquareMatrix v(std::move(cam.world2ViewMatrix()));
+      v.transpose();
       SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.3, 0.3, 0.3)));
+      m.transpose();
 
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_FALSE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_FALSE, v.getArray());
