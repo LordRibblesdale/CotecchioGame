@@ -2,9 +2,21 @@
 
 Color::Color() : FloatVector(4, {0, 0, 0, 1}) {}
 
+Color::Color(float g) : FloatVector(4, {g, g, g, 1}) {}
+
 Color::Color(float r, float g, float b) : FloatVector(4, {r, g, b, 1}) {}
 
 Color::Color(float r, float g, float b, float a) : FloatVector(4, {r, g, b, a}) {}
+
+Color::Color(const FloatVector& vector) : FloatVector(4, {0, 0, 0, 1}) {
+   if (vector.getSize() == size_) {
+      vector_ = std::move(std::unique_ptr<float>(new float[size_] {0}));
+
+      for (int i = 0; i < size_; ++i) {
+         vector_.get()[i] = vector.getVector().get()[i];
+      }
+   }
+}
 
 Color::Color(const Color &color) : FloatVector(color) {}
 
@@ -81,5 +93,5 @@ void Color::clamp() {
 }
 
 int Color::toInt8Bit(const float &f) {
-   return 255*f;
+   return 255 * f;
 }

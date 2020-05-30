@@ -4,10 +4,16 @@
         <XPos>-2</XPos>
         <YPos>-2</YPos>
         <ZPos>0</ZPos>
+
+        <XNormal>0</XNormal>
+        <YNormal>0</YNormal>
+        <ZNormal>1</ZNormal>
+
         <Red>1</Red>
         <Green>0</Green>
         <Blue>0</Blue>
         <Alpha>1</Alpha>
+
         <UCoord>0</UCoord>
         <VCoord>0</VCoord>
     </Float3>
@@ -15,10 +21,16 @@
         <XPos>2</XPos>
         <YPos>-2</YPos>
         <ZPos>0</ZPos>
+
+        <XNormal>0</XNormal>
+        <YNormal>0</YNormal>
+        <ZNormal>1</ZNormal>
+
         <Red>0</Red>
         <Green>1</Green>
         <Blue>0</Blue>
         <Alpha>1</Alpha>
+
         <UCoord>1</UCoord>
         <VCoord>0</VCoord>
     </Float3>
@@ -26,10 +38,16 @@
         <XPos>0</XPos>
         <YPos>2</YPos>
         <ZPos>0</ZPos>
+
+        <XNormal>0</XNormal>
+        <YNormal>0</YNormal>
+        <ZNormal>1</ZNormal>
+
         <Red>0</Red>
         <Green>0</Green>
         <Blue>1</Blue>
         <Alpha>1</Alpha>
+
         <UCoord>0.5</UCoord>
         <VCoord>1</VCoord>
     </Float3>

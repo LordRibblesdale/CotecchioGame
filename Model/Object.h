@@ -8,7 +8,10 @@
 
 class Object {
    std::vector<Triangle> vertices;
-   std::vector<Color> colors;
+public:
+   const vector<Triangle> &getVertices() const;
+
+private:
    std::vector<Float2> textureUnwrap;
 
    float xTranslation;
@@ -24,46 +27,49 @@ class Object {
    float zScale;
 
 public:
-   Object(const std::initializer_list<Triangle>& triangles, const std::initializer_list<Color>& colors_, const std::initializer_list<Float2>& unwrap);
+   // TODO rule of 5
+   Object(unsigned int preallocSize);
 
    //TODO check reference here
    //float* getWorldCoordinates();
 
+   void addTriangle(Triangle triangle);
+
    const float& getXTranslation() const;
 
-   void setXTranslation(float xTranslation);
+   void setXTranslation(const float& xTranslation);
 
    const float& getYTranslation() const;
 
-   void setYTranslation(float yTranslation);
+   void setYTranslation(const float& yTranslation);
 
    const float& getZTranslation() const;
 
-   void setZTranslation(float zTranslation);
+   void setZTranslation(const float& zTranslation);
 
    const float& getXRotation() const;
 
-   void setXRotation(float xRotation);
+   void setXRotation(const float& xRotation);
 
    const float& getYRotation() const;
 
-   void setYRotation(float yRotation);
+   void setYRotation(const float& yRotation);
 
    const float& getZRotation() const;
 
-   void setZRotation(float zRotation);
+   void setZRotation(const float& zRotation);
 
    const float& getXScale() const;
 
-   void setXScale(float xScale);
+   void setXScale(const float& xScale);
 
    const float& getYScale() const;
 
-   void setYScale(float yScale);
+   void setYScale(const float& yScale);
 
    const float& getZScale() const;
 
-   void setZScale(float zScale);
+   void setZScale(const float& zScale);
 };
 
 #endif //OBJECT_H

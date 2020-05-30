@@ -2,6 +2,7 @@
 #define GLSL_H
 
 #include <memory>
+#include <fstream>
 
 /* Texture: acquisizione di immagine
  * -> Necessità di geometria con coordinate, per assegnare ai pixel le informazioni
@@ -66,6 +67,7 @@
 /* IF crea branching, il che varia velocità di render dei pixel
  * Branching è tecnica erronea per la scrittura, poichè causa tempi asincroni per i pixel
  */
+
 
 static void loadShader(std::string& string, const std::string& location) {
    std::ifstream file(location);

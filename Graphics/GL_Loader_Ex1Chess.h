@@ -11,9 +11,6 @@
 #include <GLFW/glfw3.h>
 #endif
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "../IO/stb-master/stb_image.h"
-
 #include "Shaders.h"
 #include "../Vector/Float2.h"
 #include "../Vector/Float3.h"
@@ -21,6 +18,7 @@
 #include "../Matrix/SquareMatrix.h"
 #include "../Matrix/StandardMatrix.h"
 #include "../Utilities/Camera.h"
+#include "../Model/Object.h"
 
 #include <iostream>
 #include <vector>
@@ -28,18 +26,14 @@
 
 //In coordinate NDC da inviare allo shader
 //TODO check public/private access
-std::vector<Float3> vertices;
-std::vector<Color> colors;
-// Coordinate di unwrap
-std::vector<Float2> textureUnwrap;
-std::vector<Float3> normals;
+std::vector<Object> vertices;
 
 //Vertex buffer, Element buffer per la topologia
 // Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
 //  ovvero i vertici sono inseriti in verso antiorario, come vertici (non come valori)
 
-const unsigned int WIDTH = 960;
-const unsigned int HEIGHT = 540;
+const unsigned int WIDTH = 600;
+const unsigned int HEIGHT = 600;
 
 void refreshWindowSize(GLFWwindow *vindow, int width, int height) {
    // La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
@@ -130,7 +124,7 @@ static int initialise() {
    //TODO optimise here
    // Attenzione al puntatore, da eliminare appena utilizzato, andrà sempre cancellato
    std::string source;
-   loadShader(source, "Graphics/vertex.glsl");
+   loadShader(source, "Graphics/vertex_chess.glsl");
    char* charSource(const_cast<char *>(source.c_str()));
 
    if (!charSource) {
@@ -153,7 +147,7 @@ static int initialise() {
       std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
    }
 
-   loadShader(source, "Graphics/fragment.glsl");
+   loadShader(source, "Graphics/fragment_chess.glsl");
    charSource = const_cast<char *>(source.c_str());
 
    if (!charSource) {
@@ -225,15 +219,14 @@ static int initialise() {
    //TODO optimise multiple array usage
    //TODO change if there is another type of object
    std::vector<GLfloat> attributes;
-   for (auto i = 0; i < vertices.size(); ++i) {
-      auto pointer = vertices.at(i).getVector().get();
-      attributes.insert(attributes.end(), pointer, pointer + 3);
+   for (auto& vertex : vertices) {
+      for (int j = 0; j < 3; ++j) {
+         auto pointer = vertex.getVertices().at(j).getPoints().get()->getVector().get();
+         attributes.insert(attributes.end(), pointer, pointer + 3);
 
-      pointer = colors.at(i).getVector().get();
-      attributes.insert(attributes.end(), pointer, pointer + 4);
-
-      pointer = textureUnwrap.at(i).getVector().get();
-      attributes.insert(attributes.end(), pointer, pointer + 2);
+         pointer = vertex.getVertices().at(j).getColors().get()->getVector().get();
+         attributes.insert(attributes.end(), pointer, pointer + 4);
+      }
    }
 
    for (float f : attributes) {
@@ -257,79 +250,19 @@ static int initialise() {
    // DEFINITA nella scrittura dello shader
    // Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
    // Il valore 3 dice quanti vertici
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9* sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7* sizeof(GLfloat), (GLvoid*) 0);
    // Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
    // Abilita gli attributi passatigli
    glEnableVertexAttribArray(0);
 
-   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9* sizeof(GLfloat), (GLvoid*) (3* sizeof(GLfloat)));
+   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7* sizeof(GLfloat), (GLvoid*) (3* sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
-
-   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9* sizeof(GLfloat), (GLvoid*) (7* sizeof(GLfloat)));
-   glEnableVertexAttribArray(2);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
    // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
    glBindVertexArray(0);
-
-   // Creazione texture
-   GLuint texture1;
-   // Creazione allocazione memoria texture
-   glGenTextures(1, &texture1);
-   // Bind della texture
-   glBindTexture(GL_TEXTURE_2D, texture1);
-   // Impostare come applicare texture su s e t
-   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-   // Impostare come comportarsi con dimensioni più o meno piccole in base alla distanza (es usando mipmap)
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-   // Acquisizione texture
-   int width, height, channels;
-   // Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
-   // ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
-   // Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
-   stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
-
-   unsigned char* data = stbi_load("img.png", &width, &height, &channels, 0);
-
-   if (data) {
-      // Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
-      //   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
-      //   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-      // Creazione della mipmap della texture bindata
-      glGenerateMipmap(GL_TEXTURE_2D);
-   } else {
-      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
-   }
-
-   stbi_image_free(data);
-
-   // Richiesta della posizione della texture
-   // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
-   GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-
-   // Assegnazione e modifica uniform a prescindere
-   // Uso glUseProgram per assegnare texture
-   glUseProgram(shaderProgram);
-   // Assegnazione valore della texture a uno specifico canale di OpenGL
-   // Canali limitati, massimo un certo numero di texture contemporaneamente
-   glUniform1i(textureUniform, 0);
-
-   glUseProgram(0);
-
-   // Collezione indici per inviare dati allo shader
-   GLuint projectionMatrixUniform = glGetUniformLocation(shaderProgram, "projection");
-   GLuint viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
-   GLuint modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
-
-   Camera cam(std::move(Float3(10, 0, 0)), std::move(Float3(0, 0, 0)));
-
-   bool test = false;
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -340,42 +273,14 @@ static int initialise() {
 
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
       // Pulizia buffer colore e depth
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
-
-      // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
-      glEnable(GL_DEPTH_TEST);
+      glClear(GL_COLOR_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
       glUseProgram(shaderProgram);
 
-      glBindTexture(GL_TEXTURE_2D, texture1);
-      // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture
-      glActiveTexture(GL_TEXTURE0);
-
       // Scrivere nella location della variabile i valori del colore da assegnare al pixel;
       // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
-
-      // TODO check other matrix usages
-      //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(20*glfwGetTime())))));
-
-      //SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.5, 100)));
-      //p.transpose();
-      SquareMatrix v(std::move(cam.world2ViewMatrix()));
-      v.transpose();
-      SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.25, 0.25, 0.25)));
-      m.transpose();
-
-      //if (!test) {
-      //   std::cout << v.toString() << std::endl << std::endl;
-      //   std::cout << (p*v*m).toString() << std::endl << std::endl;
-
-      //   test = true;
-      //}
-
-      //glUniformMatrix4fv(projectionMatrixUniform, 1, GL_FALSE, p.getArray());
-      glUniformMatrix4fv(viewMatrixUniform, 1, GL_FALSE, v.getArray());
-      glUniformMatrix4fv(modelMatrixUniform, 1, GL_FALSE, m.getArray());
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);

@@ -29,6 +29,8 @@ int main(int argc, char** argv) {
 
       vertices.reserve(resizeIndex);
       colors.reserve(resizeIndex);
+      textureUnwrap.reserve(resizeIndex);
+      normals.reserve(resizeIndex);
 
       // Iterazioni tra i nodi
       // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
@@ -46,6 +48,9 @@ int main(int argc, char** argv) {
          textureUnwrap.emplace_back(std::move(Float2(std::stof(position->first_node("UCoord")->value()),
                                                      std::stof(position->first_node("VCoord")->value()))));
 
+         normals.emplace_back(std::move(Float3(std::stof(position->first_node("XNormal")->value()),
+                                          std::stof(position->first_node("YNormal")->value()),
+                                          std::stof(position->first_node("ZNormal")->value()))));
       }
 
       file.close();

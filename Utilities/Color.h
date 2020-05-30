@@ -6,8 +6,10 @@
 class Color : public FloatVector {
 public:
    Color();
+   Color(float g);
    Color(float r, float g, float b);
    Color(float r, float g, float b, float a);
+   Color(const FloatVector& vector);
    Color(const Color& color);
    Color(Color&& color);
    ~Color();

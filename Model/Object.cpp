@@ -1,8 +1,19 @@
 #include "Object.h"
-#include "../Matrix/SquareMatrix.h"
 
-Object::Object(const std::initializer_list<Triangle> &triangles, const std::initializer_list<Color> &colors_,
-               const std::initializer_list<Float2> &unwrap)  {
+Object::Object(unsigned int preallocSize)  {
+   vertices.reserve(preallocSize);
+
+   xTranslation = 0;
+   yTranslation = 0;
+   zTranslation = 0;
+
+   xRotation = 0;
+   yRotation = 0;
+   zRotation = 0;
+
+   xScale = 0;
+   yScale = 0;
+   zScale = 0;
    //TODO fix here
    /*
    vertices.reserve(triangles.size());
@@ -14,6 +25,10 @@ Object::Object(const std::initializer_list<Triangle> &triangles, const std::init
    colors.insert(colors.end(), colors_.begin(), colors_.end());
    textureUnwrap.insert(textureUnwrap.end(), unwrap.begin(), unwrap.end());
     */
+}
+
+void Object::addTriangle(Triangle triangle) {
+   vertices.emplace_back(std::move(triangle));
 }
 
 /*
@@ -53,7 +68,7 @@ const float& Object::getXTranslation() const {
    return xTranslation;
 }
 
-void Object::setXTranslation(float xTranslation) {
+void Object::setXTranslation(const float& xTranslation) {
    Object::xTranslation = xTranslation;
 }
 
@@ -61,7 +76,7 @@ const float& Object::getYTranslation() const {
    return yTranslation;
 }
 
-void Object::setYTranslation(float yTranslation) {
+void Object::setYTranslation(const float& yTranslation) {
    Object::yTranslation = yTranslation;
 }
 
@@ -69,7 +84,7 @@ const float& Object::getZTranslation() const {
    return zTranslation;
 }
 
-void Object::setZTranslation(float zTranslation) {
+void Object::setZTranslation(const float& zTranslation) {
    Object::zTranslation = zTranslation;
 }
 
@@ -77,7 +92,7 @@ const float& Object::getXRotation() const {
    return xRotation;
 }
 
-void Object::setXRotation(float xRotation) {
+void Object::setXRotation(const float& xRotation) {
    Object::xRotation = xRotation;
 }
 
@@ -85,7 +100,7 @@ const float& Object::getYRotation() const {
    return yRotation;
 }
 
-void Object::setYRotation(float yRotation) {
+void Object::setYRotation(const float& yRotation) {
    Object::yRotation = yRotation;
 }
 
@@ -93,7 +108,7 @@ const float& Object::getZRotation() const {
    return zRotation;
 }
 
-void Object::setZRotation(float zRotation) {
+void Object::setZRotation(const float& zRotation) {
    Object::zRotation = zRotation;
 }
 
@@ -101,7 +116,7 @@ const float& Object::getXScale() const {
    return xScale;
 }
 
-void Object::setXScale(float xScale) {
+void Object::setXScale(const float& xScale) {
    Object::xScale = xScale;
 }
 
@@ -109,7 +124,7 @@ const float& Object::getYScale() const {
    return yScale;
 }
 
-void Object::setYScale(float yScale) {
+void Object::setYScale(const float& yScale) {
    Object::yScale = yScale;
 }
 
@@ -117,6 +132,10 @@ const float& Object::getZScale() const {
    return zScale;
 }
 
-void Object::setZScale(float zScale) {
+void Object::setZScale(const float& zScale) {
    Object::zScale = zScale;
+}
+
+const vector<Triangle> &Object::getVertices() const {
+   return vertices;
 }

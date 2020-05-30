@@ -20,22 +20,25 @@ Uso 2 vertici per i vertici
 Uso uniform model matrix, view e projection
     -> projection * view * model * vec4
 
-Uso normali: per essere trasformata normale, si usa la matrice (trasposta dell'inversa di ...TODO find)
+** OK
+Uso normali: per essere trasformata normale, si usa la matrice (trasposta dell'inversa della Model matrix)
     -> Conviene avere matrici separate per alcune moltiplicazioni specifiche
     -> Trasformazioni coordinate (esempio tangent space, effetti visivi)
 
+** OK
 GPU:
     -> Passare informazioni è molto ingente (esempio tramite uniform)
     -> 3 separate per calcoli di performance su GPU accelerate
     -> Tenerle in CPU dipende dai casi (esempio numero di passaggio matrici)
 
+** OK
 Inserire matrici nel ciclo, e da ricreare e modificare nel ciclo
 
 AspectRatio nella projectionMatrix?
 
 Per la CAMERA VIEW
 Camera -> view Matrix, calcolando sistema di riferimento, con i 3 vettori a partire dalla camera
-    -> Calcola automaticamente, non richiederà parametri
+    -> Calcola automaticamente, non richiederà parametri    ** OK
     -> Gestione Yaw e Pitch, per visuale verso DX e SX, in Alto e in Basso
     -> Aggiornare vettore Up, variando anche x, y, z della camera quando necessario)
     -> Uso angoli di Eulero per variare i punti x, y, z nel riferimento locale della camera
@@ -91,7 +94,7 @@ glDrawTriangles(0 indice memoria, N numero vertici) (es: cubo ha 6 facce * 2 tri
 Implementazione Lambert
     -> layout con location e input con vec3 normal
     -> out del vec3 normal
-        -> con normal = trasposta dell'inversa di ...
+        -> con normal = trasposta dell'inversa della Model matrix
     -> Necessità di selezionare posizione per calcolare la direzione della luce per il fragment shader
     -> L (posizione luce) - P (punto sulla superficie, posizione di ciò che si guarda nel sistema di
         riferimento globale)

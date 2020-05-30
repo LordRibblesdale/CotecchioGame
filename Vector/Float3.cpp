@@ -103,7 +103,7 @@ Float3& Float3::operator*=(const float &scalar) {
    return *this;
 }
 
-const float *Float3::operator*() {
+const float* Float3::operator*() {
    return getVector().get();
 }
 
