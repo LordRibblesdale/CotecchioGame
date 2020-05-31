@@ -7,4 +7,5 @@ uniform sampler2D texture1;
 
 void main() {
     fragColor = texture(texture1, outTextCoord); // Funzione per identificare il colore dalla texture, sampling della texture
+    //fragColor = vec4(1);
 }

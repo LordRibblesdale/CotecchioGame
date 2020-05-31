@@ -31,8 +31,8 @@
 // Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
 //  ovvero i vertici sono inseriti in verso antiorario, come vertici (non come valori)
 
-const unsigned int WIDTH = 600;
-const unsigned int HEIGHT = 600;
+const unsigned int WIDTH = 940;
+const unsigned int HEIGHT = 560;
 
 void refreshWindowSize(GLFWwindow *vindow, int width, int height) {
    // La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
@@ -214,19 +214,16 @@ static int initialise() {
    // GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-   //TODO check resize and memory allocation
-   //TODO optimise multiple array usage
-   //TODO change if there is another type of object
+   float attributes[] {-1, 1, 0, 0, 1,
+                      -1, -1, 0, 0, 0,
+                      1, -1, 0, 1, 0,
 
-   float attributes[] {-1, 1, 0, 0, 0,
-                       -1, -1, 0, 0, 1,
-                       1, 1, 0, 1, 0,
+                      1, -1, 0, 1, 0,
+                      1, 1, 0, 1, 1,
+                      -1, 1, 0, 0, 1
+   };
 
-                       -1, -1, 0, 0, 1,
-                       1, -1, 0, 1, 1,
-                       1, 1, 0, 1, 0};
-
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6, attributes, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 5*6, attributes, GL_DYNAMIC_DRAW);
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
    // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL
@@ -240,12 +237,12 @@ static int initialise() {
    // DEFINITA nella scrittura dello shader
    // Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
    // Il valore 3 dice quanti vertici
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3* sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5* sizeof(GLfloat), (GLvoid*) 0);
    // Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
    // Abilita gli attributi passatigli
    glEnableVertexAttribArray(0);
 
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5* sizeof(GLfloat), (GLfloat*) (3* sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
@@ -261,8 +258,8 @@ static int initialise() {
    // Bind della texture
    glBindTexture(GL_TEXTURE_2D, texture1);
    // Impostare come applicare texture su s e t
-   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
    // Impostare come comportarsi con dimensioni più o meno piccole in base alla distanza (es usando mipmap)
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -289,18 +286,66 @@ static int initialise() {
 
    stbi_image_free(data);
 
+   /* Generazione degli indici
+    * Generazione del VertexArray e VertexBuffer
+    * Bind del VAO e VBO
+    * Creazione dati e invio al buffer
+    * Impostazione lettura dati
+    * Scollegare bind
+    */
+
+   GLuint vbo2;
+   GLuint vao2;
+
+   glGenVertexArrays(1, &vao2);
+   glGenBuffers(1, &vbo2);
+
+   glBindVertexArray(vao2);
+   glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 5*6, attributes, GL_DYNAMIC_DRAW);
+
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (GLvoid*) 0);
+   glEnableVertexAttribArray(0);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glEnableVertexAttribArray(1);
+
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindVertexArray(0);
+
+   /* Generazione texture
+    * Assegnamento indirizzo
+    * Bind texture
+    * Impostazione trasformazioni texture
+    *    - Sul minifyier e magnifyier
+    *    - Sulla trasformazione U e V
+    *    - Sulla mipmap
+    * Caricamento texture
+    * Pulizia texture dopo caricamento
+    */
+
+   GLuint texture2;
+   glGenTextures(1, &texture2);
+   glBindTexture(GL_TEXTURE1, texture2);
+   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+   data = stbi_load("charzera.png", &width, &height, &channels, 0);
+
+   if (data) {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+   } else {
+      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+   }
+
+   stbi_image_free(data);
+
    // Richiesta della posizione della texture
    // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
    GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-
-   // Assegnazione e modifica uniform a prescindere
-   // Uso glUseProgram per assegnare texture
-   glUseProgram(shaderProgram);
-   // Assegnazione valore della texture a uno specifico canale di OpenGL
-   // Canali limitati, massimo un certo numero di texture contemporaneamente
-   glUniform1i(textureUniform, 0);
-
-   glUseProgram(0);
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -320,10 +365,11 @@ static int initialise() {
       // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
 
+      glUniform1i(textureUniform, 0);
+
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
       // Chamata di disegno della primitiva
-      // TODO fix .at(0) - too specific for general purposes
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       //Necessità di modificare il buffer prima di inviarlo
