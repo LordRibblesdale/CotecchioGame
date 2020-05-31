@@ -7,11 +7,9 @@
 #include "../Vector/Float2.h"
 
 class Object {
-   std::vector<Triangle> vertices;
-public:
-   const vector<Triangle> &getVertices() const;
 
 private:
+   std::vector<Triangle> vertices;
    std::vector<Float2> textureUnwrap;
 
    float xTranslation;
@@ -34,6 +32,8 @@ public:
    //float* getWorldCoordinates();
 
    void addTriangle(Triangle triangle);
+
+   const std::vector<Triangle> &getVertices() const;
 
    const float& getXTranslation() const;
 

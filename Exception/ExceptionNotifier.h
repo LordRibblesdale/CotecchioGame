@@ -1,9 +1,6 @@
 #ifndef EXCEPTIONNOTIFIER_H
 #define EXCEPTIONNOTIFIER_H
 
-#include <exception>
-#include <string>
-
 class ExceptionNotifier : public std::exception {
 private:
    const char* s_;

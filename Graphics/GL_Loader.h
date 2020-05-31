@@ -243,7 +243,7 @@ static int initialise() {
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * attributes.size(), attributes.data(), GL_DYNAMIC_DRAW);
 
    // Pulizia della memoria, fine dello scope
-   attributes.clear();
+   attributes.erase(attributes.begin(), attributes.end());
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
    // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL

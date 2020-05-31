@@ -200,7 +200,7 @@ static int initialise() {
    // E' possibile attribuire durante il ciclo il colore, tramite l'uniform vec4
    // Gathering variabile uniform del pixel shader che risiede nel programma, ma non si accede tramite puntatore
    //    -> Accesso tramite  (poichè puntatore non generato nello shader)
-   GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "color");  // Puntatore alla variabile
+   //GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "color");  // Puntatore alla variabile
 
    // Genera il Vertex Array Object
    glGenVertexArrays(1, &vao);
@@ -220,12 +220,14 @@ static int initialise() {
    //TODO change if there is another type of object
    std::vector<GLfloat> attributes;
    for (auto& vertex : vertices) {
-      for (int j = 0; j < 3; ++j) {
-         auto pointer = vertex.getVertices().at(j).getPoints().get()->getVector().get();
-         attributes.insert(attributes.end(), pointer, pointer + 3);
+      for (Triangle point : vertex.getVertices()) {
+         for (int j = 0; j < 3; ++j) {
+            auto pointer = point.getPoints()[j].getVector().get();
+            attributes.insert(attributes.end(), pointer, pointer + 3);
 
-         pointer = vertex.getVertices().at(j).getColors().get()->getVector().get();
-         attributes.insert(attributes.end(), pointer, pointer + 4);
+            pointer = point.getColors().get()[j].getVector().get();
+            attributes.insert(attributes.end(), pointer, pointer + 4);
+         }
       }
    }
 
@@ -236,7 +238,7 @@ static int initialise() {
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * attributes.size(), attributes.data(), GL_DYNAMIC_DRAW);
 
    // Pulizia della memoria, fine dello scope
-   attributes.clear();
+   attributes.erase(attributes.begin(), attributes.end());
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
    // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL
@@ -285,10 +287,8 @@ static int initialise() {
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
       // Chamata di disegno della primitiva
-      glDrawArrays(GL_TRIANGLES, 0, 3);
-
-      // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
-      glDisable(GL_DEPTH_TEST);
+      // TODO fix .at(0) - too specific for general purposes
+      glDrawArrays(GL_TRIANGLES, 0, 3*vertices.at(0).getVertices().size());
 
       //Necessità di modificare il buffer prima di inviarlo
       // prima, modifica il buffer B (sul successivo)
