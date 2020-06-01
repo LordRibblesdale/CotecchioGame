@@ -326,11 +326,11 @@ static int initialise() {
 
    GLuint texture2;
    glGenTextures(1, &texture2);
-   glBindTexture(GL_TEXTURE1, texture2);
-   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_WRAP_S, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE1, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glBindTexture(GL_TEXTURE_2D, texture2);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
    data = stbi_load("charzera.png", &width, &height, &channels, 0);
 
@@ -342,10 +342,12 @@ static int initialise() {
    }
 
    stbi_image_free(data);
+   glBindTexture(GL_TEXTURE_2D, 0);
 
    // Richiesta della posizione della texture
    // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
    GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
+   GLuint matrixUniform = glGetUniformLocation(shaderProgram, "scale");
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -365,12 +367,21 @@ static int initialise() {
       // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
       // Quindi attenzione al posizionamento delle chiamate di modifica stato
 
-      glUniform1i(textureUniform, 0);
-
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
-      // Chamata di disegno della primitiva
+
+      glBindTexture(GL_TEXTURE_2D, texture1);
+      glUniform1i(textureUniform, 0);
+
+      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
       glDrawArrays(GL_TRIANGLES, 0, 6);
+
+      /*
+      glBindVertexArray(vao2);
+      glUniform1i(textureUniform, 0);
+      glBindTexture(GL_TEXTURE_2D, texture2);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+       */
 
       //Necessità di modificare il buffer prima di inviarlo
       // prima, modifica il buffer B (sul successivo)
