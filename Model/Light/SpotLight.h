@@ -10,7 +10,7 @@ class SpotLight : Light {
 
 public:
    SpotLight();
-   SpotLight(Float3 origin, float intensity, float midAngle_, float maxAngle_);
+   SpotLight(Float3 origin, Color color, float intensity, float midAngle_, float maxAngle_);
 
    virtual float getIrradiance(float angle) override;
 

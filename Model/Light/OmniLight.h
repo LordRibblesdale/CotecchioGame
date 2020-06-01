@@ -9,7 +9,7 @@ class OmniLight : Light {
 
 public:
    OmniLight();
-   OmniLight(Float3 origin, float intensity);
+   OmniLight(Float3 origin, Color c, float intensity);
 
    virtual float getIrradiance(float distance) override;
 };

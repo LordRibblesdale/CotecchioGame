@@ -34,6 +34,17 @@
 const unsigned int WIDTH = 940;
 const unsigned int HEIGHT = 560;
 
+GLFWwindow* window = nullptr;
+GLuint shaderProgram = 0;
+GLuint vbo = 0; // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
+GLuint vao = 0; // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
+GLuint vbo2 = 0;
+GLuint vao2 = 0;
+// Creazione texture
+GLuint texture1 = 0;
+GLuint textureUniform = 0;
+GLuint matrixUniform = 0;
+
 void refreshWindowSize(GLFWwindow *vindow, int width, int height) {
    // La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
    // glViewport è la funzione per la trasformazione da NDC a Screen
@@ -77,20 +88,17 @@ void pollInput(GLFWwindow *window) {
  * - Chiamata del program con glUseProgram per chiamare i vari shader
  */
 
-static int initialise() {
-   // Inzializzazione di OpenGL per il render
-   glfwInit();
-   // Setup versione da utilizzare
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+void checkInputs();
+void initialiseGLFW();
+void compileShaders();
+void createBackground(float* attributes);
+void createCharacter(float* attributes);
 
-#ifdef __APPLE__
-   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+static int initialise() {
+   initialiseGLFW();
 
    // Creazione finestra, con nome, monitor da assegnare e finestre da cui dipendere
-   GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Cotecchio Game", nullptr, nullptr);
+   window = glfwCreateWindow(WIDTH, HEIGHT, "Cotecchio Game", nullptr, nullptr);
 
    if (!window) {
       // Controllo in caso di errore di inizializzazione e pulizia del programma annessa
@@ -111,6 +119,116 @@ static int initialise() {
       return -1;
    }
 
+   compileShaders();
+
+   // Generazione del Vertex Buffer Object e Vertex Array Object
+   // Esempio un oggettto è dato da un insieme di vertici, elementi (topologia)
+   // Generare vbo e vao tramite funzioni predefinite semplifica chiamate a runtime
+
+   // E' possibile attribuire durante il ciclo il colore, tramite l'uniform vec4
+   // Gathering variabile uniform del pixel shader che risiede nel programma, ma non si accede tramite puntatore
+   //    -> Accesso tramite  (poichè puntatore non generato nello shader)
+   //GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "color");  // Puntatore alla variabile
+
+   float attributes[] {-1, 1, 0, 0, 1,
+                       -1, -1, 0, 0, 0,
+                       1, -1, 0, 1, 0,
+
+                       1, -1, 0, 1, 0,
+                       1, 1, 0, 1, 1,
+                       -1, 1, 0, 0, 1
+   };
+
+   /* Generazione degli indici
+ * Generazione del VertexArray e VertexBuffer
+ * Bind del VAO e VBO
+ * Creazione dati e invio al buffer
+ * Impostazione lettura dati
+ * Scollegare bind
+ */
+
+   createBackground(attributes);
+   createCharacter(attributes);
+
+   matrixUniform = glGetUniformLocation(shaderProgram, "scale");
+
+   // Chiamate di GLAD e di GLFW
+   //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
+   while (!glfwWindowShouldClose(window)) { // semmai la finestra dovesse chiudersi
+      // Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
+      // In base all'ordine dei comandi, modifica lo stato del sistema corrente o successivo
+      checkInputs();
+
+      glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+      // Pulizia buffer colore e depth
+      glClear(GL_COLOR_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
+
+      // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
+      glUseProgram(shaderProgram);
+
+      // Scrivere nella location della variabile i valori del colore da assegnare al pixel;
+      // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
+      // Quindi attenzione al posizionamento delle chiamate di modifica stato
+
+      // Caricare vertexArrayObject interessato
+      glBindVertexArray(vao);
+
+      glBindTexture(GL_TEXTURE_2D, texture1);
+      glActiveTexture(GL_TEXTURE0);
+      glUniform1i(textureUniform, 0);
+
+      float id[16] {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+      //glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
+      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, id);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+
+      /*
+      glBindVertexArray(vao2);
+      glUniform1i(textureUniform, 0);
+      glBindTexture(GL_TEXTURE_2D, texture2);
+      glActivateTexture(GL_TEXTURE1);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+       */
+
+      //Necessità di modificare il buffer prima di inviarlo
+      // prima, modifica il buffer B (sul successivo)
+      // Crea multipli frame buffers per aggiornare i pixel, (double buffer, triple buffer, area di memoria per salvare framebuffer attuale e successivo), swap al frame buffer preparatorio)
+      glfwSwapBuffers(window);
+      // Sostituisce questo buffer con quello successivo, visualizzando quello già riempito
+      // Cambia frame buffer su cui lavorare
+      glfwPollEvents();
+      // Controlla tutti gli eventi in background (qualunque) OBBLIGATORIO
+   }
+
+   // Liberazione della memoria
+   glDeleteBuffers(1, &vbo);
+   glDeleteVertexArrays(1, &vao);
+   glDeleteProgram(shaderProgram);
+   glfwTerminate();
+
+   return 0;
+}
+
+void checkInputs() {
+   pollInput(window);
+}
+
+void initialiseGLFW() {
+   // Inzializzazione di OpenGL per il render
+   glfwInit();
+   // Setup versione da utilizzare
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+}
+
+void compileShaders() {
    // Creazione dello shader (vertex o fragment)
    // VERTEX SHADER
    // Restituisce GL unsigned int, indice/puntatore dell'oggetto vertex shader creato dalla GPU
@@ -168,7 +286,7 @@ static int initialise() {
    }
 
    // Creazione contenitore (program), rappresenta la pipeline di rendering (nel senso delle possibilità programmabili dall'utente)
-   GLuint shaderProgram = glCreateProgram();
+   shaderProgram = glCreateProgram();
 
    // Aggiunta del programma dei vari shader
    glAttachShader(shaderProgram, vertexShader);
@@ -189,18 +307,9 @@ static int initialise() {
    // Pulizia memoria dopo la compilazione e link
    glDeleteShader(vertexShader);
    glDeleteShader(fragmentShader);
+}
 
-   // Generazione del Vertex Buffer Object e Vertex Array Object
-   // Esempio un oggettto è dato da un insieme di vertici, elementi (topologia)
-   // Generare vbo e vao tramite funzioni predefinite semplifica chiamate a runtime
-
-   GLuint vbo; // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
-   GLuint vao; // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
-   // E' possibile attribuire durante il ciclo il colore, tramite l'uniform vec4
-   // Gathering variabile uniform del pixel shader che risiede nel programma, ma non si accede tramite puntatore
-   //    -> Accesso tramite  (poichè puntatore non generato nello shader)
-   //GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "color");  // Puntatore alla variabile
-
+void createBackground(float* attributes) {
    // Genera il Vertex Array Object
    glGenVertexArrays(1, &vao);
    // Genera il Vertex Buffer Object
@@ -213,15 +322,6 @@ static int initialise() {
    // Copia dati nell'array, inizializzando la memoria nel punto bindato del buffer (prima solo indice, VBO)
    // GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-   float attributes[] {-1, 1, 0, 0, 1,
-                      -1, -1, 0, 0, 0,
-                      1, -1, 0, 1, 0,
-
-                      1, -1, 0, 1, 0,
-                      1, 1, 0, 1, 1,
-                      -1, 1, 0, 0, 1
-   };
 
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 5*6, attributes, GL_DYNAMIC_DRAW);
 
@@ -251,8 +351,6 @@ static int initialise() {
    // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
    glBindVertexArray(0);
 
-   // Creazione texture
-   GLuint texture1;
    // Creazione allocazione memoria texture
    glGenTextures(1, &texture1);
    // Bind della texture
@@ -285,18 +383,9 @@ static int initialise() {
    }
 
    stbi_image_free(data);
+}
 
-   /* Generazione degli indici
-    * Generazione del VertexArray e VertexBuffer
-    * Bind del VAO e VBO
-    * Creazione dati e invio al buffer
-    * Impostazione lettura dati
-    * Scollegare bind
-    */
-
-   GLuint vbo2;
-   GLuint vao2;
-
+void createCharacter(float* attributes) {
    glGenVertexArrays(1, &vao2);
    glGenBuffers(1, &vbo2);
 
@@ -332,7 +421,9 @@ static int initialise() {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-   data = stbi_load("charzera.png", &width, &height, &channels, 0);
+   int width, height, channels;
+
+   unsigned char* data = stbi_load("charzera.png", &width, &height, &channels, 0);
 
    if (data) {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -346,60 +437,7 @@ static int initialise() {
 
    // Richiesta della posizione della texture
    // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
-   GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-   GLuint matrixUniform = glGetUniformLocation(shaderProgram, "scale");
-
-   // Chiamate di GLAD e di GLFW
-   //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
-   while (!glfwWindowShouldClose(window)) { // semmai la finestra dovesse chiudersi
-      // Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
-      // In base all'ordine dei comandi, modifica lo stato del sistema corrente o successivo
-      pollInput(window);
-
-      glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-      // Pulizia buffer colore e depth
-      glClear(GL_COLOR_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
-
-      // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
-      glUseProgram(shaderProgram);
-
-      // Scrivere nella location della variabile i valori del colore da assegnare al pixel;
-      // Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
-      // Quindi attenzione al posizionamento delle chiamate di modifica stato
-
-      // Caricare vertexArrayObject interessato
-      glBindVertexArray(vao);
-
-      glBindTexture(GL_TEXTURE_2D, texture1);
-      glUniform1i(textureUniform, 0);
-
-      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-
-      /*
-      glBindVertexArray(vao2);
-      glUniform1i(textureUniform, 0);
-      glBindTexture(GL_TEXTURE_2D, texture2);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-       */
-
-      //Necessità di modificare il buffer prima di inviarlo
-      // prima, modifica il buffer B (sul successivo)
-      // Crea multipli frame buffers per aggiornare i pixel, (double buffer, triple buffer, area di memoria per salvare framebuffer attuale e successivo), swap al frame buffer preparatorio)
-      glfwSwapBuffers(window);
-      // Sostituisce questo buffer con quello successivo, visualizzando quello già riempito
-      // Cambia frame buffer su cui lavorare
-      glfwPollEvents();
-      // Controlla tutti gli eventi in background (qualunque) OBBLIGATORIO
-   }
-
-   // Liberazione della memoria
-   glDeleteBuffers(1, &vbo);
-   glDeleteVertexArrays(1, &vao);
-   glDeleteProgram(shaderProgram);
-   glfwTerminate();
-
-   return 0;
+   textureUniform = glGetUniformLocation(shaderProgram, "texture1");
 }
 
 #endif //GL_LOADER_H

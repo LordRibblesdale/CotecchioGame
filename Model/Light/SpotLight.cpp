@@ -1,11 +1,11 @@
 #include "SpotLight.h"
 
-SpotLight::SpotLight() : Light(std::move(Float3(0, 0, 0)), 10) {
+SpotLight::SpotLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 10) {
    midAngle = degree2Radiants(35);
    maxAngle = degree2Radiants(45);
 }
 
-SpotLight::SpotLight(Float3 origin, float intensity, float midAngle_, float maxAngle_) : Light(std::move(origin), intensity) {
+SpotLight::SpotLight(Float3 origin, Color c, float intensity, float midAngle_, float maxAngle_) : Light(std::move(origin), std::move(color), intensity) {
    midAngle = midAngle_;
    maxAngle = maxAngle_;
 }

@@ -2,12 +2,12 @@
 
 #include <utility>
 
-OmniLight::OmniLight() : Light(std::move(Float3(0, 0, 0)), 10) {
+OmniLight::OmniLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 10) {
    nearFalloffDistance = intensity; // As distance in meters
    farFalloffDistance = 1.5f*intensity;
 }
 
-OmniLight::OmniLight(Float3 origin, float intensity) : Light(std::move(origin), intensity) {
+OmniLight::OmniLight(Float3 origin, Color color, float intensity) : Light(std::move(origin), std::move(color), intensity) {
    nearFalloffDistance = intensity; // As distance in meters
    farFalloffDistance = 1.5f*intensity;
 }

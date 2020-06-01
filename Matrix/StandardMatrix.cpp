@@ -125,7 +125,10 @@ SquareMatrix Transform::translateMatrix4(float x, float y, float z) {
                            0, 0, 0, 1});
 }
 
-SquareMatrix Transform::tranScalaRotoMatrix4(float xTransl, float yTransl, float zTransl, float xScale, float yScale, float zScale) {
+SquareMatrix Transform::tranScalaRotoMatrix4(float xTransl, float yTransl, float zTransl, float xScale, float yScale, float zScale,
+        float xAngle, float yAngle, float zAngle) {
+   //TODO implement rotation
+
    return SquareMatrix(4, {xScale, 0, 0, xTransl,
                            0, yScale, 0, yTransl,
                            0, 0, zScale, zTransl,

@@ -349,7 +349,7 @@ static int initialise() {
       glUseProgram(shaderProgram);
 
       glBindTexture(GL_TEXTURE_2D, texture1);
-      // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture
+      // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
       glActiveTexture(GL_TEXTURE0);
 
       // Scrivere nella location della variabile i valori del colore da assegnare al pixel;
@@ -360,11 +360,8 @@ static int initialise() {
       //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(20*glfwGetTime())))));
 
       //SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.5, 100)));
-      //p.transpose();
       SquareMatrix v(std::move(cam.world2ViewMatrix()));
-      v.transpose();
       SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.25, 0.25, 0.25)));
-      m.transpose();
 
       //if (!test) {
       //   std::cout << v.toString() << std::endl << std::endl;
@@ -373,9 +370,9 @@ static int initialise() {
       //   test = true;
       //}
 
-      //glUniformMatrix4fv(projectionMatrixUniform, 1, GL_FALSE, p.getArray());
-      glUniformMatrix4fv(viewMatrixUniform, 1, GL_FALSE, v.getArray());
-      glUniformMatrix4fv(modelMatrixUniform, 1, GL_FALSE, m.getArray());
+      //glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
+      glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
+      glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);
