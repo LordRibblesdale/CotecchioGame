@@ -415,7 +415,7 @@ void createCharacter(float* attributes) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
    charData = stbi_load("charzera.png", &charWidth, &charHeight, &charChannel, 0);
-   unsigned char resizedData[charWidth/8*charHeight/3*charChannel];
+   unsigned char resizedData [(charWidth/8)*(charHeight/3)*charChannel];
 
    if (charData) {
       stbir_resize_uint8(charData, charWidth, charHeight, 0, resizedData, charWidth/8, charHeight/3, position/100*(charWidth/8), charChannel);
@@ -430,7 +430,7 @@ void createCharacter(float* attributes) {
 }
 
 void updateCharacter() {
-   unsigned char resizedData[charWidth*charHeight*charChannel];
+   unsigned char resizedData [(charWidth/8)*(charHeight/3)*charChannel];
 
    glBindTexture(GL_TEXTURE_2D, texture2);
    stbir_resize_uint8(charData, charWidth, charHeight, 0, resizedData, charWidth/8, charHeight/3, position/100*(charWidth/8), charChannel);

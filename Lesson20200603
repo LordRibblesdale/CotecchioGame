@@ -1,0 +1,67 @@
+Aggiunta di Phong
+-> Calcolo del raggio riflesso e richiesta in input del coefficiente di specularità
+-> Salvo vettore della parte diffusiva separatamente
+-> Calcolo quindi della parte speculare
+    -> Nuovo uniform che richiede ks (coefficiente di specularità)
+    -> Alpha come uniform coefficiente di specularità del materiale
+    => Calcolo di V (vettore di vista) con normalize(EYE-POS)
+        (Aggiungendo nuovo uniform con EYE)
+    => Calcolo speculare riflesso (della luce rispetto alla normale, teoricamente entrante, praticamente uscente)
+    => r = reflect(-l, normale) // Funzione integrata di reflect
+    => specular = ks*(max{0, <r, v>^alpha}) // tramite pow(..., alpha)
+
+Aggiunta del contributo ambientale (ka in input e ambient = ka) (Permette anche la saturazione del canale)
+
+Allora FragColor = (ambient + diffuse + specular)*lightColor (come vec4)
+//TODO distribuire lightColor nel fragment
+Allora assegnare latoCPU tutti i parametri necessari ambientali, diffusivi e speculari
+-> ambient ka
+-> diffuse kd
+-> specular ks e alpha
+
+-> eye
+
+Per PBR, l'intera energia deve essere NORMALIZZATA, quindi ogni ka, kd, ks, rappresentando le proprietà del materiale
+    della superficie, questi si sommano a 1 (ka + kd + ks = 1)
+    Per correggere, richiederebbe normalizzazione fisicamente corretta
+
+BUONA NORMA di NORMALIZZAZIONE, soprattutto per correggere perspective division!!
+Ottimizzazione con Element Object
+
+(fragment = pixel)
+Necessità di divisione tra Fragment Shader e Vertex Shader
+    -> Fragment utile poichè, essendo eseguito pixel per pixel, è piu efficiente del
+        Vertex, eseguito vertice per vertice!
+        Fragment interpolerà dai vertici di sostegno (?)
+    -> Il campionamento dei vertici, invece delle coordinate UV tramite interpolazione,
+        ottiene diversi valori di colori differenti per vertice (generalmente)
+        e si ottengono valori interpolati, causando artefatti visivi!!
+        (esempio, specularità e texture con problemi visivi se il numero di triangoli/vertici
+            è basso) => problematiche di interpolazione, nei calcoli di illuminazione (es prodotti scalari
+                effettuati per ogni pixel)
+    -> Uso dell'illuminazione per vertex per varie necessità (simulazione)
+
+
+Per la creazione di geometria più complessa richiede l'uso di Elementi
+-- Esempio un quadrato richiederebbe 6 vertici (per i 2 triangoli), oppure uso di element, con 4 vertici
+
+GLuint EBO (Element Buffer Object)
+genBuffer per generare l'indice per la topologia dell'oggetto
+GL_ELEMENT_ARRAY_BUFFER si riferisce all'EBO per il bind
+-> Necessità di vertici principali e un nuovo array per la topologia (connessione vertici)
+-> Definizione facce con vertici antiorari per normali uscenti verso l'utente
+-> Normali dovranno essere proprietà per singolo vertice, poichè
+
+Chiamata di glDrawElements()
+-> Che tipo di elemento da disegnare
+-> Il numero di elementi da renderizzare (numero di indici)
+-> Tipo di dato degli indici
+-> Da dove partire per disegnare gli elementi
+
+(Element permette di creare una mesh continua, triangoli uniti)
+-> Necessità di elaborare scene più complesse
+
+Per Pixel o Fragment
+-> Illuminazione laddove serve nel vertex o fragment
+
+Visualizzazione flat o smooth

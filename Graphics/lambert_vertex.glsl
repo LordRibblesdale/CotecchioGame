@@ -3,12 +3,13 @@
 layout (location = 0) in vec3 position; // Variabile in ingresso di 3 float (vettore), layout da posizione sulla memoria
 layout (location = 1) in vec4 vertexColor;
 layout (location = 2) in vec2 textureCoordinates;
-layout (location = 3) in vec3 normal;
+layout (location = 3) in vec3 normalVector;
 
 // IMPORTANTE: i nomi delle variabili tra i due shader devono essere uguali se li si vogliono passare da vertex a fragment
 out vec2 outTextCoord;
 out vec4 inColor;
-out vec3 normalVector;
+// TODO implementare la normale e la sua relativa trasformazione
+out vec3 outNormalVector;
 out vec3 sPos;
 
 // Projection Matrix
@@ -26,6 +27,7 @@ void main() {
     sPos = pos;
     gl_Position = projection * view * vec4(pos, 1.0f);   // Posizione in Clip Space/NDC
 
+    outNormalVector = mat3(transpose(inverse(model))) * normalVector;
     inColor = vertexColor;   // Salvare colore vertici
     outTextCoord = textureCoordinates;
 }
