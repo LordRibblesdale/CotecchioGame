@@ -21,7 +21,9 @@
 #include "../Model/Object.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "../IO/stb-master/stb_image.h"
+#include "../IO/stb-master/stb_image_resize.h"
 
 #include <iostream>
 #include <vector>
@@ -42,8 +44,20 @@ GLuint vbo2 = 0;
 GLuint vao2 = 0;
 // Creazione texture
 GLuint texture1 = 0;
+GLuint texture2 = 0;
 GLuint textureUniform = 0;
 GLuint matrixUniform = 0;
+
+unsigned char* charData;
+int charWidth, charHeight, charChannel;
+int position = 0;
+
+void checkInputs();
+void initialiseGLFW();
+void compileShaders();
+void createBackground(float* attributes);
+void createCharacter(float* attributes);
+void updateCharacter();
 
 void refreshWindowSize(GLFWwindow *vindow, int width, int height) {
    // La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
@@ -55,24 +69,13 @@ void pollInput(GLFWwindow *window) {
    // Funzione per l'input, esempio via tastiera
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       glfwSetWindowShouldClose(window, true);
-   } /*else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-      for (int i = 0; i < 3; ++i) {
-         vertices[3*i] -= 0.1;
-      }
+   } else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+      position-1 == -1 ? 700 : --position;
+      updateCharacter();
    } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-      for (int i = 0; i < 3; ++i) {
-         vertices[3*i] += 0.1;
-      }
-   } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-      for (int i = 0; i < 3; ++i) {
-         vertices[3*i+1] -= 0.1;
-      }
-   } else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-      for (int i = 0; i < 3; ++i) {
-         vertices[3*i+1] -= 0.1;
-      }
+      position+1 == 800 ? 0 : ++position;
+      updateCharacter();
    }
-   */
 }
 
 /* Processo di rendering:
@@ -87,12 +90,6 @@ void pollInput(GLFWwindow *window) {
  * - Preparazione tipi di dati da leggere
  * - Chiamata del program con glUseProgram per chiamare i vari shader
  */
-
-void checkInputs();
-void initialiseGLFW();
-void compileShaders();
-void createBackground(float* attributes);
-void createCharacter(float* attributes);
 
 static int initialise() {
    initialiseGLFW();
@@ -151,6 +148,9 @@ static int initialise() {
    createCharacter(attributes);
 
    matrixUniform = glGetUniformLocation(shaderProgram, "scale");
+   // Richiesta della posizione della texture
+   // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
+   textureUniform = glGetUniformLocation(shaderProgram, "texture1");
 
    // Chiamate di GLAD e di GLFW
    //Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
@@ -174,22 +174,17 @@ static int initialise() {
       glBindVertexArray(vao);
 
       glBindTexture(GL_TEXTURE_2D, texture1);
-      glActiveTexture(GL_TEXTURE0);
-      glUniform1i(textureUniform, 0);
-
-      float id[16] {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-
-      //glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
-      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, id);
+      glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
-      /*
       glBindVertexArray(vao2);
-      glUniform1i(textureUniform, 0);
+
       glBindTexture(GL_TEXTURE_2D, texture2);
-      glActivateTexture(GL_TEXTURE1);
+      glUniformMatrix4fv(matrixUniform, 1, GL_TRUE, Transform::tranScalaRotoMatrix4(-0.8f + 0.2f*position/100.0f, -0.55f, 0,
+              0.08f, 0.2f, 1,
+              0, 0, 0).getArray());
       glDrawArrays(GL_TRIANGLES, 0, 6);
-       */
+
 
       //Necessità di modificare il buffer prima di inviarlo
       // prima, modifica il buffer B (sul successivo)
@@ -225,7 +220,6 @@ void initialiseGLFW() {
 #ifdef __APPLE__
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
 }
 
 void compileShaders() {
@@ -413,7 +407,6 @@ void createCharacter(float* attributes) {
     * Pulizia texture dopo caricamento
     */
 
-   GLuint texture2;
    glGenTextures(1, &texture2);
    glBindTexture(GL_TEXTURE_2D, texture2);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -421,23 +414,30 @@ void createCharacter(float* attributes) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-   int width, height, channels;
+   charData = stbi_load("charzera.png", &charWidth, &charHeight, &charChannel, 0);
+   unsigned char resizedData[charWidth/8*charHeight/3*charChannel];
 
-   unsigned char* data = stbi_load("charzera.png", &width, &height, &channels, 0);
-
-   if (data) {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+   if (charData) {
+      stbir_resize_uint8(charData, charWidth, charHeight, 0, resizedData, charWidth/8, charHeight/3, position/100*(charWidth/8), charChannel);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, charWidth/8, charHeight/3, 0, GL_RGBA, GL_UNSIGNED_BYTE, resizedData);
       glGenerateMipmap(GL_TEXTURE_2D);
    } else {
       std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
    }
 
-   stbi_image_free(data);
+   stbi_image_free(charData);
    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
-   // Richiesta della posizione della texture
-   // Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
-   textureUniform = glGetUniformLocation(shaderProgram, "texture1");
+void updateCharacter() {
+   unsigned char resizedData[charWidth*charHeight*charChannel];
+
+   glBindTexture(GL_TEXTURE_2D, texture2);
+   stbir_resize_uint8(charData, charWidth, charHeight, 0, resizedData, charWidth/8, charHeight/3, position/100*(charWidth/8), charChannel);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, charWidth/8, charHeight/3, 0, GL_RGBA, GL_UNSIGNED_BYTE, resizedData);
+   glGenerateMipmap(GL_TEXTURE_2D);
+
+   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 #endif //GL_LOADER_H
