@@ -1,7 +1,7 @@
 #version 330 core
 
 layout (location = 0) in vec3 position; // Variabile in ingresso di 3 float (vettore), layout da posizione sulla memoria
-layout (location = 1) in vec4 vertexColor;
+layout (location = 1) in vec4 vertexColor;  //TODO check input here
 layout (location = 2) in vec2 textureCoordinates;
 layout (location = 3) in vec3 normalVector;
 
