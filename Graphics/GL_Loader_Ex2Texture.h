@@ -42,11 +42,24 @@ GLuint vbo = 0; // Vertex Buffer Object, buffer per inviare i dettagli per dare 
 GLuint vao = 0; // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
 GLuint vbo2 = 0;
 GLuint vao2 = 0;
+GLuint ebo = 0;
+GLuint ebo2 = 0;
 // Creazione texture
 GLuint texture1 = 0;
 GLuint texture2 = 0;
 GLuint textureUniform = 0;
 GLuint matrixUniform = 0;
+
+float attributes[] {-1, 1, 0, 0, 1,
+                    -1, -1, 0, 0, 0,
+                    1, -1, 0, 1, 0,
+                    1, 1, 0, 1, 1,
+};
+
+unsigned int indices[] {
+        0, 1, 3,
+        1, 2, 3
+};
 
 unsigned char* charData;
 int charWidth, charHeight, charChannel;
@@ -55,8 +68,8 @@ int position = 0;
 void checkInputs();
 void initialiseGLFW();
 void compileShaders();
-void createBackground(float* attributes);
-void createCharacter(float* attributes);
+void createBackground();
+void createCharacter();
 void updateCharacter();
 
 void refreshWindowSize(GLFWwindow *vindow, int width, int height) {
@@ -70,7 +83,7 @@ void pollInput(GLFWwindow *window) {
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       glfwSetWindowShouldClose(window, true);
    } else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-      position-1 == -1 ? 700 : --position;
+      position-1 == -1 ? 799 : --position;
       updateCharacter();
    } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
       position+1 == 800 ? 0 : ++position;
@@ -127,15 +140,6 @@ static int initialise() {
    //    -> Accesso tramite  (poichè puntatore non generato nello shader)
    //GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "color");  // Puntatore alla variabile
 
-   float attributes[] {-1, 1, 0, 0, 1,
-                       -1, -1, 0, 0, 0,
-                       1, -1, 0, 1, 0,
-
-                       1, -1, 0, 1, 0,
-                       1, 1, 0, 1, 1,
-                       -1, 1, 0, 0, 1
-   };
-
    /* Generazione degli indici
  * Generazione del VertexArray e VertexBuffer
  * Bind del VAO e VBO
@@ -144,8 +148,8 @@ static int initialise() {
  * Scollegare bind
  */
 
-   createBackground(attributes);
-   createCharacter(attributes);
+   createBackground();
+   createCharacter();
 
    matrixUniform = glGetUniformLocation(shaderProgram, "scale");
    // Richiesta della posizione della texture
@@ -175,7 +179,7 @@ static int initialise() {
 
       glBindTexture(GL_TEXTURE_2D, texture1);
       glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, Transform::scaleMatrix4(1, 1, 1).getArray());
-      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
       glBindVertexArray(vao2);
 
@@ -183,7 +187,7 @@ static int initialise() {
       glUniformMatrix4fv(matrixUniform, 1, GL_TRUE, Transform::tranScalaRotoMatrix4(-0.8f + 0.2f*position/100.0f, -0.55f, 0,
               0.08f, 0.2f, 1,
               0, 0, 0).getArray());
-      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
       //Necessità di modificare il buffer prima di inviarlo
@@ -303,11 +307,12 @@ void compileShaders() {
    glDeleteShader(fragmentShader);
 }
 
-void createBackground(float* attributes) {
+void createBackground() {
    // Genera il Vertex Array Object
    glGenVertexArrays(1, &vao);
    // Genera il Vertex Buffer Object
    glGenBuffers(1, &vbo);
+   glGenBuffers(1, &ebo);
    // Chiamata per collegare un tipo di buffer noto agli attributi di vertice, l'indice dell'area di memoria creata va intesa come arraybuffer
    // Bind all'inizio delle operazioni riferite al VAO
    // Binding: ogni chiamata di tipo ARRAY_BUFFER sarà assegnata all'ultimo bind assegnato
@@ -316,8 +321,9 @@ void createBackground(float* attributes) {
    // Copia dati nell'array, inizializzando la memoria nel punto bindato del buffer (prima solo indice, VBO)
    // GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 5*6, attributes, GL_DYNAMIC_DRAW);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*3*2, indices, GL_DYNAMIC_DRAW);
 
    // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
    // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL
@@ -379,18 +385,54 @@ void createBackground(float* attributes) {
    stbi_image_free(data);
 }
 
-void createCharacter(float* attributes) {
+void createCharacter() {
+   /*
+   -1, 1, 0, 0, 1,
+   -1, -1, 0, 0, 0,
+   1, -1, 0, 1, 0,
+   1, 1, 0, 1, 1,
+    */
+
+   attributes[5 + 4] = 0.67f;
+   attributes[5*2 + 3] = 0.07f;
+   attributes[5*2 + 4] = 0.67f;
+   attributes[5*3 + 3] = 0.07f;
+
+   // Genera il Vertex Array Object
    glGenVertexArrays(1, &vao2);
+   // Genera il Vertex Buffer Object
    glGenBuffers(1, &vbo2);
-
+   glGenBuffers(1, &ebo2);
+   // Chiamata per collegare un tipo di buffer noto agli attributi di vertice, l'indice dell'area di memoria creata va intesa come arraybuffer
+   // Bind all'inizio delle operazioni riferite al VAO
+   // Binding: ogni chiamata di tipo ARRAY_BUFFER sarà assegnata all'ultimo bind assegnato
    glBindVertexArray(vao2);
+
+   // Copia dati nell'array, inizializzando la memoria nel punto bindato del buffer (prima solo indice, VBO)
+   // GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 5*6, attributes, GL_DYNAMIC_DRAW);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo2);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*3*2, indices, GL_DYNAMIC_DRAW);
 
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (GLvoid*) 0);
+   // Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
+   // Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL
+   // Stride, in termini di byte: size in byte di un gruppo di dati da analizzare
+   /* 0        1        2
+    * x y z    x y z    x y z
+    * Nelle varie posizioni saranno salvate le informazioni
+    * Offset di memoria, ovvero punto zona di memoria per leggere i dati, poichè a priori non nota (potrebbero esserci dati in piu da non dover leggere
+    * x y z u v  x y ... offset 2
+    */
+   // DEFINITA nella scrittura dello shader
+   // Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
+   // Il valore 3 dice quanti vertici
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5* sizeof(GLfloat), (GLvoid*) 0);
+   // Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
+   // Abilita gli attributi passatigli
    glEnableVertexAttribArray(0);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5* sizeof(GLfloat), (GLfloat*) (3* sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -415,11 +457,9 @@ void createCharacter(float* attributes) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
    charData = stbi_load("charzera.png", &charWidth, &charHeight, &charChannel, 0);
-   unsigned char resizedData [(charWidth/8)*(charHeight/3)*charChannel];
 
    if (charData) {
-      stbir_resize_uint8(charData, charWidth, charHeight, 0, resizedData, charWidth/8, charHeight/3, position/100*(charWidth/8), charChannel);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, charWidth/8, charHeight/3, 0, GL_RGBA, GL_UNSIGNED_BYTE, resizedData);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, charWidth, charHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, charData);
       glGenerateMipmap(GL_TEXTURE_2D);
    } else {
       std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
@@ -430,14 +470,20 @@ void createCharacter(float* attributes) {
 }
 
 void updateCharacter() {
-   unsigned char resizedData [(charWidth/8)*(charHeight/3)*charChannel];
+   //TODO fix sending data (w/ offset and attributes reposition (vertices | uv) instead of (vert uv | vert uv | ....)
+   int i = (position)%8;
+   float d = 1.0f/14.0f;
+   std::cout << (position)%8 << std::endl;
+   attributes[3] = i*d;
+   attributes[5 + 3] = i*d;
+   attributes[5*2 + 3] = (1 + i)*d;
+   attributes[5*3 + 3] = (1 + i)*d;
 
-   glBindTexture(GL_TEXTURE_2D, texture2);
-   stbir_resize_uint8(charData, charWidth, charHeight, 0, resizedData, charWidth/8, charHeight/3, position/100*(charWidth/8), charChannel);
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, charWidth/8, charHeight/3, 0, GL_RGBA, GL_UNSIGNED_BYTE, resizedData);
-   glGenerateMipmap(GL_TEXTURE_2D);
 
-   glBindTexture(GL_TEXTURE_2D, 0);
+
+   glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(attributes), attributes);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 #endif //GL_LOADER_H
