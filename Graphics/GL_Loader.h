@@ -359,9 +359,9 @@ static int initialise() {
       // TODO check other matrix usages
       //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(20*glfwGetTime())))));
 
-      //SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.5, 100)));
+      SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.5, 100)));
       SquareMatrix v(std::move(cam.world2ViewMatrix()));
-      SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.25, 0.25, 0.25)));
+      SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.25, 0.25, 0.25, 0, 0, 0)));
 
       //if (!test) {
       //   std::cout << v.toString() << std::endl << std::endl;
@@ -370,7 +370,7 @@ static int initialise() {
       //   test = true;
       //}
 
-      //glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
+      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
       glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 

@@ -17,7 +17,7 @@ uniform mat4 view;
 // Model Matrix
 uniform mat4 model;
 // Normal Matrix
-uniform mat4 normal;
+uniform mat4 normalM;
 
 void main() {
     // gl_Position attribuisce la posizione al vertice

@@ -11,19 +11,19 @@
 #include <GLFW/glfw3.h>
 #endif
 
-#include "Shaders.h"
-#include "../Vector/Float2.h"
-#include "../Vector/Float3.h"
-#include "../Utilities/Color.h"
-#include "../Matrix/SquareMatrix.h"
-#include "../Matrix/StandardMatrix.h"
-#include "../Utilities/Camera.h"
-#include "../Model/Object.h"
+#include "../../Graphics/Shaders.h"
+#include "../../Vector/Float2.h"
+#include "../../Vector/Float3.h"
+#include "../../Utilities/Color.h"
+#include "../../Matrix/SquareMatrix.h"
+#include "../../Matrix/StandardMatrix.h"
+#include "../../Utilities/Camera.h"
+#include "../../Model/Object.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "../IO/stb-master/stb_image.h"
-#include "../IO/stb-master/stb_image_resize.h"
+#include "../../IO/stb-master/stb_image.h"
+#include "../../IO/stb-master/stb_image_resize.h"
 
 #include <iostream>
 #include <vector>

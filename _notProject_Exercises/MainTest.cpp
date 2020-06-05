@@ -1,8 +1,8 @@
 #include <iostream>
-#include "Matrix/Matrix.h"
-#include "Matrix/SquareMatrix.h"
-#include "Vector/Float4.h"
-#include "Matrix/StandardMatrix.h"
+#include "../Matrix/Matrix.h"
+#include "../Matrix/SquareMatrix.h"
+#include "../Vector/Float4.h"
+#include "../Matrix/StandardMatrix.h"
 
 using namespace std;
 
