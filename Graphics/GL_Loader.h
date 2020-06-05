@@ -344,6 +344,7 @@ static int initialise() {
 
       // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
       glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LESS);
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
       glUseProgram(shaderProgram);
