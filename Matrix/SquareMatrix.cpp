@@ -219,10 +219,9 @@ float SquareMatrix::calculateDeterminant(const SquareMatrix& matrix) {
           */
 
          //TODO change calculation through first row
-         //TODO improve performance for callings and power calculation
+         //TODO implement LU decomposition
          for (int i = 0; i < matrix.getColumns(); ++i) {
-            determinant += matrix.getArray()[i] * (i % 2 == 0 ? 1 : -1) * calculateDeterminant(
-                    createSubmatrix(matrix, 0, i));
+            determinant += matrix.getArray()[i] * (i % 2 == 0 ? 1 : -1) * calculateDeterminant(createSubmatrix(matrix, 0, i));
          }
    }
 

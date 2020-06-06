@@ -23,9 +23,10 @@ uniform mat4 normal;
 
 void main() {
     // gl_Position attribuisce la posizione al vertice
-    vec3 pos = vec3(model * vec4(position, 1.0f));
+    vec4 tmp = model * vec4(position, 1.0f);
+    vec3 pos = vec3(tmp);
     sPos = pos;
-    gl_Position = projection * view * vec4(pos, 1.0f);   // Posizione in Clip Space/NDC
+    gl_Position = projection * view * tmp;   // Posizione in Clip Space/NDC
 
     outNormalVector = mat3(transpose(inverse(model))) * normalVector;
     inColor = vertexColor;   // Salvare colore vertici

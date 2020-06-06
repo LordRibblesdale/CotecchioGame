@@ -142,7 +142,7 @@ SquareMatrix Projection::view2ClipProjection(const float& right, const float& le
    float invFN = 1/(far-near);
    return SquareMatrix(4, {2*near*invRL, 0,            (right+left)*invRL, 0,
                            0,          2*near*invTB, (top+bottom)*invTB, 0,
-                           0,          0,            -(far+near)*invFN,  2*far*near*invFN,
+                           0,          0,            -(far+near)*invFN,  -2*far*near*invFN,
                            0,          0,            -1,                 0});
 }
 
@@ -150,7 +150,7 @@ SquareMatrix Projection::onAxisView2ClipProjection(const float& right, const flo
    float invFN = 1/(far-near);
    return SquareMatrix(4, {near/right, 0, 0, 0,
                            0, near/top, 0, 0,
-                           0, 0, -(far+near)*invFN, 2*far*near*invFN,
+                           0, 0, -(far+near)*invFN, -2*far*near*invFN,
                            0, 0, -1,                0});
 }
 

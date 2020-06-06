@@ -124,7 +124,7 @@ float Float3::l2Norm() const {
 void Float3::normalize() {
    float norm = l2Norm();
     if (norm != 0) {
-       float n = 1/norm;
+       float n = 1.0f/norm;
        setX(getX() * n);
        setY(getY() * n);
        setZ(getZ() * n);

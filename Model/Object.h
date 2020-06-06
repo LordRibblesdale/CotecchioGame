@@ -1,5 +1,5 @@
-#ifndef BJECT_H
-#define BJECT_H
+#ifndef OBJECT_H
+#define OBJECT_H
 
 #include <vector>
 #include "Triangle.h"

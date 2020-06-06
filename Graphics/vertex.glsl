@@ -16,14 +16,12 @@ uniform mat4 projection;
 uniform mat4 view;
 // Model Matrix
 uniform mat4 model;
-// Normal Matrix
-uniform mat4 normalM;
 
 void main() {
     // gl_Position attribuisce la posizione al vertice
-    //gl_Position = projection * view * model * vec4(position, 1.0f);   // Posizione in Clip Space/NDC
-    gl_Position = view * model * vec4(position, 1.0f);
+    gl_Position = projection * view * model * vec4(position, 1.0f);   // Posizione in Clip Space/NDC
 
     inColor = vertexColor;   // Salvare colore vertici
     outTextCoord = textureCoordinates;
+    normalVector = mat3(transpose(inverse(model))) * normal;
 }

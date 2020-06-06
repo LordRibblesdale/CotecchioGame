@@ -327,7 +327,8 @@ static int initialise() {
    GLuint viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
    GLuint modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
-   Camera cam(std::move(Float3(10, 0, 0)), std::move(Float3(0, 0, 0)));
+   //Camera cam(std::move(Float3(0, 10, 10)), std::move(Float3(0, 0, 0)));
+   Camera cam(std::move(Float3(0, -10, 0)), std::move(Float3(0, 0, 0)));
 
    bool test = false;
 
@@ -360,9 +361,15 @@ static int initialise() {
       // TODO check other matrix usages
       //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(20*glfwGetTime())))));
 
-      SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.5, 100)));
+      SquareMatrix p(std::move(Projection::onAxisView2ClipProjection(WIDTH*0.5, HEIGHT*0.5, 0.01, 100)));
       SquareMatrix v(std::move(cam.world2ViewMatrix()));
       SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.25, 0.25, 0.25, 0, 0, 0)));
+
+      std::cout << (p*v*m).toString() << std::endl;
+      std::cout << (p).toString() << std::endl;
+      std::cout << (v).toString() << std::endl;
+      std::cout << (m).toString() << std::endl;
+
 
       //if (!test) {
       //   std::cout << v.toString() << std::endl << std::endl;
@@ -371,7 +378,7 @@ static int initialise() {
       //   test = true;
       //}
 
-      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
+      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_FALSE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
       glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
