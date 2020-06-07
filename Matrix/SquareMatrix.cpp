@@ -203,7 +203,7 @@ float SquareMatrix::calculateDeterminant(const SquareMatrix& matrix) {
          determinant = (array[0]*array[4]*array[8] + array[1]*array[5]*array[6] + array[2]*array[3]*array[7])
                  - (array[2]*array[4]*array[6] + array[0]*array[5]*array[7] + array[8]*array[3]*array[1]);
          break;
-      default: ;
+      default:
          /*
          bool calculateRowDeterminant = false;
 

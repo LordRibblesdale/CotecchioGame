@@ -42,7 +42,7 @@ public:
    void setZ(const float& z);
    void setW(const float& w);
 
-   Float3 getProjectionQuotient();
+   Float3 getFloat3();
 };
 
 #endif //FLOAT4_H

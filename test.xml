@@ -2,8 +2,8 @@
 <SimpleTriangle>
     <Float3>
         <XPos>-2</XPos>
-        <YPos>-2</YPos>
-        <ZPos>0</ZPos>
+        <YPos>0</YPos>
+        <ZPos>-2</ZPos>
 
         <XNormal>0</XNormal>
         <YNormal>0</YNormal>
@@ -19,8 +19,8 @@
     </Float3>
     <Float3>
         <XPos>2</XPos>
-        <YPos>-2</YPos>
-        <ZPos>0</ZPos>
+        <YPos>0</YPos>
+        <ZPos>-2</ZPos>
 
         <XNormal>0</XNormal>
         <YNormal>0</YNormal>
@@ -36,8 +36,8 @@
     </Float3>
     <Float3>
         <XPos>0</XPos>
-        <YPos>2</YPos>
-        <ZPos>0</ZPos>
+        <YPos>0</YPos>
+        <ZPos>2</ZPos>
 
         <XNormal>0</XNormal>
         <YNormal>0</YNormal>

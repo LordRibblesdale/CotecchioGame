@@ -1,9 +1,37 @@
 #include <iostream>
 #include "Camera.h"
+#include "../Matrix/StandardMatrix.h"
 
-Camera::Camera(Float3 eye, Float3 lookAt) : eye(std::move(eye)), lootAt(std::move(lookAt)),  up(std::move(Float3(0, 0, 1))) {}
+Camera::Camera(Float3 eye, Float3 lookAt) : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(Float3(0, 0, 1))) {
+   near = 0.1f;
+   far = 100;
+   angle = degree2Radiants(45);
+   right = near * tanf(angle*0.5f);
+}
 
-Camera::Camera(Float3 eye, Float3 lookAt, Float3 up) : eye(std::move(eye)), lootAt(std::move(lookAt)),  up(std::move(up)) {}
+Camera::Camera(Float3 eye, Float3 lookAt, Float3 up) : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {}
+
+Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float angle, float aspectRatio)
+               : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
+   Camera::near = near;
+   Camera::far = far;
+   Camera::angle = degree2Radiants(35);
+   Camera::aspectRatio = aspectRatio;
+
+   Camera::right = near * tanf(Camera::angle*0.5f);
+   Camera::top = aspectRatio * right;
+}
+
+Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left,
+               float right, float angle) : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
+   Camera::near = near;
+   Camera::far = far;
+   Camera::bottom = bottom;
+   Camera::top = top;
+   Camera::left = left;
+   Camera::right = right;
+   Camera::angle = degree2Radiants(angle);
+}
 
 SquareMatrix Camera::world2ViewMatrix() {
    /* TODO implement minimum variation
@@ -14,13 +42,12 @@ SquareMatrix Camera::world2ViewMatrix() {
     * che la camera vada in posizioni complicate
     * TODO end implementation
     */
-   Float3 zView(std::move(eye - lootAt));
-   Float3 xView(std::move(up.crossProduct(zView)));
-   Float3 yView(std::move(zView.crossProduct(xView)));
-
-   xView.normalize();
-   yView.normalize();
+   Float3 zView(std::move(eye - lookAt));
    zView.normalize();
+   Float3 xView(std::move(up.crossProduct(zView)));
+   xView.normalize();
+   Float3 yView(std::move(zView.crossProduct(xView)));
+   yView.normalize();
 
    SquareMatrix view2WorldMatrix(4, {xView.getX(), yView.getX(), zView.getX(), eye.getX(),
                                      xView.getY(), yView.getY(), zView.getY(), eye.getY(),
@@ -29,3 +56,110 @@ SquareMatrix Camera::world2ViewMatrix() {
 
    return SquareMatrix::calculateInverse(view2WorldMatrix);
 }
+
+void Camera::updateCamera() {
+   //TODO update basing on axis-type camera
+   right = near * tanf(angle*0.5f);
+   top = right * aspectRatio;
+}
+
+//TODO check which function needs to call updateCamera()
+float Camera::getNear() const {
+   return near;
+}
+
+void Camera::setNear(float near) {
+   Camera::near = near;
+
+   updateCamera();
+}
+
+float Camera::getFar() const {
+   return far;
+}
+
+void Camera::setFar(float far) {
+   Camera::far = far;
+}
+
+float Camera::getLeft() const {
+   return left;
+}
+
+void Camera::setLeft(float left) {
+   Camera::left = left;
+}
+
+float Camera::getRight() const {
+   return right;
+}
+
+void Camera::setRight(float right) {
+   Camera::right = right;
+}
+
+float Camera::getBottom() const {
+   return bottom;
+}
+
+void Camera::setBottom(float bottom) {
+   Camera::bottom = bottom;
+}
+
+float Camera::getTop() const {
+   return top;
+}
+
+void Camera::setTop(float top) {
+   Camera::top = top;
+}
+
+float Camera::getAngle() const {
+   return angle;
+}
+
+void Camera::setAngle(float angle) {
+   Camera::angle = degree2Radiants(angle);
+
+   updateCamera();
+}
+
+float Camera::getAspectRatio() const {
+   return aspectRatio;
+}
+
+void Camera::setAspectRatio(float aspectRatio) {
+   Camera::aspectRatio = aspectRatio;
+
+   updateCamera();
+}
+
+const Float3 &Camera::getEye() const {
+   return eye;
+}
+
+void Camera::setEye(const Float3 &eye) {
+   Camera::eye = eye;
+}
+
+const Float3 &Camera::getLookAt() const {
+   return lookAt;
+}
+
+void Camera::setLookAt(const Float3 &lookAt) {
+   Camera::lookAt = lookAt;
+}
+
+const Float3 &Camera::getUp() const {
+   return up;
+}
+
+void Camera::setUp(const Float3 &up) {
+   Camera::up = up;
+}
+
+
+
+
+
+

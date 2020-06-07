@@ -1,3 +1,4 @@
+#include <iostream>
 #include "StandardMatrix.h"
 
 Float3 Rotation::axisXRotateVertex3(const Float3 &vector, const float &angleX) {
@@ -24,7 +25,7 @@ Float3 Rotation::axisZRotateVertex3(const Float3 &vector, const float &angleZ) {
    return Float3(std::move(rotation.multiplyVector(vector)));
 }
 
-Float4 Rotation::quaternionAxisRotateVertex4(const Float4 &vector, Float4 &direction, const float &angle) {
+Float4 Rotation::quaternionAxisRotateVertex4(const Float4 &vector, const Float4 &direction, const float &angle) {
    //TODO optimise here (remainder function)
    if (direction.l2Norm() != 0) {
       if (remainder(angle, 2 * M_PI) != 0) {
@@ -135,8 +136,8 @@ SquareMatrix Transform::tranScalaRotoMatrix4(float xTransl, float yTransl, float
                            0, 0, 0, 1});
 }
 
-SquareMatrix Projection::view2ClipProjection(const float& right, const float& left, const float &near, const float &far,
-                                             const float &top, const float &bottom) {
+SquareMatrix Projection::view2ClipProjectiveMatrix(const float& right, const float& left, const float &near, const float &far,
+                                                   const float &top, const float &bottom) {
    float invRL = 1/(right-left);
    float invTB = 1/(top-bottom);
    float invFN = 1/(far-near);
@@ -146,13 +147,18 @@ SquareMatrix Projection::view2ClipProjection(const float& right, const float& le
                            0,          0,            -1,                 0});
 }
 
-SquareMatrix Projection::onAxisView2ClipProjection(const float& right, const float& top, const float& near, const float& far) {
+SquareMatrix Projection::onAxisView2ClipProjectiveMatrix(const float& right, const float& top, const float& near, const float& far) {
    float invFN = 1/(far-near);
    return SquareMatrix(4, {near/right, 0, 0, 0,
                            0, near/top, 0, 0,
                            0, 0, -(far+near)*invFN, -2*far*near*invFN,
                            0, 0, -1,                0});
 }
+
+SquareMatrix Projection::onAxisFOV2ClipProjectiveMatrix(const Camera& camera) {
+   return onAxisView2ClipProjectiveMatrix(camera.getRight(), camera.getTop(), camera.getNear(), camera.getFar());
+}
+
 
 SquareMatrix Projection::orthogonalProjection(const float &right, const float &left, const float &near, const float &far,
                                  const float &top, const float &bottom) {

@@ -157,12 +157,12 @@ void Float4::setW(const float &w) {
    getVector().get()[3] = w;
 }
 
-Float3 Float4::getProjectionQuotient() {
+Float3 Float4::getFloat3() {
    if (vector_.get()[3] != 0) {
       float inv = 1 / getW();
 
       return Float3(getX() * inv, getY() * inv, getZ() * inv);
    } else {
-      throw vector_.get()[3];
+      return Float3(getX(), getY(), getZ());
    }
 }

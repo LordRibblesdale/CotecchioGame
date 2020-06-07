@@ -3,6 +3,7 @@
 
 #include "../Vector/Float4.h"
 #include "SquareMatrix.h"
+#include "../Utilities/Camera.h"
 #include <cmath>
 
 //TODO add Identity and Translation
@@ -17,7 +18,7 @@ namespace Rotation {
    Float3 axisYRotateVertex3(const Float3 &vector, const float& angleY);
    Float3 axisZRotateVertex3(const Float3 &vector, const float& angleZ);
 
-   Float4 quaternionAxisRotateVertex4(const Float4 &vector, Float4 &direction, const float &angle);
+   Float4 quaternionAxisRotateVertex4(const Float4 &vector, const Float4 &direction, const float &angle);
 }
 
 namespace Transform {
@@ -31,10 +32,11 @@ namespace Transform {
 
 namespace Projection {
    //TODO check if move function into Camera
-   SquareMatrix view2ClipProjection(const float& right, const float& left, const float& near, const float& far, const float& top,
-                                    const float& bottom);
+   SquareMatrix view2ClipProjectiveMatrix(const float& right, const float& left, const float& near, const float& far, const float& top,
+                                          const float& bottom);
 
-   SquareMatrix onAxisView2ClipProjection(const float& right, const float& top, const float& near, const float& far);
+   SquareMatrix onAxisView2ClipProjectiveMatrix(const float& right, const float& top, const float& near, const float& far);
+   SquareMatrix onAxisFOV2ClipProjectiveMatrix(const Camera& camera);
 
    SquareMatrix orthogonalProjection(const float& right, const float& left, const float& near, const float& far, const float& top,
                                      const float& bottom);
@@ -45,7 +47,7 @@ namespace Projection {
 }
 
 static float degree2Radiants(float degree) {
-   float inv = 1.0f/180;
+   float inv = 1.0f/180.0f;
 
    return degree * inv * M_PI;
 }

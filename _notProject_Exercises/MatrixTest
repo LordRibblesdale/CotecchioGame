@@ -27,7 +27,7 @@
 
       Float4 point(0.7, 0.5, 0, 1);
       Float4 direction(0, 0, 1, 1);
-      Float3 vector0(axisZRotateVertex3(point.getProjectionQuotient(), degree2Radiants(30)));
+      Float3 vector0(axisZRotateVertex3(point.getFloat3(), degree2Radiants(30)));
       Float4 vector(quaternionAxisRotateVertex4(point, direction, degree2Radiants(30)));
 
       std::cout << vector0.to_string() << std::endl;
