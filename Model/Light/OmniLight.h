@@ -3,7 +3,7 @@
 
 #include "Light.h"
 
-class OmniLight : Light {
+class OmniLight : public Light {
    float nearFalloffDistance;
    float farFalloffDistance;
 

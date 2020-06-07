@@ -27,9 +27,20 @@ protected:
 public:
    virtual float getIrradiance(float distance) = 0;
 
-   // TODO check function call if inheritance is private
-   inline const Color& getColor() {
+   const Color& getColor() {
       return color;
+   }
+
+   const Float3 &getOrigin() const {
+      return origin;
+   }
+
+   void setOrigin(const Float3 &origin) {
+      Light::origin = origin;
+   }
+
+   void setColor(const Color &color) {
+      Light::color = color;
    }
 };
 

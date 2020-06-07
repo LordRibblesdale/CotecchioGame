@@ -21,6 +21,7 @@
 #include "../Matrix/SquareMatrix.h"
 #include "../Matrix/StandardMatrix.h"
 #include "../Utilities/Camera.h"
+#include "../Model/Light/OmniLight.h"
 
 #include <iostream>
 #include <vector>
@@ -32,6 +33,8 @@ std::vector<Color> colors;
 // Coordinate di unwrap
 std::vector<Float2> textureUnwrap;
 std::vector<Float3> normals;
+
+OmniLight light(Float3(2, -3, 0), Color(1, 1, 1), 5);
 
 /* Vertex buffer, Element buffer per la topologia
  * Rappresentazione elemento geometrico è visibile se la normale dell'elemento è diretta verso la camera
@@ -178,7 +181,7 @@ void compileShaders() {
    char infoLog[512];
 
    std::string source;
-   loadShader(source, "Graphics/vertex.glsl");
+   loadShader(source, "Graphics/standard_vertex.glsl");
    char* charSource(const_cast<char *>(source.c_str()));
 
    if (!charSource) {
@@ -202,7 +205,7 @@ void compileShaders() {
       std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
    }
 
-   loadShader(source, "Graphics/fragment.glsl");
+   loadShader(source, "Graphics/standard_fragment.glsl");
    charSource = const_cast<char *>(source.c_str());
 
    if (!charSource) {
@@ -316,6 +319,9 @@ static int initialise() {
 
       pointer = textureUnwrap.at(i).getVector().get();
       attributes.insert(attributes.end(), pointer, pointer + 2);
+
+      pointer = normals.at(i).getVector().get();
+      attributes.insert(attributes.end(), pointer, pointer + 3);
    }
 
    for (float f : attributes) {
@@ -339,17 +345,20 @@ static int initialise() {
     * Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
     * Il valore 3 dice quanti vertici
     */
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9* sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12* sizeof(GLfloat), (GLvoid*) 0);
    /* Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
     * Abilita gli attributi passatigli
     */
    glEnableVertexAttribArray(0);
 
-   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9* sizeof(GLfloat), (GLvoid*) (3* sizeof(GLfloat)));
+   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 12* sizeof(GLfloat), (GLvoid*) (3* sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
 
-   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9* sizeof(GLfloat), (GLvoid*) (7* sizeof(GLfloat)));
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 12* sizeof(GLfloat), (GLvoid*) (7* sizeof(GLfloat)));
    glEnableVertexAttribArray(2);
+
+   glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 12* sizeof(GLfloat), (GLvoid*) (9* sizeof(GLfloat)));
+   glEnableVertexAttribArray(3);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -416,6 +425,16 @@ static int initialise() {
    GLuint viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
    GLuint modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
+   GLuint lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
+   GLuint lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
+   GLuint lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
+
+   GLuint ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
+   GLuint diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
+   GLuint specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
+   GLuint specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
+   GLuint eyePosition = glGetUniformLocation(shaderProgram, "eye");
+
    /* Chiamate di GLAD e di GLFW
     * Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
     */
@@ -425,7 +444,7 @@ static int initialise() {
        */
       pollInput(window);
 
-      glClearColor(0, 1, 0, 1.0f);
+      glClearColor(0.1, 0.9, 0.1, 1.0f);
       // Pulizia buffer colore e depth
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
@@ -445,9 +464,6 @@ static int initialise() {
        * Quindi attenzione al posizionamento delle chiamate di modifica stato
        */
 
-      // TODO check other matrix usages
-      //SquareMatrix rotation(std::move(SquareMatrix::transpose(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(20*glfwGetTime())))));
-
       SquareMatrix p(std::move(Projection::onAxisFOV2ClipProjectiveMatrix(cam)));
       SquareMatrix v(std::move(cam.world2ViewMatrix()));
       SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 1, 1, 1, 0, 0, 0)));
@@ -455,6 +471,20 @@ static int initialise() {
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
       glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
+
+      light.setOrigin(light.getOrigin() + Float3(0.05f*sinf(glfwGetTime()), 0, 0));
+
+      glUniform3f(lightPosUniform, light.getOrigin().getX(), light.getOrigin().getY(), light.getOrigin().getZ());
+      glUniform3f(lightColorUniform, light.getColor().getRed(), light.getColor().getGreen(), light.getColor().getBlue());
+      //TODO manage falloff
+      glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
+
+      glUniform3f(ambientCoefficient, 0, 0, 0);
+      glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8);
+      glUniform3f(specularCoefficient, 0.5, 0.5, 0.5);
+      glUniform1f(specularAlpha, 110);
+
+      glUniform3f(eyePosition, cam.getEye().getX(), cam.getEye().getY(), cam.getEye().getZ());
 
       // Caricare vertexArrayObject interessato
       glBindVertexArray(vao);

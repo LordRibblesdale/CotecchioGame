@@ -6,8 +6,8 @@
         <ZPos>-2</ZPos>
 
         <XNormal>0</XNormal>
-        <YNormal>0</YNormal>
-        <ZNormal>1</ZNormal>
+        <YNormal>-1</YNormal>
+        <ZNormal>0</ZNormal>
 
         <Red>1</Red>
         <Green>0</Green>
@@ -23,8 +23,8 @@
         <ZPos>-2</ZPos>
 
         <XNormal>0</XNormal>
-        <YNormal>0</YNormal>
-        <ZNormal>1</ZNormal>
+        <YNormal>-1</YNormal>
+        <ZNormal>0</ZNormal>
 
         <Red>0</Red>
         <Green>1</Green>
@@ -40,8 +40,8 @@
         <ZPos>2</ZPos>
 
         <XNormal>0</XNormal>
-        <YNormal>0</YNormal>
-        <ZNormal>1</ZNormal>
+        <YNormal>-1</YNormal>
+        <ZNormal>0</ZNormal>
 
         <Red>0</Red>
         <Green>0</Green>

@@ -8,7 +8,6 @@ layout (location = 3) in vec3 normalVector;
 // IMPORTANTE: i nomi delle variabili tra i due shader devono essere uguali se li si vogliono passare da vertex a fragment
 out vec2 outTextCoord;
 out vec4 inColor;
-// TODO implementare la normale e la sua relativa trasformazione
 out vec3 outNormalVector;
 out vec3 sPos;
 
@@ -24,11 +23,10 @@ uniform mat4 normal;
 void main() {
     // gl_Position attribuisce la posizione al vertice
     vec4 tmp = model * vec4(position, 1.0f);
-    vec3 pos = vec3(tmp);
-    sPos = pos;
+    sPos = vec3(tmp);
     gl_Position = projection * view * tmp;   // Posizione in Clip Space/NDC
 
-    outNormalVector = mat3(transpose(inverse(model))) * normalVector;
+    outNormalVector = normalize(mat3(transpose(inverse(model))) * normalVector);
     inColor = vertexColor;   // Salvare colore vertici
     outTextCoord = textureCoordinates;
 }
