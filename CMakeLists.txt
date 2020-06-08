@@ -30,9 +30,18 @@ target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")
 target_include_directories(${PROJECT_NAME} PRIVATE "IO/rapidxml-1.13")
 
+target_link_libraries(${PROJECT_NAME} ${ASSIMP_LIBRARIES})
+
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glfw-3.3.2.bin.WIN64/include/GLFW")
     target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/glfw-3.3.2.bin.WIN64/lib-mingw-w64/libglfw3.a")
+    #TODO fix here
+    target_link_libraries(${PROJECT_NAME} "C:/mingw-w64/x86_64-8.1.0-posix-seh-rt_v6-rev0/mingw64/lib/gcc/x86_64-w64-mingw32/lib/libassimp.dll.a")
+
+    if (CMAKE_GENERATOR MATCHES "Visual Studio")
+        target_link_libraries(${PROJECT_NAME} "Graphics/assimp/assimp-vc142-mt.dll")
+        configure_file(Graphics/assimp/include/assimp/config.h.in Graphics/assimp/include/assimp/config.h @ONLY)
+    endif()
 endif()
 
 if(UNIX)

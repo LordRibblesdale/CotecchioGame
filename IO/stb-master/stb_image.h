@@ -336,7 +336,12 @@ enum
    STBI_rgb_alpha  = 4
 };
 
+#if (_MSC_VER >= 1500)
+#include <stdlib.h>
+#else
 #include <c++/stdlib.h>
+#endif
+
 typedef unsigned char stbi_uc;
 typedef unsigned short stbi_us;
 

@@ -2,8 +2,26 @@
 #include "Graphics/GL_Loader.h"
 #include "rapidxml.hpp"
 
+#if (_MSC_VER >= 1500)
+#include "Graphics/assimp/include/assimp/Importer.hpp"
+#include "Graphics/assimp/include/assimp/scene.h"
+#include "Graphics/assimp/include/assimp/postprocess.h"
+#else
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#endif
+
 // Argument as XML file importer
 int main(int argc, char** argv) {
+   std::string s("C:\\Users\\Green\\CLionProjects\\CotecchioGame\\Test.fbx");
+   Assimp::Importer importer;
+   std::unique_ptr<const aiScene> scene(importer.ReadFile(s, aiProcess_Triangulate));
+
+   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+      return 0;
+
+   /*
    // Creazione input buffer
    std::ifstream file("test.xml");
 
@@ -54,10 +72,11 @@ int main(int argc, char** argv) {
       }
 
       file.close();
+      */
 
-      return initialise();
-   } else {
       std::cout << "Error XML_FILE_INPUT: no default file has been loaded.";
+   } else {
+      return initialise();
    }
 
    return EXIT_FAILURE;
