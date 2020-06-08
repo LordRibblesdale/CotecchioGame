@@ -38,10 +38,10 @@ if(WIN32)
     #TODO fix here
     target_link_libraries(${PROJECT_NAME} "C:/mingw-w64/x86_64-8.1.0-posix-seh-rt_v6-rev0/mingw64/lib/gcc/x86_64-w64-mingw32/lib/libassimp.dll.a")
 
-    if (CMAKE_GENERATOR MATCHES "Visual Studio")
-        target_link_libraries(${PROJECT_NAME} "Graphics/assimp/assimp-vc142-mt.dll")
-        configure_file(Graphics/assimp/include/assimp/config.h.in Graphics/assimp/include/assimp/config.h @ONLY)
-    endif()
+    message("-> Linking Libraries in Visual Studio")
+    add_library(LIBRARY "Graphics/assimp/assimp-vc142-mt.dll")
+    set_target_properties(LIBRARY PROPERTIES LINKER_LANGUAGE CXX)
+    target_link_libraries(${PROJECT_NAME} LIBRARY)
 endif()
 
 if(UNIX)
