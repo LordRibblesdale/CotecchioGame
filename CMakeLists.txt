@@ -35,11 +35,9 @@ target_link_libraries(${PROJECT_NAME} ${ASSIMP_LIBRARIES})
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glfw-3.3.2.bin.WIN64/include/GLFW")
     target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/glfw-3.3.2.bin.WIN64/lib-mingw-w64/libglfw3.a")
-    #TODO fix here
-    target_link_libraries(${PROJECT_NAME} "C:/mingw-w64/x86_64-8.1.0-posix-seh-rt_v6-rev0/mingw64/lib/gcc/x86_64-w64-mingw32/lib/libassimp.dll.a")
+    target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/assimp/libassimp.dll")
 
-    message("-> Linking Libraries in Visual Studio")
-    add_library(LIBRARY "Graphics/assimp/assimp-vc142-mt.dll")
+    add_library(LIBRARY "${CMAKE_SOURCE_DIR}/Graphics/assimp/libassimp.dll")
     set_target_properties(LIBRARY PROPERTIES LINKER_LANGUAGE CXX)
     target_link_libraries(${PROJECT_NAME} LIBRARY)
 endif()
