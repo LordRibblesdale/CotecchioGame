@@ -41,13 +41,7 @@ if(WIN32)
         target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/glfw-3.3.2.bin.WIN64/lib-mingw-w64/libglfw3.a")
     endif()
 
-    target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/assimp/libassimp.dll")
-    #target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/assimp/assimp-vc142-mt.dll")
-
-    #add_library(LIBRARY "${CMAKE_SOURCE_DIR}/libassimp.lib")
-    #add_library(LIBRARY "${CMAKE_SOURCE_DIR}/libassimp.dll")
-    #set_target_properties(LIBRARY PROPERTIES LINKER_LANGUAGE CXX)
-    #target_link_libraries(${PROJECT_NAME} LIBRARY)
+    target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/Graphics/assimp/libassimp.dll.a")
 endif()
 
 if(UNIX)
