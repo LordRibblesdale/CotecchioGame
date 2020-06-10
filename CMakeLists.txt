@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.15)
 project(CotecchioGame)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-static-libstdc++ -static-libgcc" CACHE STRING "compile flags" FORCE)
+
+#add_compile_definitions(-static-libstdc++)
+#add_compile_definitions(-static-libgcc)
 
 file(GLOB_RECURSE VectorFolder "Vector/*.cpp" "Vector/*.h")
 file(GLOB_RECURSE MatrixFolder "Matrix/*.cpp" "Matrix/*.h")

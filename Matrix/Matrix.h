@@ -6,6 +6,8 @@
 
 class Matrix {
 protected:
+   // Accesso a variabile protetta permesso alle sottoclassi
+   // https://en.cppreference.com/w/cpp/language/access#Protected_member_access
    std::unique_ptr<FloatArray> data_;
 
 public:

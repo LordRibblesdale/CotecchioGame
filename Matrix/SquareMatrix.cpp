@@ -25,13 +25,13 @@ SquareMatrix::SquareMatrix(Matrix &&matrix) : Matrix(std::move(matrix)) {
 SquareMatrix::~SquareMatrix() {}
 
 SquareMatrix &SquareMatrix::operator=(const SquareMatrix &matrix) {
-   data_ = std::move(std::make_unique<FloatArray>(*matrix.getData()));
+   data_ = std::move(std::make_unique<FloatArray>(*matrix.data_));
 
    return *this;
 }
 
 SquareMatrix &SquareMatrix::operator=(SquareMatrix && matrix) {
-   data_ = std::move(std::make_unique<FloatArray>(*const_cast<std::unique_ptr<FloatArray>&>(matrix.getData()).release()));
+   data_ = std::move(std::make_unique<FloatArray>(*matrix.data_.release()));
 
    matrix.deleteMatrix();
 

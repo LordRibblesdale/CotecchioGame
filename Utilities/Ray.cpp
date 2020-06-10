@@ -38,7 +38,7 @@ bool Ray::isIntersecting(const Box &box) const {
 }
 
 TriangleIntersection& Ray::getTriangleIntersection(const Triangle &triangle) const {
-   std::unique_ptr<TriangleIntersection> intersection = std::make_unique<TriangleIntersection>(false, nullptr, nullptr);
+   std::unique_ptr<TriangleIntersection> intersection(new TriangleIntersection(false, nullptr, nullptr));
 
    //TODO optimise memory?
    Float3 q(direction_.crossProduct(triangle.getPoints()[2] - triangle.getPoints()[0]));
@@ -57,7 +57,7 @@ TriangleIntersection& Ray::getTriangleIntersection(const Triangle &triangle) con
          if (v >= 0 && (u+v) <= 1) {
             float t = a*(r.dotProduct(triangle.getPoints()[2] - triangle.getPoints()[0]));
 
-            intersection = std::make_unique<TriangleIntersection>(true, new Float3(origin_ + t*direction_), new Float3(t, u, v));
+            intersection = std::move(std::make_unique<TriangleIntersection>(true, new Float3(origin_ + t*direction_), new Float3(t, u, v)));
          }
        }
    }
