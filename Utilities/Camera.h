@@ -14,6 +14,14 @@ class Camera {
    float angle = 0;
    float aspectRatio = 0;
 
+   float sensibility = 0.02f;
+public:
+   float getSensibility() const;
+
+   void setSensibility(float sensibility);
+
+private:
+
    Float3 eye;
    Float3 lookAt;
    Float3 up;
@@ -34,8 +42,6 @@ public:
    //TODO add Yaw and Pitch
 
    SquareMatrix world2ViewMatrix();
-
-   void updateCamera();
 
    float getNear() const;
 

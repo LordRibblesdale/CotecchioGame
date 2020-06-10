@@ -57,21 +57,12 @@ SquareMatrix Camera::world2ViewMatrix() {
    return SquareMatrix::calculateInverse(view2WorldMatrix);
 }
 
-void Camera::updateCamera() {
-   //TODO update basing on axis-type camera
-   right = near * tanf(angle*0.5f);
-   top = right * aspectRatio;
-}
-
-//TODO check which function needs to call updateCamera()
 float Camera::getNear() const {
    return near;
 }
 
 void Camera::setNear(float near) {
    Camera::near = near;
-
-   updateCamera();
 }
 
 float Camera::getFar() const {
@@ -120,8 +111,6 @@ float Camera::getAngle() const {
 
 void Camera::setAngle(float angle) {
    Camera::angle = degree2Radiants(angle);
-
-   updateCamera();
 }
 
 float Camera::getAspectRatio() const {
@@ -130,8 +119,6 @@ float Camera::getAspectRatio() const {
 
 void Camera::setAspectRatio(float aspectRatio) {
    Camera::aspectRatio = aspectRatio;
-
-   updateCamera();
 }
 
 const Float3 &Camera::getEye() const {
@@ -156,6 +143,14 @@ const Float3 &Camera::getUp() const {
 
 void Camera::setUp(const Float3 &up) {
    Camera::up = up;
+}
+
+float Camera::getSensibility() const {
+   return sensibility;
+}
+
+void Camera::setSensibility(float sensibility) {
+   Camera::sensibility = sensibility;
 }
 
 

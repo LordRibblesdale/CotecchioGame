@@ -65,54 +65,43 @@ void refreshWindowSize(GLFWwindow *window, int width, int height) {
    glfwGetWindowSize(window, &WIDTH, &HEIGHT);
    aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
    cam.setAspectRatio(aspectRatio);
-   cam.updateCamera();
    glViewport(0, 0, width, height);
 }
 
 void cursorPositionCallBack(GLFWwindow* window, double xPos, double yPos) {
-   /*
-   std::cout << xPos << std::endl;
-   //float xDiff =
-   if (xPos > 0) {
-      float angle = atanf(xPos/100.0f);
-      Float4 tmp(-(cam.getEye().getY() - cam.getLookAt().getY()), cam.getEye().getX() - cam.getLookAt().getX(), 0, 0);
+   if (xPos != 0) {
+      float angle = cam.getSensibility() * atanf(xPos);
+      std::cout << angle << std::endl;
 
-      Float4 rotate(Rotation::quaternionAxisRotateVertex4(Float4(cam.getLookAt(), false), tmp, angle));
+      Float3 tmp(cam.getLookAt()-cam.getEye());
 
-      cam.setLookAt(rotate.getFloat3());
+      Float3 rotate(Rotation::axisZRotateVertex3(tmp, -angle));
+      rotate += cam.getEye();
+
+      cam.setLookAt(rotate);
    }
 
-   if (xPos < 0) {
-      float angle = atanf(xPos/1000.0f);
-      Float4 tmp(-(cam.getEye().getY() - cam.getLookAt().getY()), cam.getEye().getX() - cam.getLookAt().getX(), 0, 0);
+   if (yPos != 0) {
+      /*
+      float angle = cam.getSensibility() * 0.01f * atanf(xPos);
 
-      Float4 rotate(Rotation::quaternionAxisRotateVertex4(Float4(cam.getLookAt(), false), tmp, -angle));
+      Float3 tmp(cam.getLookAt().crossProduct(cam.getEye()));
 
-      cam.setLookAt(rotate.getFloat3());
-   }
+      Float3 rotate(Rotation::axisZRotateVertex3(tmp, -angle));
 
-   if (yPos > 0) {
-      float angle = atanf(xPos/1000.0f);
-
-      Float4 rotate(Rotation::quaternionAxisRotateVertex4(Float4(cam.getLookAt(), false), Float4(cam.getUp(), false), angle));
-
-      cam.setLookAt(rotate.getFloat3());
-   }
-
-   if (yPos < 0) {
-
+      cam.setLookAt(rotate);
+       */
    }
 
    glfwSetCursorPos(window, 0, 0);
-    */
 }
 
 void scrollCallBack(GLFWwindow* window, double xOffset, double yOffset) {
-   /*
    if (yOffset > 0) {
       cam.setNear(cam.getNear()+0.5f);
+   } else if (yOffset < 0) {
+      cam.setNear(cam.getNear()-0.5f);
    }
-    */
 }
 
 void pollInput(GLFWwindow *window) {
@@ -188,9 +177,9 @@ void setUpWindowEnvironment() {
    glfwSetWindowSizeCallback(window, refreshWindowSize);
 
    // Imposto input tramite mouse
-   //glfwSetCursorPosCallback(window, cursorPositionCallBack);
-   //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-   //glfwSetCursorPos(window, 0, 0);
+   glfwSetCursorPosCallback(window, cursorPositionCallBack);
+   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+   glfwSetCursorPos(window, 0, 0);
 
    glfwSetScrollCallback(window, scrollCallBack);
 
@@ -198,6 +187,8 @@ void setUpWindowEnvironment() {
       // Controllo in caso di errore di caricamento puntatori alle funzioni della scheda video
       std::cout << "Error LOADING_GL: libraries cannot be called";
       glfwTerminate();
+
+      //TODO fix here
       throw(EXIT_FAILURE);
    }
 }
