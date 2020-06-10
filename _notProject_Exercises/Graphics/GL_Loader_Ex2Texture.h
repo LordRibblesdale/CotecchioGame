@@ -18,7 +18,7 @@
 #include "../../Matrix/SquareMatrix.h"
 #include "../../Matrix/StandardMatrix.h"
 #include "../../Utilities/Camera.h"
-#include "../../Model/Object.h"
+#include "../../Model/Mesh.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_RESIZE_IMPLEMENTATION

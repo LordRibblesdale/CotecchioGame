@@ -167,7 +167,7 @@
     <ClCompile Include="model\light\SpotLight.cpp" />
     <ClCompile Include="model\Material.cpp" />
     <ClCompile Include="model\Model.cpp" />
-    <ClCompile Include="model\Object.cpp" />
+    <ClCompile Include="model\Mesh.cpp" />
     <ClCompile Include="model\Triangle.cpp" />
     <ClCompile Include="utilities\Camera.cpp" />
     <ClCompile Include="utilities\Color.cpp" />
@@ -309,7 +309,7 @@
     <ClInclude Include="model\light\SpotLight.h" />
     <ClInclude Include="model\Material.h" />
     <ClInclude Include="model\Model.h" />
-    <ClInclude Include="model\Object.h" />
+    <ClInclude Include="model\Mesh.h" />
     <ClInclude Include="model\Triangle.h" />
     <ClInclude Include="utilities\Camera.h" />
     <ClInclude Include="utilities\Color.h" />

@@ -213,7 +213,7 @@
     <ClCompile Include="model\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="model\Object.cpp">
+    <ClCompile Include="model\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="model\Triangle.cpp">
@@ -635,7 +635,7 @@
     <ClInclude Include="model\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="model\Object.h">
+    <ClInclude Include="model\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="model\Triangle.h">

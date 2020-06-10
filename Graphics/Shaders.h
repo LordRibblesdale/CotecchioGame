@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <fstream>
+#include <iostream>
 
 /* Texture: acquisizione di immagine
  * -> Necessità di geometria con coordinate, per assegnare ai pixel le informazioni
@@ -68,12 +69,56 @@
  * Branching è tecnica erronea per la scrittura, poichè causa tempi asincroni per i pixel
  */
 
-
 static void loadShader(std::string& string, const std::string& location) {
    std::ifstream file(location);
    std::string s((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
    string = const_cast<char *>(s.c_str());
+}
+
+static void setUpTexture(GLuint& uniform) {
+   // Creazione allocazione memoria texture
+   glGenTextures(1, &uniform);
+   // Bind della texture
+   glBindTexture(GL_TEXTURE_2D, uniform);
+   /* Impostare come applicare texture su s e t
+    *  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    *  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    * Impostare come comportarsi con dimensioni più o meno piccole in base alla distanza (es usando mipmap)
+    */
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+   glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void loadTexture(const GLuint& uniform, const std::string& location) {
+   // Acquisizione texture
+   int width, height, channels;
+   /* Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
+    * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
+    * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
+    */
+   stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
+
+   unsigned char* data = stbi_load("img.png", &width, &height, &channels, 0);
+
+   if (data) {
+      /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
+       *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
+       *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
+       */
+      glBindTexture(GL_TEXTURE_2D, uniform);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+      // Creazione della mipmap della texture bindata
+      glGenerateMipmap(GL_TEXTURE_2D);
+
+      glBindTexture(GL_TEXTURE_2D, 0);
+   } else {
+      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+   }
+
+   stbi_image_free(data);
 }
 
 #endif //GLSL_H

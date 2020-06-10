@@ -11,14 +11,14 @@
 #include <GLFW/glfw3.h>
 #endif
 
-#include "Shaders.h"
-#include "../Vector/Float2.h"
-#include "../Vector/Float3.h"
-#include "../Utilities/Color.h"
-#include "../Matrix/SquareMatrix.h"
-#include "../Matrix/StandardMatrix.h"
-#include "../Utilities/Camera.h"
-#include "../Model/Object.h"
+#include "../../Graphics/Shaders.h"
+#include "../../Vector/Float2.h"
+#include "../../Vector/Float3.h"
+#include "../../Utilities/Color.h"
+#include "../../Matrix/SquareMatrix.h"
+#include "../../Matrix/StandardMatrix.h"
+#include "../../Utilities/Camera.h"
+#include "../../Model/Mesh.h"
 
 #include <iostream>
 #include <vector>

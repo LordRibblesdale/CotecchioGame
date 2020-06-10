@@ -3,7 +3,6 @@
 in vec2 outTextCoord;
 in vec3 outNormalVector;   // Input della normale per i calcoli di colore
 in vec3 sPos;           // Input per determinare l'illuminazione (o ottenuta dal vertex shader o di default interpolato)
-in vec4 inColor;        // TODO fix inColor usage
 
 out vec4 fragColor; // Colore da rappresentare - in questo caso tramite
 

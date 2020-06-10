@@ -1,4 +1,4 @@
-#include "Graphics/GL_Loader_Ex1Chess.h"
+#include "_notProject_Exercises/Graphics/GL_Loader_Ex1Chess.h"
 
 // Argument as XML file importer
 int main(int argc, char** argv) {
