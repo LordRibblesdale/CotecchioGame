@@ -14,7 +14,7 @@ class Camera {
    float angle = 0;
    float aspectRatio = 0;
 
-   float sensibility = 0.02f;
+   float sensibility = 0.1f;
 public:
    float getSensibility() const;
 

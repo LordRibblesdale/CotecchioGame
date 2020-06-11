@@ -95,3 +95,7 @@ void Color::clamp() {
 int Color::toInt8Bit(const float &f) {
    return 255 * f;
 }
+
+float Color::toFloat8Bit(const int &i) {
+   return static_cast<float>(i)/255.0f;
+}

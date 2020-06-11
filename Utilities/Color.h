@@ -30,6 +30,8 @@ public:
    void clamp();
 
    static int toInt8Bit(const float& f);
+
+   static float toFloat8Bit(const int& i);
 };
 
 #endif //COLOR_H

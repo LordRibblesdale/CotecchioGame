@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
    const aiScene* scene(importer.ReadFile(s, aiProcess_Triangulate));
 
    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl;
+      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
 
       return EXIT_FAILURE;
    } else {
@@ -28,6 +28,5 @@ int main(int argc, char** argv) {
       objects.emplace_back(table);
 
       return initialise();
-      //return EXIT_SUCCESS;
    }
 }

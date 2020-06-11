@@ -45,12 +45,15 @@ GLFWwindow* window = nullptr;
 Camera cam(std::move(Float3(0, -5, 0)), std::move(Float3(0, 0, 0)), std::move(Float3(0, 0, 1)),
            0.4f, 10000, 35, aspectRatio);
 
+double prevXPos, prevYPos;
+
 /* Generazione del Vertex Buffer Object e Vertex Array Object
  * Esempio un oggettto è dato da un insieme di vertici, elementi (topologia)
  * Generare vbo e vao tramite funzioni predefinite semplifica chiamate a runtime
  */
 
 GLuint colorOnlyShaderProgram;
+GLuint shaderProgram;
 
 std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
 std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
@@ -69,38 +72,48 @@ void refreshWindowSize(GLFWwindow *window, int width, int height) {
 }
 
 void cursorPositionCallBack(GLFWwindow* window, double xPos, double yPos) {
-   if (xPos != 0) {
-      float angle = cam.getSensibility() * atanf(xPos);
-      std::cout << angle << std::endl;
+   float diffX = cam.getSensibility() * (xPos - prevXPos);
+   float diffY = cam.getSensibility() * (yPos - prevYPos);
 
-      Float3 tmp(cam.getLookAt()-cam.getEye());
+   if (diffX != 0) {
+      float angle = atan(diffX/100.0f);
 
-      Float3 rotate(Rotation::axisZRotateVertex3(tmp, -angle));
+      Float3 tmp(std::move(cam.getLookAt()-cam.getEye()));
+
+      Float3 rotate(std::move(Rotation::axisZRotateVertex3(tmp, -angle)));
       rotate += cam.getEye();
 
       cam.setLookAt(rotate);
+
+      prevXPos = xPos;
    }
 
-   if (yPos != 0) {
+   if (diffY != 0) {
       /*
-      float angle = cam.getSensibility() * 0.01f * atanf(xPos);
+      float angle = atan(diffY/100.0f);
 
-      Float3 tmp(cam.getLookAt().crossProduct(cam.getEye()));
+      float ftmp;
+      Float4 tmp(cam.getLookAt()-cam.getEye(), false);
+      ftmp = tmp.getX();
+      tmp.setX(-tmp.getY());
+      tmp.setY(ftmp);
+      tmp.setZ(0);
 
-      Float3 rotate(Rotation::axisZRotateVertex3(tmp, -angle));
+      Float3 rotate(Rotation::quaternionAxisRotateVertex4(Float4(cam.getLookAt()-cam.getEye(), false), tmp, -angle).getFloat3());
+      rotate += cam.getEye();
 
       cam.setLookAt(rotate);
+
+      prevYPos = yPos;
        */
    }
-
-   glfwSetCursorPos(window, 0, 0);
 }
 
 void scrollCallBack(GLFWwindow* window, double xOffset, double yOffset) {
    if (yOffset > 0) {
-      cam.setNear(cam.getNear()+0.5f);
+      cam.setNear(cam.getNear()+0.25f);
    } else if (yOffset < 0) {
-      cam.setNear(cam.getNear()-0.5f);
+      cam.setNear(cam.getNear()-0.25f);
    }
 }
 
@@ -111,22 +124,30 @@ void pollInput(GLFWwindow *window) {
    // Funzione per l'input, esempio via tastiera
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       glfwSetWindowShouldClose(window, true);
-   } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
       Float3 tmp(-(cam.getEye().getY() - cam.getLookAt().getY()), cam.getEye().getX() - cam.getLookAt().getX(), 0);
 
       cam.setEye(cam.getEye() - Float3(speed * tmp.getX(), speed * tmp.getY(), 0));
       cam.setLookAt(cam.getLookAt() - Float3(speed * tmp.getX(), speed * tmp.getY(), 0));
-   } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
       Float3 tmp(-(cam.getEye().getY() - cam.getLookAt().getY()), cam.getEye().getX() - cam.getLookAt().getX(), 0);
 
       cam.setEye(cam.getEye() + Float3(speed * tmp.getX(), speed * tmp.getY(), 0));
       cam.setLookAt(cam.getLookAt() + Float3(speed * tmp.getX(), speed * tmp.getY(), 0));
-   } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
       Float3 tmp(cam.getEye() - cam.getLookAt());
 
       cam.setEye(cam.getEye() + Float3(speed * tmp.getX(), speed * tmp.getY(), 0));
       cam.setLookAt(cam.getLookAt() + Float3(speed * tmp.getX(), speed * tmp.getY(), 0));
-   } else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
       Float3 tmp(cam.getEye() - cam.getLookAt());
 
       cam.setEye(cam.getEye() - Float3(speed * tmp.getX(), speed * tmp.getY(), 0));
@@ -155,6 +176,10 @@ void initializeGLFW() {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+   // Attivazione multisampling
+   // TODO manage this from program settings
+   glfwWindowHint(GLFW_SAMPLES, 4);
+
    #ifdef __APPLE__
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
    #endif
@@ -179,7 +204,6 @@ void setUpWindowEnvironment() {
    // Imposto input tramite mouse
    glfwSetCursorPosCallback(window, cursorPositionCallBack);
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-   glfwSetCursorPos(window, 0, 0);
 
    glfwSetScrollCallback(window, scrollCallBack);
 
@@ -329,7 +353,7 @@ void generateObjects(const Mesh& mesh) {
     * Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
     * Il valore 3 dice quanti vertici
     */
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3* sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
    /* Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
     * Abilita gli attributi passatigli
     */
@@ -337,11 +361,13 @@ void generateObjects(const Mesh& mesh) {
 
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
    // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
    glBindVertexArray(0);
+
+   // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
    vertexArrayObjects.emplace_back(vao);
    vertexBufferObjects.emplace_back(vbo);
@@ -363,6 +389,7 @@ static int initialise() {
       }
    }
 
+   // TODO prepare textures
    //setUpTexture(texture1);    // Creazione texture
    //loadTexture(texture1, "img.png");
 
@@ -381,20 +408,23 @@ static int initialise() {
    glUseProgram(0);
    */
 
+   //TODO create method for specific OpenGL features
+   glEnable(GL_MULTISAMPLE);
+
    // Collezione indici per inviare dati allo shader
    GLuint projectionMatrixUniform = glGetUniformLocation(colorOnlyShaderProgram, "projection");
    GLuint viewMatrixUniform = glGetUniformLocation(colorOnlyShaderProgram, "view");
    GLuint modelMatrixUniform = glGetUniformLocation(colorOnlyShaderProgram, "model");
 
-   //GLuint lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
-   //GLuint lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
-   //GLuint lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
+   GLuint lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
+   GLuint lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
+   GLuint lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
 
-   //GLuint ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
-   //GLuint diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
-   //GLuint specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
-   //GLuint specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
-   //GLuint eyePosition = glGetUniformLocation(shaderProgram, "eye");
+   GLuint ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
+   GLuint diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
+   GLuint specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
+   GLuint specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
+   GLuint eyePosition = glGetUniformLocation(shaderProgram, "eye");
 
    GLuint color = glGetUniformLocation(colorOnlyShaderProgram, "inColor");
 
@@ -407,7 +437,7 @@ static int initialise() {
        */
       pollInput(window);
 
-      glClearColor(0.1, 0.9, 0.1, 1.0f);
+      glClearColor(1, Color::toFloat8Bit(83), 0, 1.0f);
       // Pulizia buffer colore e depth
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
@@ -429,7 +459,7 @@ static int initialise() {
 
       SquareMatrix p(std::move(Projection::onAxisFOV2ClipProjectiveMatrix(cam)));
       SquareMatrix v(std::move(cam.world2ViewMatrix()));
-      SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 0.25, 0.25, 0.25, 0, 0, 0)));
+      SquareMatrix m(std::move(Transform::tranScalaRotoMatrix4(0, 0, 0, 1, 1, 1, 0, 0, 0)));
 
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
@@ -442,10 +472,10 @@ static int initialise() {
       //TODO manage falloff
       //glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
 
-      //glUniform3f(ambientCoefficient, 0, 0, 0);
-      //glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8);
-      //glUniform3f(specularCoefficient, 0.5, 0.5, 0.5);
-      //glUniform1f(specularAlpha, 110);
+      glUniform3f(ambientCoefficient, 0, 0, 0);
+      glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8);
+      glUniform3f(specularCoefficient, 0.5, 0.5, 0.5);
+      glUniform1f(specularAlpha, 110);
 
       //glUniform3f(eyePosition, cam.getEye().getX(), cam.getEye().getY(), cam.getEye().getZ());
 
@@ -453,10 +483,12 @@ static int initialise() {
 
       glUniform4f(color, 0.3, 0.3, 0.3, 1);
 
-      for (unsigned int& vertexArrayObject : vertexArrayObjects) {
-         glBindVertexArray(vertexArrayObject);
-         // Chamata di disegno della primitiva
-         glDrawArrays(GL_TRIANGLES, 0, 3);
+      for (auto& object : objects) {
+         for (int j = 0; j < object.getMeshes().size(); ++j) {
+            glBindVertexArray(vertexArrayObjects.at(j));
+            // Chamata di disegno della primitiva
+            glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
+         }
       }
 
       // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
@@ -478,8 +510,8 @@ static int initialise() {
    // Liberazione della memoria
    for (int i = 0; i < vertexArrayObjects.size(); ++i) {
       glDeleteBuffers(1, &vertexBufferObjects.at(i));
+      glDeleteBuffers(1, &elementBufferObjects.at(i));
       glDeleteVertexArrays(1, &vertexArrayObjects.at(i));
-
    }
 
    glDeleteProgram(colorOnlyShaderProgram);
