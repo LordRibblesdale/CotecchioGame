@@ -32,12 +32,11 @@ FloatArray::FloatArray(const FloatArray &floatArray) {
 }
 
 FloatArray::FloatArray(FloatArray&& floatArray) {
-   //TODO test const_cast here
-   array_ = std::move(std::unique_ptr<float>((const_cast<std::unique_ptr<float>&>(floatArray.getArray())).release()));
+   // Accesso a variabile protetta permesso alle classi/sottoclassi
+   // https://en.cppreference.com/w/cpp/language/access#Protected_member_access
+   array_ = std::move(std::unique_ptr<float>(floatArray.array_.release()));
    rows_ = floatArray.getRows();
    columns_ = floatArray.getColumns();
-
-   //TODO check implicit destructor
 }
 
 FloatArray &FloatArray::operator=(const FloatArray &floatArray) {
@@ -53,12 +52,11 @@ FloatArray &FloatArray::operator=(const FloatArray &floatArray) {
 }
 
 FloatArray &FloatArray::operator=(FloatArray &&floatArray) {
-   //TODO test const_cast here
-   array_ = move(std::unique_ptr<float>((const_cast<std::unique_ptr<float>&>(floatArray.getArray())).release()));
+   // Accesso a variabile protetta permesso alle classi/sottoclassi
+   // https://en.cppreference.com/w/cpp/language/access#Protected_member_access
+   array_ = std::move(std::unique_ptr<float>(floatArray.array_.release()));
    rows_ = floatArray.getRows();
    columns_ = floatArray.getColumns();
-
-   //TODO check implicit destructor
 
    return *this;
 }

@@ -28,6 +28,8 @@
 #include <vector>
 #include <cmath>
 
+#include "Settings.h"
+
 //In coordinate NDC da inviare allo shader
 std::vector<Model> objects;
 
@@ -228,16 +230,17 @@ void compileShaders() {
    int report;
    char infoLog[512];
 
-   std::string source;
-   loadShader(source, "Graphics/Shader Files/vertex.glsl");
-   char* charSource(const_cast<char *>(source.c_str()));
+   std::unique_ptr<const char> charSource;
+   loadShader(charSource, "Graphics/Shader Files/vertex.glsl");
 
    if (!charSource) {
       std::cout << "Error VERTEX_FILE_IMPORT" << std::endl;
    }
 
    // Assegnazione codice allo shader (handle), assegnazione char* (codice GLSL da compilare)
-   glShaderSource(vertexShader, 1, &charSource, nullptr);
+   // Richiesta di un puntatore che accede alla stringa/char*, puntatore costante
+   // Release restituisce puntatore alla stringa, ma non è costante (consigliato da IDE)
+   glShaderSource(vertexShader, 1, reinterpret_cast<const char* const*>(charSource.release()), nullptr);
    // Compilazione shader
    glCompileShader(vertexShader);
 
@@ -253,8 +256,7 @@ void compileShaders() {
       std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
    }
 
-   loadShader(source, "Graphics/Shader Files/fragment.glsl");
-   charSource = const_cast<char *>(source.c_str());
+   loadShader(charSource, "Graphics/Shader Files/fragment.glsl");
 
    if (!charSource) {
       std::cout << "Error FRAGMENT_FILE_IMPORT" << std::endl;
@@ -264,7 +266,7 @@ void compileShaders() {
     * Restituisce GL unsigned int, indice dell'oggetto fragment shader creato dalla GPU
     */
    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragmentShader, 1, &charSource, nullptr);
+   glShaderSource(fragmentShader, 1, reinterpret_cast<const char* const*>(charSource.release()), nullptr);
    glCompileShader(fragmentShader);
 
    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &report);
@@ -326,10 +328,10 @@ void generateObjects(const Mesh& mesh) {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao);
 
    //TODO check resize and memory allocation
-   //TODO optimise multiple array usage
-   //TODO change if there is another type of object
+   //       optimise multiple array usage
+   //       change if there is another type of object
    unsigned int size = mesh.getVertices().size();
-   float attributes[3*size];
+   GLfloat attributes[3*size];
 
    int index = 0;
    for (int i = 0; i < size; ++i) {
@@ -358,7 +360,6 @@ void generateObjects(const Mesh& mesh) {
     * Abilita gli attributi passatigli
     */
    glEnableVertexAttribArray(0);
-
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -441,12 +442,12 @@ static int initialise() {
       // Pulizia buffer colore e depth
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
+      // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
+      glUseProgram(colorOnlyShaderProgram);
+
       // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LESS);
-
-      // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
-      glUseProgram(colorOnlyShaderProgram);
 
       //glBindTexture(GL_TEXTURE_2D, texture1);
       // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)

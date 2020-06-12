@@ -1,6 +1,8 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include "../Vector/Float3.h"
+
 #define M_E		2.7182818284590452354
 #define M_LOG2E		1.4426950408889634074
 #define M_LOG10E	0.43429448190325182765
@@ -16,11 +18,14 @@
 #define M_SQRT1_2	0.70710678118654752440
 
 class Material {
-   //TODO check if diffuse/reflective color is needed here
-   float diffuseCoeff;     // Coefficiente di diffusione
-   float specularCoeff;    // Coefficiente di specularità TODO check if necessary here
-   float shininess;        // Grado di specularità
-   float slope;            // Indice di rugosità
+   //TODO check if names are correct (Factor =? Coeff), (Coeff =? Color)
+   float ambientFactor;
+   Float3 ambientCoeff;
+   float diffuseFactor;
+   Float3 diffuseCoeff;
+   float specularFactor;
+   Float3 specularCoeff;
+   float shininess;
 
 public:
    Material();

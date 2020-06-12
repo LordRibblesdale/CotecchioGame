@@ -3,7 +3,7 @@
 #include "Material.h"
 
 float Material::getLambertBRDF() {
-   return diffuseCoeff * M_1_PI;
+   return diffuseFactor * M_1_PI;
 }
 
 float Material::getPhongBRDF() {

@@ -12,13 +12,17 @@ SquareMatrix::SquareMatrix(SquareMatrix &&matrix) : Matrix(std::move(matrix)) {}
 
 SquareMatrix::SquareMatrix(const Matrix &matrix) : Matrix(matrix) {
    if (getRows() != getColumns()) {
-      throw (std::exception());
+      std::string s("Error SQUAREMATRIX_INITIALIZATION: initializing SM from Matrix with different size:");
+      s.append(std::to_string(getRows())).append(" != ").append(std::to_string(matrix.getColumns()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 
 SquareMatrix::SquareMatrix(Matrix &&matrix) : Matrix(std::move(matrix)) {
    if (getRows() != getColumns()) {
-      throw (std::exception());
+      std::string s("Error SQUAREMATRIX_INITIALIZATION: initializing SM from Matrix with different size:");
+      s.append(std::to_string(getRows())).append(" != ").append(std::to_string(matrix.getColumns()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 
@@ -38,34 +42,19 @@ SquareMatrix &SquareMatrix::operator=(SquareMatrix && matrix) {
    return *this;
 }
 
-//TODO fix repeated functions
-//TODO return Matrix results and cast them
 SquareMatrix SquareMatrix::operator+(const SquareMatrix &matrix) noexcept(false) {
-   return SquareMatrix(std::move((Matrix) *this + matrix));
-
-   /*
-   unsigned int dim = getDimension();
-   std::unique_ptr<float> newData(new float[dim * dim]);
-
-   if (dim == matrix.getDimension()) {
-      for (int i = 0; i < dim*dim; ++i) {
-         newData.get()[i] = data_[i] + matrix.getData()[i];
-      }
+   if (getDimension() == matrix.getDimension()) {
+      return SquareMatrix(std::move((Matrix) *this + matrix));
    } else {
       std::string s = "Exception: dimensions do not correspond.";
-      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
-              .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
-                      matrix.getColumns())).append(")\n");
+      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getDimension())).append(") ")
+              .append(" != (").append(std::to_string(matrix.getDimension())).append(", ").append(std::to_string(matrix.getDimension())).append(")\n");
       // (row, columns_) != (matrix.getRows(), matrix.getColumns()
 
       throw ExceptionNotifier(s.c_str());
    }
-
-   return SquareMatrix(dim, newData.release());
-    */
 }
 
-//TODO fix repeated functions
 void SquareMatrix::operator+=(const SquareMatrix &matrix) noexcept(false) {
    unsigned int dim = getDimension();
 
@@ -85,27 +74,16 @@ void SquareMatrix::operator+=(const SquareMatrix &matrix) noexcept(false) {
 }
 
 SquareMatrix SquareMatrix::operator-(const SquareMatrix &matrix) noexcept(false) {
-   return SquareMatrix(std::move((Matrix) *this - matrix));
-   /*
-   std::unique_ptr<float> newData(new float[getRows() * getColumns()]);
-
-   if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
-      for (int i = 0; i < getRows() * getColumns(); ++i) {
-         newData.get()[i] = data_->operator[](i) - matrix.getData()->operator[](i);
-      }
+   if (getDimension() == matrix.getDimension()) {
+      return SquareMatrix(std::move((Matrix) *this - matrix));
    } else {
-      string s = "Exception: dimensions do not correspond.";
-      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
-              .append(" != (").append(std::to_string(matrix.getRows())).append(", ").append(std::to_string(
-                      matrix.getColumns())).append(")\n");
+      std::string s = "Exception: dimensions do not correspond.";
+      s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getDimension())).append(") ")
+              .append(" != (").append(std::to_string(matrix.getDimension())).append(", ").append(std::to_string(matrix.getDimension())).append(")\n");
       // (row, columns_) != (matrix.getRows(), matrix.getColumns()
 
       throw ExceptionNotifier(s.c_str());
-
    }
-
-   return SquareMatrix(getDimension(), newData.release());
-    */
 }
 
 void SquareMatrix::operator-=(const SquareMatrix &matrix) noexcept(false) {
@@ -127,7 +105,6 @@ void SquareMatrix::operator-=(const SquareMatrix &matrix) noexcept(false) {
 }
 
 SquareMatrix SquareMatrix::operator*(float scalar) {
-   //TODO check if optimal (instead of rewriting the whole function)
    return SquareMatrix(std::move((Matrix) *this * scalar));
 }
 
@@ -137,41 +114,23 @@ void SquareMatrix::operator*=(float scalar) {
    }
 }
 
-//TODO fix repeated functions
 SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) noexcept(false) {
-   return SquareMatrix(std::move((Matrix) *this * matrix));
-   /*
-   unsigned int dim = getDimension();
-
-   std::unique_ptr<float> newData(new float[getRows() * matrix.getColumns()]);
-
    if (getDimension() == matrix.getDimension()) {
-      for (unsigned int r = 0; r < dim; ++r) {
-         for (unsigned int c = 0; c < dim; ++c) {
-            for (unsigned int i = 0; i < dim; ++i) {
-               newData.get()[r * dim + c] += data_->operator[](r * dim + i) * matrix.getData()->operator[](i * dim + c);
-            }
-         }
-      }
+      return SquareMatrix(std::move((Matrix) *this * matrix));
    } else {
-      string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
+      std::string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
       s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");
 
       throw ExceptionNotifier(s.c_str());
    }
-
-   return SquareMatrix(dim, newData.release());
-    */
 }
 
 
 void SquareMatrix::transpose() {
-   SquareMatrix transposed(std::move(Matrix::transpose(*this)));
+   Matrix transposed(std::move(Matrix::transpose(*this)));
 
-   //TODO fix "for" calling (more security in modifying matrix values)
-   for (int i = 0; i < getDimension() * getDimension(); ++i) {
-      getArray()[i] = transposed.getArray()[i];
-   }
+   //TODO check if working
+   data_.reset(transposed.getData().get());
 }
 
 SquareMatrix SquareMatrix::transpose(const SquareMatrix &matrix) {
@@ -219,7 +178,8 @@ float SquareMatrix::calculateDeterminant(const SquareMatrix& matrix) {
           */
 
          //TODO change calculation through first row
-         //TODO implement LU decomposition
+         //TODO implement LU decomposition after 5/6 dimension
+         // Laplace det-> O(n!) ; LU dec-> O(n^3)
          for (int i = 0; i < matrix.getColumns(); ++i) {
             determinant += matrix.getArray()[i] * (i % 2 == 0 ? 1 : -1) * calculateDeterminant(createSubmatrix(matrix, 0, i));
          }
@@ -235,10 +195,8 @@ float SquareMatrix::calculateCofactor(const SquareMatrix& matrix, unsigned int r
 void SquareMatrix::invert() {
    SquareMatrix inverse(std::move(SquareMatrix::calculateInverse(*this)));
 
-   //TODO fix "for" calling (more security in modifying matrix values)
-   for (int i = 0; i < getRows() * getColumns(); ++i) {
-      getArray()[i] = inverse.getArray()[i];
-   }
+   //TODO check if working
+   data_.reset(inverse.getData().get());
 }
 
 SquareMatrix SquareMatrix::calculateInverse(const SquareMatrix &matrix) {

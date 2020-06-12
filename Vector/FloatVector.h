@@ -10,7 +10,6 @@ struct FloatVector {
    unsigned int size_;
 
 public:
-   //TODO add move constructor
    FloatVector(unsigned int size, float* data);
 
    FloatVector(unsigned int size, const std::initializer_list<float>& data);

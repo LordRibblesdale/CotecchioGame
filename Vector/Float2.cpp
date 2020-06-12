@@ -25,15 +25,17 @@ Float2::Float2(Float2&& point) : FloatVector(2, {point.getX(), point.getY()}) {
 
 Float2::Float2(const FloatVector &point) : FloatVector(point) {
    if (point.getSize() != 2) {
-      //TODO fix generic exception
-      throw (std::exception());
+      std::string s("Error FLOAT2_INITIALIZATION: initializing F4 from FloatVector with different size: 2 != ");
+      s.append(std::to_string(point.getSize()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 
 Float2::Float2(FloatVector &&point) : FloatVector(std::move(point)) {
    if (point.getSize() != 2) {
-      //TODO fix generic exception
-      throw (std::exception());
+      std::string s("Error FLOAT2_INITIALIZATION: initializing F4 from FloatVector with different size: 2 != ");
+      s.append(std::to_string(point.getSize()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 

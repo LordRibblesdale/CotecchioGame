@@ -69,11 +69,10 @@
  * Branching è tecnica erronea per la scrittura, poichè causa tempi asincroni per i pixel
  */
 
-static void loadShader(std::string& string, const std::string& location) {
+static void loadShader(std::unique_ptr<const char>& charSource, const std::string& location) {
    std::ifstream file(location);
    std::string s((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-   string = const_cast<char *>(s.c_str());
+   charSource.reset(s.c_str());
 }
 
 static void setUpTexture(GLuint& uniform) {

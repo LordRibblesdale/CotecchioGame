@@ -26,9 +26,7 @@ FloatVector::FloatVector(const FloatVector &floatVector) {
 }
 
 FloatVector::FloatVector(FloatVector &&floatVector) {
-   //TODO test const_cast here
-   //USED in: Matrix::multiplyVector()
-   vector_ = std::move(std::unique_ptr<float>((const_cast<std::unique_ptr<float>&>(floatVector.getVector())).release()));
+   vector_ = std::move(std::unique_ptr<float>(floatVector.vector_.release()));
    size_ = floatVector.getSize();
 }
 
@@ -49,9 +47,7 @@ FloatVector &FloatVector::operator=(const FloatVector &vector) {
 }
 
 FloatVector &FloatVector::operator=(FloatVector &&vector) {
-   //TODO test const_cast here
-   //USED in: Matrix::multiplyVector()
-   vector_ = std::move(std::unique_ptr<float>((const_cast<std::unique_ptr<float>&>(vector.getVector())).release()));
+   vector_ = std::move(std::unique_ptr<float>(vector.vector_.release()));
    size_ = vector.getSize();
 
    return *this;

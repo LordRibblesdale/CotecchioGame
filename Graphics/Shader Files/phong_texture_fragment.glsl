@@ -7,7 +7,6 @@ in vec3 sPos;           // Input per determinare l'illuminazione (o ottenuta dal
 out vec4 fragColor; // Colore da rappresentare - in questo caso tramite
 
 // Scrittura di variabili uniform per ottenere informazioni delle luci (pos, color e coeff)
-//TODO setup uniform gathering in cpp
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 lightIntensity;

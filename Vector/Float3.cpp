@@ -15,15 +15,17 @@ Float3::Float3(Float3 &&point) : FloatVector(3, {point.getX(), point.getY(), poi
 
 Float3::Float3(const FloatVector &point) : FloatVector(point) {
    if (point.getSize() != 3) {
-      //TODO fix generic exception
-      throw (std::exception());
+      std::string s("Error FLOAT3_INITIALIZATION: initializing F3 from FloatVector with different size: 3 != ");
+      s.append(std::to_string(point.getSize()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 
 Float3::Float3(FloatVector &&point) : FloatVector(std::move(point)) {
    if (point.getSize() != 3) {
-      //TODO fix generic exception
-      throw (std::exception());
+      std::string s("Error FLOAT3_INITIALIZATION: initializing F3 from FloatVector with different size: 3 != ");
+      s.append(std::to_string(point.getSize()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 

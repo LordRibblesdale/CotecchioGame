@@ -26,7 +26,6 @@ Float3 Rotation::axisZRotateVertex3(const Float3 &vector, const float &angleZ) {
 }
 
 Float4 Rotation::quaternionAxisRotateVertex4(const Float4 &vector, const Float4 &direction, const float &angle) {
-   //TODO optimise here (remainder function)
    if (direction.l2Norm() != 0 && remainder(angle, 2 * M_PI) != 0) {
       float sin = sinf(angle*0.5f);
       float q1 = direction.getX() * sin;
@@ -82,7 +81,6 @@ SquareMatrix Rotation::rotationByQuaternion(const Float4& direction, const float
 
    }
 
-   //TODO check here
    return SquareMatrix(4, {});
 }
 

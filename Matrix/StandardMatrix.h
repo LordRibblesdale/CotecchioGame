@@ -45,7 +45,6 @@ namespace Transform {
 }
 
 namespace Projection {
-   //TODO check if move function into Camera
    SquareMatrix view2ClipProjectiveMatrix(const float& right, const float& left, const float& near, const float& far, const float& top,
                                           const float& bottom);
 

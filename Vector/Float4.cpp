@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include "Float4.h"
 
 Float4::Float4() : FloatVector(4, {0, 0, 0, 0}) {}
@@ -22,15 +23,17 @@ Float4::Float4(const Float3& float3, bool isPoint) : FloatVector(4, {float3.getX
 
 Float4::Float4(const FloatVector &point) : FloatVector(point) {
    if (point.getSize() != 4) {
-      //TODO fix generic exception
-      throw (std::exception());
+      std::string s("Error FLOAT4_INITIALIZATION: initializing F4 from FloatVector with different size: 4 != ");
+      s.append(std::to_string(point.getSize()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 
 Float4::Float4(FloatVector &&point) : FloatVector(std::move(point)) {
    if (point.getSize() != 4) {
-      //TODO fix generic exception
-      throw (std::exception());
+      std::string s("Error FLOAT4_INITIALIZATION: initializing F4 from FloatVector with different size: 4 != ");
+      s.append(std::to_string(point.getSize()));
+      throw (ExceptionNotifier(s.c_str()));
    }
 }
 
