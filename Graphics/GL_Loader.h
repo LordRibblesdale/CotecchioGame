@@ -230,17 +230,16 @@ void compileShaders() {
    int report;
    char infoLog[512];
 
-   std::unique_ptr<const char> charSource;
-   loadShader(charSource, "Graphics/Shader Files/vertex.glsl");
+   std::string source;
+   loadShader(source, "Graphics/Shader Files/vertex.glsl");
+   char* charSource(const_cast<char *>(source.c_str()));
 
    if (!charSource) {
       std::cout << "Error VERTEX_FILE_IMPORT" << std::endl;
    }
 
    // Assegnazione codice allo shader (handle), assegnazione char* (codice GLSL da compilare)
-   // Richiesta di un puntatore che accede alla stringa/char*, puntatore costante
-   // Release restituisce puntatore alla stringa, ma non è costante (consigliato da IDE)
-   glShaderSource(vertexShader, 1, reinterpret_cast<const char* const*>(charSource.release()), nullptr);
+   glShaderSource(vertexShader, 1, &charSource, nullptr);
    // Compilazione shader
    glCompileShader(vertexShader);
 
@@ -256,7 +255,8 @@ void compileShaders() {
       std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
    }
 
-   loadShader(charSource, "Graphics/Shader Files/fragment.glsl");
+   loadShader(source, "Graphics/Shader Files/fragment.glsl");
+   charSource = const_cast<char *>(source.c_str());
 
    if (!charSource) {
       std::cout << "Error FRAGMENT_FILE_IMPORT" << std::endl;
@@ -266,7 +266,7 @@ void compileShaders() {
     * Restituisce GL unsigned int, indice dell'oggetto fragment shader creato dalla GPU
     */
    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragmentShader, 1, reinterpret_cast<const char* const*>(charSource.release()), nullptr);
+   glShaderSource(fragmentShader, 1, &charSource, nullptr);
    glCompileShader(fragmentShader);
 
    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &report);
