@@ -129,8 +129,10 @@ SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) noexcept(false)
 void SquareMatrix::transpose() {
    Matrix transposed(std::move(Matrix::transpose(*this)));
 
-   //TODO check if working
-   data_.reset(transposed.getData().get());
+   //TODO fix "for" calling (more security in modifying matrix values)
+   for (int i = 0; i < getDimension() * getDimension(); ++i) {
+      getArray()[i] = transposed.getArray()[i];
+   }
 }
 
 SquareMatrix SquareMatrix::transpose(const SquareMatrix &matrix) {
@@ -195,8 +197,10 @@ float SquareMatrix::calculateCofactor(const SquareMatrix& matrix, unsigned int r
 void SquareMatrix::invert() {
    SquareMatrix inverse(std::move(SquareMatrix::calculateInverse(*this)));
 
-   //TODO check if working
-   data_.reset(inverse.getData().get());
+   //TODO fix "for" calling (more security in modifying matrix values)
+   for (int i = 0; i < getRows() * getColumns(); ++i) {
+      getArray()[i] = inverse.getArray()[i];
+   }
 }
 
 SquareMatrix SquareMatrix::calculateInverse(const SquareMatrix &matrix) {
