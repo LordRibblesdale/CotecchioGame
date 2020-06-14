@@ -1,7 +1,6 @@
 #ifndef FLOATVECTOR_H
 #define FLOATVECTOR_H
 
-#include <string>
 #include <memory>
 #include "../Exception/ExceptionNotifier.h"
 

@@ -36,19 +36,20 @@ const vector<Mesh> &Model::getMeshes() const {
 }
 
 SquareMatrix Model::getWorldCoordinates() const {
-   // TODO complete
-   // x y z r g b u v
-   SquareMatrix translation(std::move(Transform::translateMatrix4(xTranslation, yTranslation, zTranslation)));
-   //TODO check how to rotate with quaternions (check which axis to use)
-   //SquareMatrix rotation(std::move(Rotation::rotationByQuaternion(Float4(1, 0, 0, 0), degree2Radiants(xRotation))));
-   SquareMatrix xRotoMatrix(std::move(Rotation::rotationXAxisMatrix(xRotation)));
-   SquareMatrix yRotoMatrix(std::move(Rotation::rotationXAxisMatrix(yRotation)));
-   SquareMatrix zRotoMatrix(std::move(Rotation::rotationXAxisMatrix(zRotation)));
-   SquareMatrix scale(Transform::scaleMatrix4(xScale, yScale, zScale));
-   //TODO check apply here
-   SquareMatrix transform(translation * zRotoMatrix * yRotoMatrix * xRotoMatrix * scale);
+   float alpha1 = cosf(xRotation);
+   float beta1 = sinf(xRotation);
+   float alpha2 = cosf(yRotation);
+   float beta2 = sinf(yRotation);
+   float alpha3 = cosf(zRotation);
+   float beta3 = sinf(zRotation);
 
-   return transform;
+   float a1b2 = alpha1 * beta2;
+   float b1b2 = beta1 * beta2;
+
+   return SquareMatrix(4, {xScale * alpha2 * alpha3, -yScale*(b1b2 * alpha3 + alpha1 * beta3), -zScale*(a1b2 * alpha3 - beta1 * beta3), xTranslation,
+                           xScale * alpha2 * beta3, -yScale*(b1b2 * beta3 - alpha1 * alpha3), -zScale*(a1b2 * beta3 + beta1 * alpha3), yTranslation,
+                           xScale * beta2, yScale * beta1 * alpha2, zScale * alpha1 * alpha2, zTranslation,
+                           0, 0, 0, 1});
 }
 
 const float& Model::getXTranslation() const {

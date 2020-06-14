@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Camera.h"
 #include "../Matrix/StandardMatrix.h"
 

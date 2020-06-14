@@ -13,6 +13,10 @@ class Mesh {
    std::vector<Color> vertexColors;
    std::vector<unsigned int> indices;
 
+   bool diffusive;
+   bool specular;
+   bool pbr;
+
 public:
    // TODO rule of 5
    Mesh(unsigned int preallocSize);

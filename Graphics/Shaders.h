@@ -3,7 +3,9 @@
 
 #include <memory>
 #include <fstream>
-#include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "../IO/stb-master/stb_image.h"
 
 /* Texture: acquisizione di immagine
  * -> Necessità di geometria con coordinate, per assegnare ai pixel le informazioni

@@ -1,5 +1,8 @@
 #include "Graphics/GL_Loader.h"
 #include "Graphics/Settings.h"
+#include <fstream>
+#include <filesystem>
+
 #include "rapidxml.hpp"
 
 #if (_MSC_VER >= 1500)
@@ -14,6 +17,7 @@
 // Argument as XML file importer
 int main(int argc, char** argv) {
    // Creazione input buffer
+   /*
    std::ifstream file("settings.xml");
 
    if (file.is_open()) {
@@ -40,8 +44,9 @@ int main(int argc, char** argv) {
    } else {
       std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
    }
+    */
 
-   std::string s("Test.fbx");
+   std::string s("DATA_ASSETS/Table_OBJ/Table.obj");
    Assimp::Importer importer;
    const aiScene* scene(importer.ReadFile(s, aiProcess_Triangulate));
 
@@ -53,7 +58,8 @@ int main(int argc, char** argv) {
       Model table;
       table.processNode(scene->mRootNode, scene);
 
-      objects.emplace_back(table);
+      fillModelMemory(table);
+      table.setYRotation(degree2Radiants(90));
 
       return initialise();
    }

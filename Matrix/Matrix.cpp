@@ -29,8 +29,6 @@ Matrix &Matrix::operator=(const Matrix &matrix) {
 Matrix &Matrix::operator=(Matrix && matrix) {
    data_ = std::move(std::make_unique<FloatArray>(*matrix.data_.release()));
 
-   matrix.deleteMatrix();
-
    return *this;
 }
 
@@ -195,12 +193,6 @@ FloatVector Matrix::multiplyVector(const FloatVector& vector) const noexcept(fal
          .append(std::to_string(vector.getSize())).append("\n");
 
       throw ExceptionNotifier(s.c_str());
-   }
-}
-
-void Matrix::deleteMatrix() {
-   for (int i = 0; i < getRows() * getColumns(); ++i) {
-      data_->operator[](i) = 0;
    }
 }
 

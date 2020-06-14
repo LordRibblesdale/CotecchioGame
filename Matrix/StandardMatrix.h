@@ -40,8 +40,6 @@ namespace Transform {
    SquareMatrix scaleTransform3(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ);
 
    SquareMatrix translateMatrix4(float x, float y, float z);
-
-   SquareMatrix tranScalaRotoMatrix4(float xTransl, float yTransl, float zTransl, float xScale, float yScale, float zScale, float xAngle, float yAngle, float zAngle);
 }
 
 namespace Projection {

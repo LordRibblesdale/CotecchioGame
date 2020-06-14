@@ -37,8 +37,6 @@ SquareMatrix &SquareMatrix::operator=(const SquareMatrix &matrix) {
 SquareMatrix &SquareMatrix::operator=(SquareMatrix && matrix) {
    data_ = std::move(std::make_unique<FloatArray>(*matrix.data_.release()));
 
-   matrix.deleteMatrix();
-
    return *this;
 }
 
