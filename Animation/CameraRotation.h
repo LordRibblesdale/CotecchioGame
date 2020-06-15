@@ -7,12 +7,13 @@
 class CameraRotation {
    //TODO implement camera rotation on different axis using finalPosition and initialPosition inclination
    SquareMatrix quaternion;
+   Float3 center;
    float angle;
 
 public:
-   CameraRotation(const Float3& initialPosition, const Float3& finalPosition, double duration, float radius);
+   CameraRotation(const Float3& initialPosition, const Float3& finalPosition, float radius);
 
-   Float4 rotateCamera(const Float3 &position, double duration);
+   Float3 rotateCamera(const Float3 &position, double duration);
 };
 
 

@@ -53,27 +53,30 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
 
       Float3 rotate(std::move(Rotation::axisZRotateVertex3(tmp, -angle)));
       rotate += camera.getEye();
+      rotate.normalize();
 
       camera.setLookAt(rotate);
+      camera.setYawAngle(acosf(tmp.getX()/100.0f));
 
       prevXPos = xPos;
    }
 
    if (diffY != 0) {
+      /*
       float angle = atan(diffY/100.0f);
 
-      float ftmp;
-      Float4 tmp(camera.getLookAt()-camera.getEye(), false);
-      ftmp = tmp.getX();
-      tmp.setX(-tmp.getY());
-      tmp.setY(ftmp);
+      Float3 tmp(std::move(camera.getLookAt() - camera.getEye()));
 
-      Float3 rotate(Rotation::quaternionAxisRotateVertex4(Float4(camera.getLookAt()-camera.getEye(), false), tmp, -angle).getFloat3());
+      Float3 rotate(Rotation::axisZRotateVertex3(tmp, camera.getYawAngle()));
+      rotate = std::move(Rotation::axisYRotateVertex3(rotate, angle));
+      rotate = std::move(Rotation::axisZRotateVertex3(rotate, -camera.getYawAngle()));
+
       rotate += camera.getEye();
-
+      rotate.normalize();
       camera.setLookAt(rotate);
+       */
 
-      prevYPos = yPos;
+      //prevYPos = yPos;
    }
 }
 
@@ -134,15 +137,13 @@ void pollInput(GLFWwindow *window) {
    if (TRANSFORM_CAMERA) {
       double diff = currTime - prevTime;
       if (!cameraRotation) {
-         // TODO fix here
-         cameraRotation = std::make_unique<CameraRotation>(camera.getEye(), position1, diff, 0);
+         cameraRotation = std::make_unique<CameraRotation>(camera.getEye(), position1, 0);
       }
 
       if (sumTime + diff <= cameraAnimationTime) {
-         camera.setEye(cameraRotation->rotateCamera(camera.getEye(), diff).getFloat3());
+         camera.setEye(cameraRotation->rotateCamera(camera.getEye(), diff));
 
          sumTime += diff;
-         std::cout << sumTime << std::endl;
       } else {
          sumTime = 0;
          TRANSFORM_CAMERA = false;
