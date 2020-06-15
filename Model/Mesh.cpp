@@ -1,11 +1,19 @@
 #include "Mesh.h"
 
-Mesh::Mesh(unsigned int preallocSize)  {
+Mesh::Mesh(unsigned int preallocSize, bool hasTextures)  {
    vertices.reserve(preallocSize);
    normals.reserve(preallocSize);
-   textureUnwrap.reserve(preallocSize);
-   vertexColors.reserve(preallocSize);
    indices.reserve(preallocSize);
+
+   hasTextures ? textureUnwrap.reserve(preallocSize) : vertexColors.reserve(preallocSize);
+}
+
+Mesh::~Mesh() {
+   vertices.clear();
+   normals.clear();
+   indices.clear();
+   textureUnwrap.clear();
+   vertexColors.clear();
 }
 
 void Mesh::addVertex(const Float3& vertex) {

@@ -34,6 +34,7 @@ public:
 
    float l2Norm() const;
    void normalize();
+   Float3 getNormalized() const;
 
    float getX() const;
    float getY() const;

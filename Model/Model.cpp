@@ -2,6 +2,8 @@
 #include "../Matrix/StandardMatrix.h"
 
 void Model::processNode(aiNode *node, const aiScene *scene) {
+   meshes.reserve(meshes.size() + node->mNumMeshes);
+
    for (int i = 0; i < node->mNumMeshes; ++i) {
       // Accesso alle mesh di interesse a partire dagli indici posseduti dal nodo
       processMesh(scene->mMeshes[node->mMeshes[i]], scene);
@@ -12,7 +14,8 @@ void Model::processNode(aiNode *node, const aiScene *scene) {
 }
 
 void Model::processMesh(aiMesh *mesh, const aiScene *scene) {
-   Mesh mesh1(mesh->mNumVertices);
+   Mesh mesh1(mesh->mNumVertices, true);
+
    for (int i = 0; i < mesh->mNumVertices; ++i) {
       mesh1.addVertex(Float3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z));
       mesh1.addNormal(Float3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z));
@@ -28,11 +31,30 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 
    meshes.push_back(mesh1);
 
-   //TODO add material
+
+   if (scene->HasMaterials()) {
+      for (int i = 0; i < scene->mMaterials[mesh->mMaterialIndex]->GetTextureCount(aiTextureType_DIFFUSE); ++i) {
+         aiString s;
+
+         if (scene->mMaterials[mesh->mMaterialIndex]->GetTexture(aiTextureType_DIFFUSE, i, &s) == AI_SUCCESS) {
+            textureUniforms.emplace_back(s.C_Str());
+         }
+      }
+   }
+
+   processTexture(mesh->mMaterialIndex, scene);
+}
+
+void Model::processTexture(unsigned int materialIndex, const aiScene *scene) {
+
 }
 
 const vector<Mesh> &Model::getMeshes() const {
    return meshes;
+}
+
+const vector<const char*> &Model::getTextureUniforms() const {
+   return textureUniforms;
 }
 
 SquareMatrix Model::getWorldCoordinates() const {

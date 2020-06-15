@@ -19,7 +19,8 @@ class Mesh {
 
 public:
    // TODO rule of 5
-   Mesh(unsigned int preallocSize);
+   Mesh(unsigned int preallocSize, bool hasTextures);
+   ~Mesh();
 
    void addVertex(const Float3& vertex);
    void addNormal(const Float3& normal);

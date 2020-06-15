@@ -7,7 +7,7 @@ Camera::Camera(Float3 eye, Float3 lookAt) : eye(std::move(eye)), lookAt(std::mov
    viewAngle = degree2Radiants(45);
    right = near * tanf(viewAngle * 0.5f);
 
-   yawAngle = (eye - lookAt).dotProduct(Float3(1, 0, 0));
+   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up) : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
@@ -16,7 +16,7 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up) : eye(std::move(eye)), look
    viewAngle = degree2Radiants(45);
    right = near * tanf(viewAngle * 0.5f);
 
-   yawAngle = acosf((lookAt - eye).getX()/100.0f);
+   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float angle, float aspectRatio)
@@ -29,7 +29,7 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
    Camera::right = near * tanf(Camera::viewAngle * 0.5f);
    Camera::top = aspectRatio * right;
 
-   yawAngle = acosf((lookAt - eye).getX()/100.0f);
+   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left,
@@ -42,7 +42,7 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
    Camera::right = right;
    Camera::viewAngle = degree2Radiants(angle);
 
-   yawAngle = acosf((lookAt - eye).getX()/100.0f);
+   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 SquareMatrix Camera::world2ViewMatrix() {

@@ -8,7 +8,9 @@
 
 class Model {
    std::vector<Mesh> meshes;
+   std::vector<const char*> textureUniforms;
 
+private:
    float xTranslation = 0;
    float yTranslation = 0;
    float zTranslation = 0;
@@ -25,9 +27,11 @@ class Model {
 
 public:
    const vector<Mesh> &getMeshes() const;
+   const vector<const char*> &getTextureUniforms() const;
 
    void processNode(aiNode* node, const aiScene* scene);
    void processMesh(aiMesh* mesh, const aiScene* scene);
+   void processTexture(unsigned int materialIndex, const aiScene* scene);
 
    SquareMatrix getWorldCoordinates() const;
 

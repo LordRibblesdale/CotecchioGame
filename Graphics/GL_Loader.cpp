@@ -2,13 +2,14 @@
 
 #include <memory>
 #include "Shaders.h"
+#include "../Model/Light/SpotLight.h"
 #include "../Animation/CameraRotation.h"
 
 int WIDTH = 960;
 int HEIGHT = 540;
 float aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
 
-Camera camera(std::move(Float3(-10, 10, 0)), std::move(Float3(0, 0, 0)), std::move(Float3(0, 0, 1)),
+Camera camera(std::move(Float3(-15, 15, 15)), std::move(Float3(-14, 14, 14)), std::move(Float3(0, 0, 1)),
               0.4f, 10000, 35, aspectRatio);
 Float3 position1(0, 10, 0);
 double cameraAnimationTime;
@@ -20,14 +21,15 @@ double prevTime, currTime, sumTime;
 
 std::vector<Model> objects;
 
+SpotLight light(std::move(Float3(-14, 14, 14)), Color(1, 1, 1), 5, degree2Radiants(40), degree2Radiants(60));
+
 GLuint colorOnlyShaderProgram;
 GLuint shaderProgram;
 
 std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
 std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
 std::vector<GLuint> elementBufferObjects;
-
-GLuint texture1;
+std::vector<GLuint> textureUniforms;
 
 bool TRANSFORM_CAMERA = false;
 std::unique_ptr<CameraRotation> cameraRotation;
@@ -47,36 +49,32 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
    float diffY = camera.getSensibility() * (yPos - prevYPos);
 
    if (diffX != 0) {
-      float angle = atan(diffX/100.0f);
+      float angle = atanf(diffX/100.0f);
 
-      Float3 tmp(std::move(camera.getLookAt() - camera.getEye()));
+      Float3 tmp(std::move((camera.getLookAt() - camera.getEye()).getNormalized()));
+      tmp = std::move(Rotation::axisZRotateVertex3(tmp, -angle));
 
-      Float3 rotate(std::move(Rotation::axisZRotateVertex3(tmp, -angle)));
-      rotate += camera.getEye();
-      rotate.normalize();
+      camera.setYawAngle(acosf(tmp.getNormalized().getX()));
 
-      camera.setLookAt(rotate);
-      camera.setYawAngle(acosf(tmp.getX()/100.0f));
+      tmp += camera.getEye();
+      camera.setLookAt(tmp);
 
       prevXPos = xPos;
    }
 
    if (diffY != 0) {
-      /*
-      float angle = atan(diffY/100.0f);
+      float angle = atanf(diffY/100.0f);
 
-      Float3 tmp(std::move(camera.getLookAt() - camera.getEye()));
+      Float3 tmp(std::move((camera.getLookAt() - camera.getEye()).getNormalized()));
 
-      Float3 rotate(Rotation::axisZRotateVertex3(tmp, camera.getYawAngle()));
-      rotate = std::move(Rotation::axisYRotateVertex3(rotate, angle));
-      rotate = std::move(Rotation::axisZRotateVertex3(rotate, -camera.getYawAngle()));
+      tmp = std::move(Rotation::axisZRotateVertex3(tmp, camera.getYawAngle()*0.5f));
+      tmp = std::move(Rotation::axisYRotateVertex3(tmp, angle));
+      tmp = std::move(Rotation::axisZRotateVertex3(tmp, -camera.getYawAngle()*0.5f));
+      tmp += camera.getEye();
 
-      rotate += camera.getEye();
-      rotate.normalize();
-      camera.setLookAt(rotate);
-       */
+      camera.setLookAt(tmp);
 
-      //prevYPos = yPos;
+      prevYPos = yPos;
    }
 }
 
@@ -99,32 +97,48 @@ void pollInput(GLFWwindow *window) {
 
    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
       Float3 vec(camera.getEye() - camera.getLookAt());
+      vec.normalize();
       float tmp = vec.getX();
       vec.setX(-vec.getY());
       vec.setY(tmp);
       camera.setEye(camera.getEye() - speed*vec);
+      /*
+      vec *= -1;
       camera.setLookAt(camera.getLookAt() - speed*vec);
+       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
       Float3 vec(camera.getEye() - camera.getLookAt());
+      vec.normalize();
       float tmp = vec.getX();
       vec.setX(-vec.getY());
       vec.setY(tmp);
       camera.setEye(camera.getEye() + speed*vec);
+      /*
+      vec *= -1;
       camera.setLookAt(camera.getLookAt() + speed*vec);
+       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
       Float3 vec(camera.getEye() - camera.getLookAt());
+      vec.normalize();
       camera.setEye(camera.getEye() + speed*vec);
+      /*
+      vec *= -1;
       camera.setLookAt(camera.getLookAt() + speed*vec);
+       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
       Float3 vec(camera.getEye() - camera.getLookAt());
+      vec.normalize();
       camera.setEye(camera.getEye() - speed*vec);
+      /*
+      vec *= -1;
       camera.setLookAt(camera.getLookAt() - speed*vec);
+       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
@@ -141,6 +155,7 @@ void pollInput(GLFWwindow *window) {
       }
 
       if (sumTime + diff <= cameraAnimationTime) {
+         std::cout << camera.getEye().toString() << std::endl;
          camera.setEye(cameraRotation->rotateCamera(camera.getEye(), diff));
 
          sumTime += diff;
@@ -292,9 +307,28 @@ void compileShaders() {
 }
 
 void loadObjects() {
+   unsigned long verticesLenght = 0;
+   unsigned long texturesLength = 0;
+
    for (const Model& model : objects) {
       for (const Mesh& mesh : model.getMeshes()) {
+         verticesLenght += mesh.getVertices().size();
+      }
+
+      texturesLength += model.getTextureUniforms().size();
+   }
+
+   vertexArrayObjects.reserve(verticesLenght);
+   vertexBufferObjects.reserve(verticesLenght);
+   textureUniforms.resize(texturesLength);
+
+   for (const Model& model : objects) {
+      for (const auto& mesh : model.getMeshes()) {
          generateObjects(mesh);
+      }
+
+      for (auto i = 0; i < model.getTextureUniforms().size(); ++i) {
+         loadTexture(textureUniforms.at(i), model.getTextureUniforms().at(i));
       }
    }
 }
@@ -400,7 +434,7 @@ void render() {
 
       pollInput(window);
 
-      glClearColor(1, Color::toFloat8Bit(83), 0, 1.0f);
+      glClearColor(0.2, 0.2, 0.2, 1.0f);
       // Pulizia buffer colore e depth
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 

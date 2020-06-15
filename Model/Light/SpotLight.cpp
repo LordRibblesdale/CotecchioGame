@@ -5,7 +5,7 @@ SpotLight::SpotLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 
    maxAngle = degree2Radiants(45);
 }
 
-SpotLight::SpotLight(Float3 origin, Color c, float intensity, float midAngle_, float maxAngle_) : Light(std::move(origin), std::move(color), intensity) {
+SpotLight::SpotLight(Float3 origin, Color color1, float intensity, float midAngle_, float maxAngle_) : Light(std::move(origin), std::move(color1), intensity) {
    midAngle = midAngle_;
    maxAngle = maxAngle_;
 }

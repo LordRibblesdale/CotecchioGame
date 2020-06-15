@@ -78,7 +78,7 @@ Float3 Float3::operator-(const Float3 &point) {
 }
 
 Float3 operator-(const Float3 &point, const Float3 &point2) {
-   return Float3(point.getX() - point2.getX(), point.getY() - point2.getY(), point.getZ() - point.getZ());
+   return Float3(point.getX() - point2.getX(), point.getY() - point2.getY(), point.getZ() - point2.getZ());
 }
 
 Float3& Float3::operator-=(const Float3 &point) {
@@ -132,6 +132,13 @@ void Float3::normalize() {
        setZ(getZ() * n);
     }
 }
+
+Float3 Float3::getNormalized() const {
+   Float3 tmp(*this);
+   tmp.normalize();
+   return tmp;
+}
+
 
 float Float3::getX() const {
    return getVector().get()[0];

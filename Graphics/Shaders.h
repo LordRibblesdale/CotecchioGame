@@ -94,7 +94,7 @@ static void setUpTexture(GLuint& uniform) {
    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-static void loadTexture(const GLuint& uniform, const std::string& location) {
+static void loadTexture(const GLuint& uniform, const char* location) {
    // Acquisizione texture
    int width, height, channels;
    /* Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
@@ -103,7 +103,7 @@ static void loadTexture(const GLuint& uniform, const std::string& location) {
     */
    stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
 
-   unsigned char* data = stbi_load("img.png", &width, &height, &channels, 0);
+   unsigned char* data = stbi_load(location, &width, &height, &channels, 0);
 
    if (data) {
       /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,

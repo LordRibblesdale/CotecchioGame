@@ -1,7 +1,6 @@
 #include "CameraRotation.h"
 #include "../Matrix/StandardMatrix.h"
 #include <cmath>
-#include <iostream>
 
 CameraRotation::CameraRotation(const Float3& initialPosition, const Float3& finalPosition, float radius) : quaternion(SquareMatrix(1, {})) {
    if (radius < 0) radius = -radius;
@@ -13,15 +12,18 @@ CameraRotation::CameraRotation(const Float3& initialPosition, const Float3& fina
    tmp1.normalize();
    tmp2.normalize();
 
-   std::cout << acosf(tmp1.dotProduct(tmp2)) << std::endl;
-
    angle = acosf(tmp1.dotProduct(tmp2));
 }
 
 Float3 CameraRotation::rotateCamera(const Float3 &position, double duration) {
-   quaternion = std::move(Rotation::rotationByQuaternion(Float4(0, 0, 1, 0), angle* static_cast<float>(duration)));
+   quaternion = std::move(Rotation::rotationZAxisMatrix(angle* static_cast<float>(duration)));
 
-   Float4 tmp(position - center, true);
+   Float3 tmp(position - center);
    tmp = std::move(quaternion.multiplyVector(tmp));
-   return tmp.getFloat3() + center;
+   return tmp + center;
+
+   /*
+   Float4 tmp(position - center, true);
+   return Rotation::quaternionAxisRotateVertex4(tmp, Float4(0, 0, 1, 0), angle* static_cast<float>(duration)).getFloat3() + center;
+    */
 }
