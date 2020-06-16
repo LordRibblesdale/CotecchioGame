@@ -24,6 +24,8 @@
 
 #include "Settings.h"
 
+const std::string TABLE_ASSETS_LOCATION("DATA_ASSETS/Table_OBJ/");
+
 /* Processo di rendering:
  * - Inizializzazione libreria
  * - Inizializzazione finestra

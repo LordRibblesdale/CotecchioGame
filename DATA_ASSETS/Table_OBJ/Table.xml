@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Table>
+    <Texture name="file1-nurbsToPoly81.1.png" material="Velvet">
+    </Texture>
+
+    <Texture name="wood1-nurbsToPoly2.2.png" material="Wood">
+        <Bump name="bump3d1-nurbsToPoly2.2.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-nurbsToPoly1.png" material="Wood">
+        <Bump name="bump3d1-nurbsToPoly1.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly6.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly6.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly61.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly61.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly50.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly50.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly80.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly80.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly14.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly14.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly25.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly25.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly18.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly18.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly38.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly38.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly39.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly39.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly24.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly24.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly32.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly32.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly37.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly37.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly33.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly33.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly31.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly31.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly68.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly68.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly74.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly74.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly43.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly43.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly69.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly69.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly67.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly67.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly55.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly55.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly11.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly11.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly56.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly56.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly57.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly57.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly51.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly51.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly49.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly49.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly75.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly75.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly75.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly75.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly73.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly73.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly44.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly44.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly45.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly45">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly10.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly10.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly26.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly26.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly27.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly27.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly62.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly62.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-group3_nurbsToPoly63.png" material="Wood">
+        <Bump name="bump3d1-group3_nurbsToPoly63.png">
+        </Bump>
+    </Texture>
+
+    <Texture name="wood1-nurbsToPoly3.png" material="Wood">
+        <Bump name="bump3d1-nurbsToPoly3.png">
+        </Bump>
+    </Texture>
+
+    <Material name="Wood">
+        <Diffuse valueR="1" valueG="1" valueB="1">
+        </Diffuse>
+        <Specular valueR="0.5" valueG="0.5" valueB="0.5" specularExp="13.19">
+        </Specular>
+    </Material>
+
+    <Material name="Velvet" valueR="1" valueG="1" valueB="1">
+        <PBR name="Velvet" valueR="1" valueG="1" valueB="1">
+            TODO change here
+        </PBR>
+    </Material>
+</Table>

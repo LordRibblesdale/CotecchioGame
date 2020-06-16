@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <fstream>
+#include <rapidxml.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../IO/stb-master/stb_image.h"
@@ -94,33 +95,63 @@ static void setUpTexture(GLuint& uniform) {
    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-static void loadTexture(const GLuint& uniform, const char* location) {
-   // Acquisizione texture
-   int width, height, channels;
-   /* Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
-    * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
-    * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
-    */
-   stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
+static void loadTexture(std::vector<GLuint>& textureCoords, const std::string& location, const std::string& name) {
+   // Creazione input buffer
+   std::ifstream file(location + name + ".xml");
 
-   unsigned char* data = stbi_load(location, &width, &height, &channels, 0);
+   if (file.is_open()) {
+      // Creazione documento
+      rapidxml::xml_document<> document;
+      // Creazione nodo iniziale per lettura file
+      rapidxml::xml_node<>* rootNode;
+      // Lettura testo :         V: iteratore file stream               V: iteratore fino all'EOF
+      std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+      // Aggiunta del carattere EOF \0
+      buffer.push_back('\0');
+      // Ricerca dei nodi (a partire dall'inizio
+      document.parse<0>(&buffer[0]);
+      // Ricerca del primo nodo
+      rootNode = document.first_node(name.c_str());
 
-   if (data) {
-      /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
-       *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
-       *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
-       */
-      glBindTexture(GL_TEXTURE_2D, uniform);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-      // Creazione della mipmap della texture bindata
-      glGenerateMipmap(GL_TEXTURE_2D);
+      // Iterazioni tra i nodi
+      // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
+      for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
+         textureCoords.emplace_back(0);
+         setUpTexture(const_cast<GLuint&>(textureCoords.at(*textureCoords.end())));
 
-      glBindTexture(GL_TEXTURE_2D, 0);
+         // Acquisizione texture
+         int width, height, channels;
+         /* Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
+          * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
+          * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
+          */
+         stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
+
+         unsigned char* data = stbi_load(location.c_str(), &width, &height, &channels, 0);
+
+         if (data) {
+            /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
+             *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
+             *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
+             */
+            glBindTexture(GL_TEXTURE_2D, textureCoords.at(*textureCoords.end()));
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            // Creazione della mipmap della texture bindata
+            glGenerateMipmap(GL_TEXTURE_2D);
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+         } else {
+            std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+         }
+
+         stbi_image_free(data);
+      }
+
+      file.close();
    } else {
-      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+      std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
    }
 
-   stbi_image_free(data);
 }
 
 #endif //GLSL_H

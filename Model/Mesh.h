@@ -13,8 +13,9 @@ class Mesh {
    std::vector<Color> vertexColors;
    std::vector<unsigned int> indices;
 
-   bool diffusive;
-   bool specular;
+   Float3 diffusive;
+   Float3 specular;
+
    bool pbr;
 
 public:
@@ -33,6 +34,18 @@ public:
    const vector<Float2> &getTextureUnwrap() const;
    const vector<Color> &getVertexColors() const;
    const vector<unsigned int> &getIndices() const;
+
+   const Float3 &getDiffusive() const;
+
+   void setDiffusive(const Float3 &diffusive);
+
+   const Float3 &getSpecular() const;
+
+   void setSpecular(const Float3 &specular);
+
+   bool isPbr() const;
+
+   void setPbr(bool pbr);
 };
 
 #endif //OBJECT_H

@@ -45,7 +45,8 @@ int main(int argc, char** argv) {
    }
     */
 
-   std::string s("DATA_ASSETS/Table_OBJ/Table.obj");
+   const char* TABLE_NAME = "Table";
+   std::string s(TABLE_ASSETS_LOCATION + TABLE_NAME + ".obj");
    Assimp::Importer importer;
    const aiScene* scene(importer.ReadFile(s, aiProcess_Triangulate));
 
@@ -54,7 +55,7 @@ int main(int argc, char** argv) {
 
       return EXIT_FAILURE;
    } else {
-      Model table;
+      Model table(TABLE_ASSETS_LOCATION, TABLE_NAME);
       table.processNode(scene->mRootNode, scene);
 
       fillModelMemory(table);

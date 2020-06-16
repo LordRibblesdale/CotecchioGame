@@ -1,6 +1,8 @@
 #include "Model.h"
 #include "../Matrix/StandardMatrix.h"
 
+Model::Model(std::string location, std::string name) : location(std::move(location)), name(std::move(name)) {}
+
 void Model::processNode(aiNode *node, const aiScene *scene) {
    meshes.reserve(meshes.size() + node->mNumMeshes);
 
@@ -30,31 +32,10 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene) {
    }
 
    meshes.push_back(mesh1);
-
-
-   if (scene->HasMaterials()) {
-      for (int i = 0; i < scene->mMaterials[mesh->mMaterialIndex]->GetTextureCount(aiTextureType_DIFFUSE); ++i) {
-         aiString s;
-
-         if (scene->mMaterials[mesh->mMaterialIndex]->GetTexture(aiTextureType_DIFFUSE, i, &s) == AI_SUCCESS) {
-            textureUniforms.emplace_back(s.C_Str());
-         }
-      }
-   }
-
-   processTexture(mesh->mMaterialIndex, scene);
-}
-
-void Model::processTexture(unsigned int materialIndex, const aiScene *scene) {
-
 }
 
 const vector<Mesh> &Model::getMeshes() const {
    return meshes;
-}
-
-const vector<const char*> &Model::getTextureUniforms() const {
-   return textureUniforms;
 }
 
 SquareMatrix Model::getWorldCoordinates() const {
@@ -144,4 +125,12 @@ const float& Model::getZScale() const {
 
 void Model::setZScale(const float& zScale) {
    Model::zScale = zScale;
+}
+
+const string &Model::getName() const {
+   return name;
+}
+
+const string &Model::getLocation() const {
+   return location;
 }

@@ -307,6 +307,8 @@ void compileShaders() {
 }
 
 void loadObjects() {
+   // TODO setup diffusive & specular
+
    unsigned long verticesLenght = 0;
    unsigned long texturesLength = 0;
 
@@ -315,28 +317,26 @@ void loadObjects() {
          verticesLenght += mesh.getVertices().size();
       }
 
-      texturesLength += model.getTextureUniforms().size();
+      texturesLength += model.getMeshes().size();
    }
 
    vertexArrayObjects.reserve(verticesLenght);
    vertexBufferObjects.reserve(verticesLenght);
-   textureUniforms.resize(texturesLength);
+   textureUniforms.reserve(texturesLength);
 
-   for (const Model& model : objects) {
-      for (const auto& mesh : model.getMeshes()) {
+   for (const auto& object : objects) {
+      for (const auto& mesh : object.getMeshes()) {
          generateObjects(mesh);
       }
 
-      for (auto i = 0; i < model.getTextureUniforms().size(); ++i) {
-         loadTexture(textureUniforms.at(i), model.getTextureUniforms().at(i));
-      }
+      loadTexture(textureUniforms, object.getLocation(), object.getName());
    }
 }
 
 void generateObjects(const Mesh &mesh) {
    /* E' possibile attribuire durante il ciclo il colore, tramite l'uniform vec4
    * Gathering variabile uniform del pixel shader che risiede nel programma, ma non si accede tramite puntatore
-   *    -> Accesso tramite  (poichè puntatore non generato nello shader)
+   *    -> Accesso tramite (poichè puntatore non generato nello shader)
    */
    GLuint vao;
    GLuint vbo;
