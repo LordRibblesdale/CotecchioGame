@@ -3,7 +3,7 @@
 
 #include "Light.h"
 
-class SpotLight : Light {
+class SpotLight : public Light {
    //TODO change variable names
    float maxAngle;   // Angolo di ombra
    float midAngle;   // Angolo di caratterizzazione comportamento

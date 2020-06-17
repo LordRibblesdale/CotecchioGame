@@ -225,6 +225,7 @@ bool setUpWindowEnvironment() {
 }
 
 void compileShaders() {
+   // TODO compile other types of shaders
    /* Creazione dello shader (vertex o fragment)
  * VERTEX SHADER
  * Restituisce GL unsigned int, indice/puntatore dell'oggetto vertex shader creato dalla GPU
@@ -236,7 +237,7 @@ void compileShaders() {
    char infoLog[512];
 
    std::string source;
-   loadShader(source, "Graphics/Shader Files/vertex.glsl");
+   loadShader(source, "Graphics/Shader Files/phong_texture_vertex.glsl");
    char* charSource(const_cast<char *>(source.c_str()));
 
    if (!charSource) {
@@ -260,7 +261,7 @@ void compileShaders() {
       std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
    }
 
-   loadShader(source, "Graphics/Shader Files/fragment.glsl");
+   loadShader(source, "Graphics/Shader Files/phong_texture_fragment.glsl");
    charSource = const_cast<char *>(source.c_str());
 
    if (!charSource) {
@@ -358,21 +359,24 @@ void generateObjects(const Mesh &mesh) {
     */
    glBindBuffer(GL_ARRAY_BUFFER, vbo);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-   //TODO check resize and memory allocation
-   //       optimise multiple array usage
-   //       change if there is another type of object
-   unsigned int size = mesh.getVertices().size();
-   GLfloat attributes[3*size];
+   unsigned int size = 3*mesh.getVertices().size() + 2*mesh.getTextureUnwrap().size() + 3*mesh.getNormals().size();
+   GLfloat attributes[size];
 
    int index = 0;
-   for (int i = 0; i < size; ++i) {
+   for (int i = 0; i < mesh.getVertices().size(); ++i) {
       attributes[index++] = mesh.getVertices().at(i).getX();
       attributes[index++] = mesh.getVertices().at(i).getY();
       attributes[index++] = mesh.getVertices().at(i).getZ();
+
+      attributes[index++] = mesh.getTextureUnwrap().at(i).getX();
+      attributes[index++] = mesh.getTextureUnwrap().at(i).getY();
+
+      attributes[index++] = mesh.getNormals().at(i).getX();
+      attributes[index++] = mesh.getNormals().at(i).getY();
+      attributes[index++] = mesh.getNormals().at(i).getZ();
    }
 
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * size, attributes, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, attributes, GL_DYNAMIC_DRAW);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.getIndices().size(), mesh.getIndices().data(), GL_DYNAMIC_DRAW);
 
    /* Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
@@ -385,13 +389,20 @@ void generateObjects(const Mesh &mesh) {
     * x y z u v  x y ... offset 2
     * DEFINITA nella scrittura dello shader
     * Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
+    *
     * Il valore 3 dice quanti vertici
-    */
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
-   /* Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
+    * Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
     * Abilita gli attributi passatigli
+    *
     */
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) 0);
    glEnableVertexAttribArray(0);
+
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glEnableVertexAttribArray(1);
+
+   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
+   glEnableVertexAttribArray(2);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -445,10 +456,6 @@ void render() {
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LESS);
 
-      //glBindTexture(GL_TEXTURE_2D, texture1);
-      // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
-      //glActiveTexture(GL_TEXTURE0);
-
       /* Scrivere nella location della variabile i valori del colore da assegnare al pixel;
        * Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
        * Quindi attenzione al posizionamento delle chiamate di modifica stato
@@ -460,30 +467,37 @@ void render() {
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
 
-      //glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
+      glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
       // Caricare vertexArrayObject interessato
-      for (Model& model : objects) {
-         model.setXRotation(degree2Radiants(90));
-         SquareMatrix m(std::move(model.getWorldCoordinates()));
+
+      for (unsigned i = 0; i < objects.size(); ++i) {
+         objects.at(i).setXRotation(degree2Radiants(90));
+         SquareMatrix m(std::move(objects.at(i).getWorldCoordinates()));
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
-         //light.setOrigin(light.getOrigin() + Float3(0.05f*sinf(glfwGetTime()), 0, 0));
-
-         //glUniform3f(lightPosUniform, light.getOrigin().getX(), light.getOrigin().getY(), light.getOrigin().getZ());
-         //glUniform3f(lightColorUniform, light.getColor().getRed(), light.getColor().getGreen(), light.getColor().getBlue());
+         glUniform3f(lightPosUniform, light.getOrigin().getX(), light.getOrigin().getY(), light.getOrigin().getZ());
+         glUniform3f(lightColorUniform, light.getColor().getRed(), light.getColor().getGreen(), light.getColor().getBlue());
          //TODO manage falloff
-         //glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
+         glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
 
          glUniform3f(ambientCoefficient, 0, 0, 0);
          glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8);
          glUniform3f(specularCoefficient, 0.5, 0.5, 0.5);
          glUniform1f(specularAlpha, 110);
 
-         for (int j = 0; j < model.getMeshes().size(); ++j) {
+         for (int j = 0; j < objects.at(i).getMeshes().size(); ++j) {
+            if (j < textureUniforms.size()) {
+               glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
+
+               //glBindTexture(GL_TEXTURE_2D, texture1);
+               // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
+               //glActiveTexture(GL_TEXTURE0);
+            }
+
             glBindVertexArray(vertexArrayObjects.at(j));
             // Chamata di disegno della primitiva
-            glDrawElements(GL_TRIANGLES, model.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, objects.at(i).getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
          }
       }
 
