@@ -100,7 +100,6 @@ static GLuint createTextureUniform() {
 }
 
 static void loadTexture(std::vector<GLuint>& textureCoords, const std::string& location, const std::string& name) {
-
    std::unordered_map<std::string, GLuint> map;
 
    // Creazione input buffer

@@ -21,7 +21,7 @@ double prevTime, currTime, sumTime;
 
 std::vector<Model> objects;
 
-SpotLight light(std::move(Float3(-14, 14, 14)), Color(1, 1, 1), 5, degree2Radiants(40), degree2Radiants(60));
+SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 100, degree2Radiants(40), degree2Radiants(60));
 
 GLuint colorOnlyShaderProgram;
 GLuint shaderProgram;
@@ -468,22 +468,20 @@ void render() {
 
       glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
-      // Caricare vertexArrayObject interessato
+      glUniform3f(lightPosUniform, light.getOrigin().getX(), light.getOrigin().getY(), light.getOrigin().getZ());
+      glUniform3f(lightColorUniform, light.getColor().getRed(), light.getColor().getGreen(), light.getColor().getBlue());
+      //TODO manage falloff
+      glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
 
+      glUniform3f(ambientCoefficient, 0, 0, 0);
+      glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8f);
+      glUniform3f(specularCoefficient, 0.5f, 0.5f, 0.5f);
+      glUniform1f(specularAlpha, 110);
+
+      // Caricare vertexArrayObject interessato
       for (auto& object : objects) {
-         object.setXRotation(degree2Radiants(90));
          SquareMatrix m(std::move(object.getWorldCoordinates()));
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
-
-         glUniform3f(lightPosUniform, light.getOrigin().getX(), light.getOrigin().getY(), light.getOrigin().getZ());
-         glUniform3f(lightColorUniform, light.getColor().getRed(), light.getColor().getGreen(), light.getColor().getBlue());
-         //TODO manage falloff
-         glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
-
-         glUniform3f(ambientCoefficient, 0, 0, 0);
-         glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8);
-         glUniform3f(specularCoefficient, 0.5, 0.5, 0.5);
-         glUniform1f(specularAlpha, 110);
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
             glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));

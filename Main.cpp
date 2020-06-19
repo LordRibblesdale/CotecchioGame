@@ -58,8 +58,8 @@ int main(int argc, char** argv) {
       Model table(TABLE_ASSETS_LOCATION, TABLE_NAME);
       table.processNode(scene->mRootNode, scene);
 
+      table.setXRotation(degree2Radiants(90));
       fillModelMemory(table);
-      table.setYRotation(degree2Radiants(90));
 
       return initialise();
    }

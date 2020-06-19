@@ -34,6 +34,6 @@ void main() {
 
     vec3 view = normalize(eye - sPos);
     vec3 reflection = reflect(-p2l, newNormal);
-    specular = pow(max(0, dot(view, reflection)), specularAlpha) * specularCoefficient;
-    fragColor = texture(texture1, outTextCoord)/* * vec4((ambiental + diffuse + specular) * lightColor, 1)*/;
+    specular = pow(max(0, abs(dot(view, reflection))), specularAlpha) * specularCoefficient;
+    fragColor = texture(texture1, outTextCoord) * vec4((ambiental + diffuse + specular) * lightColor, 1);
 }
