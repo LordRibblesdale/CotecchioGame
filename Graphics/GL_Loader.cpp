@@ -9,7 +9,7 @@ int WIDTH = 960;
 int HEIGHT = 540;
 float aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
 
-Camera camera(std::move(Float3(-15, 15, 15)), std::move(Float3(-14, 14, 14)), std::move(Float3(0, 0, 1)),
+Camera camera(std::move(Float3(0, 10, 15)), std::move(Float3(0, 0, 0)), std::move(Float3(0, 0, 1)),
               0.4f, 10000, 35, aspectRatio);
 Float3 position1(0, 10, 0);
 double cameraAnimationTime;
@@ -52,6 +52,7 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
       float angle = atanf(diffX/100.0f);
 
       Float3 tmp(std::move((camera.getLookAt() - camera.getEye()).getNormalized()));
+      // TODO implement methods with reference access (reduce copies)
       tmp = std::move(Rotation::axisZRotateVertex3(tmp, -angle));
 
       camera.setYawAngle(acosf(tmp.getNormalized().getX()));
@@ -67,8 +68,9 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
 
       Float3 tmp(std::move((camera.getLookAt() - camera.getEye()).getNormalized()));
 
+      //TODO fix angle rotation
       tmp = std::move(Rotation::axisZRotateVertex3(tmp, camera.getYawAngle()*0.5f));
-      tmp = std::move(Rotation::axisYRotateVertex3(tmp, angle));
+      tmp = std::move(Rotation::axisXRotateVertex3(tmp, angle));
       tmp = std::move(Rotation::axisZRotateVertex3(tmp, -camera.getYawAngle()*0.5f));
       tmp += camera.getEye();
 
@@ -102,10 +104,7 @@ void pollInput(GLFWwindow *window) {
       vec.setX(-vec.getY());
       vec.setY(tmp);
       camera.setEye(camera.getEye() - speed*vec);
-      /*
-      vec *= -1;
       camera.setLookAt(camera.getLookAt() - speed*vec);
-       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
@@ -115,30 +114,21 @@ void pollInput(GLFWwindow *window) {
       vec.setX(-vec.getY());
       vec.setY(tmp);
       camera.setEye(camera.getEye() + speed*vec);
-      /*
-      vec *= -1;
       camera.setLookAt(camera.getLookAt() + speed*vec);
-       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
       Float3 vec(camera.getEye() - camera.getLookAt());
       vec.normalize();
       camera.setEye(camera.getEye() + speed*vec);
-      /*
-      vec *= -1;
       camera.setLookAt(camera.getLookAt() + speed*vec);
-       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
       Float3 vec(camera.getEye() - camera.getLookAt());
       vec.normalize();
       camera.setEye(camera.getEye() - speed*vec);
-      /*
-      vec *= -1;
       camera.setLookAt(camera.getLookAt() - speed*vec);
-       */
    }
 
    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
@@ -330,6 +320,7 @@ void loadObjects() {
          generateObjects(mesh);
       }
 
+      // TODO create index array, reducing texture loading on GPU (use same texture)
       loadTexture(textureUniforms, object.getLocation(), object.getName());
    }
 }
@@ -471,9 +462,9 @@ void render() {
 
       // Caricare vertexArrayObject interessato
 
-      for (unsigned i = 0; i < objects.size(); ++i) {
-         objects.at(i).setXRotation(degree2Radiants(90));
-         SquareMatrix m(std::move(objects.at(i).getWorldCoordinates()));
+      for (auto& object : objects) {
+         object.setXRotation(degree2Radiants(90));
+         SquareMatrix m(std::move(object.getWorldCoordinates()));
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
          glUniform3f(lightPosUniform, light.getOrigin().getX(), light.getOrigin().getY(), light.getOrigin().getZ());
@@ -486,18 +477,16 @@ void render() {
          glUniform3f(specularCoefficient, 0.5, 0.5, 0.5);
          glUniform1f(specularAlpha, 110);
 
-         for (int j = 0; j < objects.at(i).getMeshes().size(); ++j) {
-            if (j < textureUniforms.size()) {
-               glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
+         for (int j = 0; j < object.getMeshes().size(); ++j) {
+            glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
 
-               //glBindTexture(GL_TEXTURE_2D, texture1);
-               // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
-               //glActiveTexture(GL_TEXTURE0);
-            }
+            //glBindTexture(GL_TEXTURE_2D, texture1);
+            // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
+            // glActiveTexture(GL_TEXTURE0);
 
             glBindVertexArray(vertexArrayObjects.at(j));
             // Chamata di disegno della primitiva
-            glDrawElements(GL_TRIANGLES, objects.at(i).getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
          }
       }
 
