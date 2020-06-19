@@ -36,12 +36,6 @@
         </Bump>
     </Texture>
 
-    <!--phong1SG14-->
-    <Texture name="wood1-group3_nurbsToPoly6.png" material="Wood">
-        <Bump name="bump3d1-group3_nurbsToPoly6.png">
-        </Bump>
-    </Texture>
-
     <!--phong1SG59-->
     <Texture name="wood1-group3_nurbsToPoly10.png" material="Wood">
         <Bump name="bump3d1-group3_nurbsToPoly10.png">

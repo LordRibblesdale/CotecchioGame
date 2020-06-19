@@ -145,7 +145,6 @@ void pollInput(GLFWwindow *window) {
       }
 
       if (sumTime + diff <= cameraAnimationTime) {
-         std::cout << camera.getEye().toString() << std::endl;
          camera.setEye(cameraRotation->rotateCamera(camera.getEye(), diff));
 
          sumTime += diff;
@@ -197,7 +196,6 @@ bool setUpWindowEnvironment() {
    glfwSetWindowSizeCallback(window, refreshWindowSize);
 
    // Imposto input tramite mouse
-   // TODO manage camera movement
    glfwSetCursorPosCallback(window, cursorPositionCallBack);
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -311,9 +309,15 @@ void loadObjects() {
       texturesLength += model.getMeshes().size();
    }
 
+   std::cout << textureUniforms.capacity() << std::endl;
+
    vertexArrayObjects.reserve(verticesLenght);
    vertexBufferObjects.reserve(verticesLenght);
    textureUniforms.reserve(texturesLength);
+
+   std::cout << textureUniforms.capacity() << std::endl;
+
+   double time = glfwGetTime();
 
    for (const auto& object : objects) {
       for (const auto& mesh : object.getMeshes()) {
@@ -323,6 +327,10 @@ void loadObjects() {
       // TODO create index array, reducing texture loading on GPU (use same texture)
       loadTexture(textureUniforms, object.getLocation(), object.getName());
    }
+
+   std::cout << (glfwGetTime() - time) << std::endl;
+
+   std::cout << textureUniforms.capacity() << std::endl;
 }
 
 void generateObjects(const Mesh &mesh) {

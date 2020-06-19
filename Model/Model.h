@@ -33,7 +33,7 @@ public:
    const vector<Mesh> &getMeshes() const;
 
    void processNode(aiNode* node, const aiScene* scene);
-   void processMesh(aiMesh* mesh, const aiScene* scene);
+   void processMesh(aiMesh* mesh);
 
    SquareMatrix getWorldCoordinates() const;
 

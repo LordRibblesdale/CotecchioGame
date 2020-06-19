@@ -8,14 +8,15 @@ void Model::processNode(aiNode *node, const aiScene *scene) {
 
    for (int i = 0; i < node->mNumMeshes; ++i) {
       // Accesso alle mesh di interesse a partire dagli indici posseduti dal nodo
-      processMesh(scene->mMeshes[node->mMeshes[i]], scene);
+      processMesh(scene->mMeshes[node->mMeshes[i]]);
    }
+
    for (int i = 0; i < node->mNumChildren; ++i) {
       processNode(node->mChildren[i], scene);
    }
 }
 
-void Model::processMesh(aiMesh *mesh, const aiScene *scene) {
+void Model::processMesh(aiMesh *mesh) {
    Mesh mesh1(mesh->mNumVertices, true);
 
    for (int i = 0; i < mesh->mNumVertices; ++i) {
