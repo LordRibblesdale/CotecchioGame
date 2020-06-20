@@ -1,11 +1,13 @@
 #ifndef GLSL_H
 #define GLSL_H
 
-#include <memory>
 #include <fstream>
 #include <rapidxml.hpp>
 #include <unordered_map>
+#include <glad.h>
+#include <vector>
 
+#define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "../IO/stb-master/stb_image.h"
 
@@ -46,136 +48,34 @@
  *
  * Creazione e caricamento texture: (stb, OpenImageIO, openIO, irfan, libtiff, libjpeg etc...
  * -> Uso libreria "stb" ed stb_image
- *
- */
-
-// Attibute e Uniform
-/* Due grandezze, variabili che inserisco nello sharer
+ * Attibute e Uniform
+ * Due grandezze, variabili che inserisco nello sharer
  * Attribute: grandezze che rappresentano proprietà ai vertici (in ingresso al vertice, per ogni vertice/elemento a cui lo shader è collegato,
  *             per la singola unità è collegato un vettore "in vec3" -> posizioni
  *             Layout: all'interno del layout si definisce la location, dove definire l'indice del puntatore al vertice che sto considerando
  *
  * Uniform: proprietà "uniforme", grandezza/variabile che rimane fissa (come const) fino a che non viene modificata
  *             ogni unità avrà la stessa proprietà definita dalla variabile uniform
- */
 
-// Impostazione linguaggio GLSL - scrittura direzionalità e tipo di dato
 
-//"layout (location = 1) in vec3 normal;\n" // Definiamo più attributi su piu indici
-//"layout (location = 2) in vec2 uv;\n"
-//"uniform bool name;\n"   // Valore uniforme, costante per tutti i vertici e/o fragment
-//"vec3 pos1 = position.xxx"; // Inizializzazione con accesso a variabili position.xyz con x y z generici
-// Attributi: dati
+   Impostazione linguaggio GLSL - scrittura direzionalità e tipo di dato
 
-// Fragment -> Pixel  (out per ogni pixel, 4 float definiscono il colore in questo caso RGBA)
+   "layout (location = 1) in vec3 normal;\n" // Definiamo più attributi su piu indici
+   "layout (location = 2) in vec2 uv;\n"
+   "uniform bool name;\n"   // Valore uniforme, costante per tutti i vertici e/o fragment
+   "vec3 pos1 = position.xxx"; // Inizializzazione con accesso a variabili position.xyz con x y z generici
+    Attributi: dati
 
-/* IF crea branching, il che varia velocità di render dei pixel
+   Fragment -> Pixel  (out per ogni pixel, 4 float definiscono il colore in questo caso RGBA)
+
+ * IF crea branching, il che varia velocità di render dei pixel
  * Branching è tecnica erronea per la scrittura, poichè causa tempi asincroni per i pixel
  */
 
-static void loadShader(std::string& string, const std::string& location) {
-   std::ifstream file(location);
-   std::string s((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+void loadShader(std::string& string, const std::string& location);
 
-   string = const_cast<char *>(s.c_str());
-}
+GLuint createTextureUniform();
 
-static GLuint createTextureUniform() {
-   GLuint uniform;
-   // Creazione allocazione memoria texture
-   glGenTextures(1, &uniform);
-   // Bind della texture
-   glBindTexture(GL_TEXTURE_2D, uniform);
-   /* Impostare come applicare texture su s e t
-    *  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    *  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    * Impostare come comportarsi con dimensioni più o meno piccole in base alla distanza (es usando mipmap)
-    */
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-   glBindTexture(GL_TEXTURE_2D, 0);
-
-   return uniform;
-}
-
-static void loadTexture(std::vector<GLuint>& textureCoords, const std::string& location, const std::string& name) {
-   std::unordered_map<std::string, GLuint> map;
-
-   // Creazione input buffer
-   std::ifstream file(location + name + ".xml");
-
-   if (file.is_open()) {
-      // Creazione documento
-      rapidxml::xml_document<> document;
-      // Creazione nodo iniziale per lettura file
-      rapidxml::xml_node<>* rootNode;
-      // Lettura testo :         V: iteratore file stream               V: iteratore fino all'EOF
-      std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-      // Aggiunta del carattere EOF \0
-      buffer.push_back('\0');
-      // Ricerca dei nodi (a partire dall'inizio
-      document.parse<0>(&buffer[0]);
-      // Ricerca del primo nodo
-      // NOTA: la voce del file XML dovrà avere lo stesso nome dell'oggetto
-      rootNode = document.first_node(name.c_str());
-
-      // Iterazioni tra i nodi
-      // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
-      GLuint texUniform;
-      unsigned char* data;
-      char* texFile;
-
-      // Acquisizione texture
-      int width, height, channels;
-
-      /* Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
-       * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
-       * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
-       */
-      stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
-
-      for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
-         if (std::string("Texture") == position->name()) {
-            if (std::string("Empty") != position->value()) {
-               texUniform = createTextureUniform();
-
-               texFile = position->first_attribute("name")->value();
-
-               if (map.find(texFile) != map.end()) {
-                  textureCoords.emplace_back(map.at(texFile));
-               } else {
-                  data = stbi_load((location + texFile).c_str(), &width, &height, &channels, 0);
-
-                  if (data) {
-                     /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
-                      *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
-                      *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
-                      */
-                     glBindTexture(GL_TEXTURE_2D, texUniform);
-                     glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
-                     // Creazione della mipmap della texture bindata
-                     glGenerateMipmap(GL_TEXTURE_2D);
-
-                     glBindTexture(GL_TEXTURE_2D, 0);
-                  } else {
-                     std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
-                  }
-
-                  stbi_image_free(data);
-
-                  textureCoords.emplace_back(texUniform);
-                  map.emplace(texFile, texUniform);
-               }
-            }
-         }
-      }
-
-      file.close();
-   } else {
-      std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
-   }
-
-}
+void loadTexture(std::vector<GLuint>& textureCoords, const std::string& location, const std::string& name);
 
 #endif //GLSL_H

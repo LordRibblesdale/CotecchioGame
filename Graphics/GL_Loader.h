@@ -22,9 +22,7 @@
 #include <vector>
 #include <cmath>
 
-#include "Settings.h"
-
-const std::string TABLE_ASSETS_LOCATION("DATA_ASSETS\\Table_OBJ\\");
+//#include "Settings.h"
 
 /* Processo di rendering:
  * - Inizializzazione libreria
@@ -57,8 +55,6 @@ void pollInput(GLFWwindow *window);
 
 //------------------------------------------------------------------------------//
 
-void fillModelMemory(const Model& model);
-
 void initializeGLFW();
 
 bool setUpWindowEnvironment();
@@ -83,25 +79,6 @@ static int initialise() {
 
    compileShaders();
    loadObjects();
-
-   // TODO prepare textures
-   //setUpTexture(texture1);    // Creazione texture
-   //loadTexture(texture1, "img.png");
-
-   /* Richiesta della posizione della texture
-    * Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
-   GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-
-    * Assegnazione e modifica uniform a prescindere
-    * Uso glUseProgram per assegnare texture
-   glUseProgram(shaderProgram);
-    * Assegnazione valore della texture a uno specifico canale di OpenGL
-    * Canali limitati, massimo un certo numero di texture contemporaneamente
-
-   glUniform1i(textureUniform, 0);
-
-   glUseProgram(0);
-   */
 
    //TODO create method for specific OpenGL features
    glEnable(GL_MULTISAMPLE);

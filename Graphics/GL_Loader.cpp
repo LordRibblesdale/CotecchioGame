@@ -1,38 +1,17 @@
 #include "GL_Loader.h"
+#include "Shaders.h"
+#include "SceneObjects.h"
 
 #include <memory>
-#include "Shaders.h"
-#include "../Model/Light/SpotLight.h"
-#include "../Animation/CameraRotation.h"
 
-int WIDTH = 960;
-int HEIGHT = 540;
-float aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
-
-Camera camera(std::move(Float3(0, 10, 15)), std::move(Float3(0, 0, 0)), std::move(Float3(0, 0, 1)),
-              0.4f, 10000, 35, aspectRatio);
-Float3 position1(0, 10, 0);
-double cameraAnimationTime;
-
-GLFWwindow* window = nullptr;
-
-double prevXPos, prevYPos;
-double prevTime, currTime, sumTime;
-
-std::vector<Model> objects;
-
-SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 100, degree2Radiants(40), degree2Radiants(60));
-
-GLuint colorOnlyShaderProgram;
-GLuint shaderProgram;
-
-std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
-std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
-std::vector<GLuint> elementBufferObjects;
-std::vector<GLuint> textureUniforms;
-
-bool TRANSFORM_CAMERA = false;
-std::unique_ptr<CameraRotation> cameraRotation;
+#if (_MSC_VER >= 1500)
+#include "Graphics/assimp/include/assimp/Importer.hpp"
+#include "Graphics/assimp/include/assimp/scene.h"
+#include "Graphics/assimp/include/assimp/postprocess.h"
+#else
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#endif
 
 void refreshWindowSize(GLFWwindow *window, int width, int height) {
    /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
@@ -157,10 +136,6 @@ void pollInput(GLFWwindow *window) {
 
 //---------------------------------------------------------------------------------//
 
-void fillModelMemory(const Model &model) {
-   objects.emplace_back(model);
-}
-
 void initializeGLFW() {
    // Inzializzazione di OpenGL per il render
    glfwInit();
@@ -209,16 +184,18 @@ bool setUpWindowEnvironment() {
       return false;
    }
 
+   //glGenFramebuffers(GL_FRAMEBUFFER, &offlineFrameBuffer);
+
    return true;
 }
 
 void compileShaders() {
-   // TODO compile other types of shaders
    /* Creazione dello shader (vertex o fragment)
- * VERTEX SHADER
- * Restituisce GL unsigned int, indice/puntatore dell'oggetto vertex shader creato dalla GPU
- * Operazione su valori binari, invia chiamata sulla scheda grafica
- */
+   * VERTEX SHADER
+   * Restituisce GL unsigned int, indice/puntatore dell'oggetto vertex shader creato dalla GPU
+   * Operazione su valori binari, invia chiamata sulla scheda grafica
+   */
+
    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
    // Variabili per il controllo di errori
    int report;
@@ -272,20 +249,20 @@ void compileShaders() {
    }
 
    // Creazione contenitore (program), rappresenta la pipeline di rendering (nel senso delle possibilità programmabili dall'utente)
-   colorOnlyShaderProgram = glCreateProgram();
+   phongShaderProgram = glCreateProgram();
 
    // Aggiunta del programma dei vari shader
-   glAttachShader(colorOnlyShaderProgram, vertexShader);
-   glAttachShader(colorOnlyShaderProgram, fragmentShader);
+   glAttachShader(phongShaderProgram, vertexShader);
+   glAttachShader(phongShaderProgram, fragmentShader);
 
    // Link del programma, unisce le unità programmabili (shader)
-   glLinkProgram(colorOnlyShaderProgram);
+   glLinkProgram(phongShaderProgram);
 
    // Controllo del link programma, status
-   glGetProgramiv(colorOnlyShaderProgram, GL_LINK_STATUS, &report);
+   glGetProgramiv(phongShaderProgram, GL_LINK_STATUS, &report);
 
    if (!report) {
-      glGetProgramInfoLog(colorOnlyShaderProgram, 512, nullptr, infoLog);
+      glGetProgramInfoLog(phongShaderProgram, 512, nullptr, infoLog);
 
       std::cout << "Error INFOLOG_LINK_PROGRAM: " << infoLog << std::endl;
    }
@@ -293,10 +270,87 @@ void compileShaders() {
    // Pulizia memoria dopo la compilazione e link
    glDeleteShader(vertexShader);
    glDeleteShader(fragmentShader);
+
+   //--------------------------OFFLINE RENDERING--------------------------------//
+
+   /*
+   vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+   loadShader(source, "Graphics/Shader Files/vertex.glsl");
+   charSource = const_cast<char *>(source.c_str());
+
+   if (!charSource) {
+      std::cout << "Error VERTEX_FILE_IMPORT" << std::endl;
+   }
+
+   glShaderSource(vertexShader, 1, &charSource, nullptr);
+   glCompileShader(vertexShader);
+
+   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &report);
+
+   if (!report) {
+      glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+
+      std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
+   }
+
+
+   loadShader(source, "Graphics/Shader Files/fragment.glsl");
+   charSource = const_cast<char *>(source.c_str());
+
+   if (!charSource) {
+      std::cout << "Error FRAGMENT_FILE_IMPORT" << std::endl;
+   }
+
+   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+   glShaderSource(fragmentShader, 1, &charSource, nullptr);
+   glCompileShader(fragmentShader);
+
+   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &report);
+
+   if (!report) {
+      glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+
+      std::cout << "Error INFOLOG_COMPILE_FRAGMENT: " << infoLog << std::endl;
+   }
+
+   phongShaderProgram = glCreateProgram();
+
+   glAttachShader(offlineShaderProgram, vertexShader);
+   glAttachShader(offlineShaderProgram, fragmentShader);
+
+   glLinkProgram(offlineShaderProgram);
+
+   glGetProgramiv(offlineShaderProgram, GL_LINK_STATUS, &report);
+
+   if (!report) {
+      glGetProgramInfoLog(offlineShaderProgram, 512, nullptr, infoLog);
+
+      std::cout << "Error INFOLOG_LINK_PROGRAM: " << infoLog << std::endl;
+   }
+
+   glDeleteShader(vertexShader);
+   glDeleteShader(fragmentShader);
+    */
 }
 
 void loadObjects() {
    // TODO setup diffusive & specular
+
+   const char* TABLE_NAME = "Table";
+   std::string s(TABLE_ASSETS_LOCATION + TABLE_NAME + ".obj");
+   Assimp::Importer importer;
+   const aiScene* scene(importer.ReadFile(s, aiProcess_Triangulate));
+
+   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
+   } else {
+      Model table(TABLE_ASSETS_LOCATION, TABLE_NAME);
+      table.processNode(scene->mRootNode, scene);
+
+      table.setXRotation(degree2Radiants(90));
+      objects.emplace_back(table);
+   }
 
    unsigned long verticesLenght = 0;
    unsigned long texturesLength = 0;
@@ -309,28 +363,29 @@ void loadObjects() {
       texturesLength += model.getMeshes().size();
    }
 
-   std::cout << textureUniforms.capacity() << std::endl;
-
    vertexArrayObjects.reserve(verticesLenght);
    vertexBufferObjects.reserve(verticesLenght);
    textureUniforms.reserve(texturesLength);
 
-   std::cout << textureUniforms.capacity() << std::endl;
-
-   double time = glfwGetTime();
-
    for (const auto& object : objects) {
+
       for (const auto& mesh : object.getMeshes()) {
          generateObjects(mesh);
       }
 
-      // TODO create index array, reducing texture loading on GPU (use same texture)
+      /* Richiesta della posizione della texture
+       * Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
+         GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
+      * Assegnazione e modifica uniform a prescindere
+      * Uso glUseProgram per assegnare texture
+         glUseProgram(shaderProgram);
+      * Assegnazione valore della texture a uno specifico canale di OpenGL
+      * Canali limitati, massimo un certo numero di texture contemporaneamente
+         glUniform1i(textureUniform, 0);
+         glUseProgram(0);
+      */
       loadTexture(textureUniforms, object.getLocation(), object.getName());
    }
-
-   std::cout << (glfwGetTime() - time) << std::endl;
-
-   std::cout << textureUniforms.capacity() << std::endl;
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -418,29 +473,35 @@ void generateObjects(const Mesh &mesh) {
 }
 
 void render() {
+   glBindRenderbuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+
    // Collezione indici per inviare dati allo shader
-   GLuint projectionMatrixUniform = glGetUniformLocation(colorOnlyShaderProgram, "projection");
-   GLuint viewMatrixUniform = glGetUniformLocation(colorOnlyShaderProgram, "view");
-   GLuint modelMatrixUniform = glGetUniformLocation(colorOnlyShaderProgram, "model");
+   GLuint projectionMatrixUniform = glGetUniformLocation(phongShaderProgram, "projection");
+   GLuint viewMatrixUniform = glGetUniformLocation(phongShaderProgram, "view");
+   GLuint modelMatrixUniform = glGetUniformLocation(phongShaderProgram, "model");
 
-   GLuint lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
-   GLuint lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
-   GLuint lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
+   GLuint lightPosUniform = glGetUniformLocation(phongShaderProgram, "lightPos");
+   GLuint lightColorUniform = glGetUniformLocation(phongShaderProgram, "lightColor");
+   GLuint lightIntensity = glGetUniformLocation(phongShaderProgram, "lightIntensity");
 
-   GLuint ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
-   GLuint diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
-   GLuint specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
-   GLuint specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
-   GLuint eyePosition = glGetUniformLocation(shaderProgram, "eye");
+   GLuint ambientCoefficient = glGetUniformLocation(phongShaderProgram, "ambientCoefficient");
+   GLuint diffusiveCoefficient = glGetUniformLocation(phongShaderProgram, "diffusiveCoefficient");
+   GLuint specularCoefficient = glGetUniformLocation(phongShaderProgram, "specularCoefficient");
+   GLuint specularAlpha = glGetUniformLocation(phongShaderProgram, "specularAlpha");
+   GLuint eyePosition = glGetUniformLocation(phongShaderProgram, "eye");
 
-   GLuint color = glGetUniformLocation(colorOnlyShaderProgram, "inColor");
+   GLuint color = glGetUniformLocation(phongShaderProgram, "inColor");
+
+   SquareMatrix p(4, {});
+   SquareMatrix v(4, {});
+   SquareMatrix m(4, {});
 
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
        * In base all'ordine dei comandi, modifica lo stato del sistema corrente o successivo
        */
-      prevTime = currTime;
-      currTime = glfwGetTime();
+      //prevTime = currTime;
+      //currTime = glfwGetTime();
 
       pollInput(window);
 
@@ -449,7 +510,7 @@ void render() {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
-      glUseProgram(colorOnlyShaderProgram);
+      glUseProgram(phongShaderProgram);
 
       // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
       glEnable(GL_DEPTH_TEST);
@@ -460,8 +521,8 @@ void render() {
        * Quindi attenzione al posizionamento delle chiamate di modifica stato
        */
 
-      SquareMatrix p(std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera)));
-      SquareMatrix v(std::move(camera.world2ViewMatrix()));
+      p = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera));
+      v = std::move(camera.world2ViewMatrix());
 
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
@@ -480,7 +541,7 @@ void render() {
 
       // Caricare vertexArrayObject interessato
       for (auto& object : objects) {
-         SquareMatrix m(std::move(object.getWorldCoordinates()));
+         m = std::move(object.getWorldCoordinates());
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
@@ -521,5 +582,5 @@ void cleanMemory() {
       glDeleteVertexArrays(1, &vertexArrayObjects.at(i));
    }
 
-   glDeleteProgram(colorOnlyShaderProgram);
+   glDeleteProgram(phongShaderProgram);
 }

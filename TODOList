@@ -1,15 +1,14 @@
-vector resize (
-
 -> Check all exceptions and noexcept(false) declarations
 -> Correct all names based on code styles
 -> Add matrix conversion in upper dimension (example: projective-4)
 -> Add all remaining friend operators
 
 -> Check "move" operations (if needed or not)
--> Normalise all vectors (especially if involved into orthogonal matrices) [ex: world->view]
 
 -> ! Implement XML reading-writing system
 
 -> Check all pointers and deletes (use of unique_ptr?) - DONE
 -> Add rotations, translations - DONE
 -> Make all stream operators "friend" and  - DONE
+-> vector reserve - DONE
+-> Normalise all vectors (especially if involved into orthogonal matrices) [ex: world->view] - DONE
