@@ -19,7 +19,9 @@ GLuint offlineFrameBuffer;
 std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
 std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
 std::vector<GLuint> elementBufferObjects;
+
 std::vector<GLuint> textureUniforms;
+std::vector<GLuint> bumpUniforms;
 
 //--------------------------------------------------------------//
 
@@ -44,6 +46,6 @@ std::vector<Model> objects;
 
 const std::string TABLE_ASSETS_LOCATION("DATA_ASSETS\\Table_OBJ\\");
 
-SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 100, degree2Radiants(40), degree2Radiants(60));
+SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60));
 
 #endif //COTECCHIOGAME_SCENEOBJECTS_H

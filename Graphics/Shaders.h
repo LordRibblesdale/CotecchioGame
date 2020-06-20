@@ -74,8 +74,8 @@
 
 void loadShader(std::string& string, const std::string& location);
 
-GLuint createTextureUniform();
+GLuint createTextureUniform(GLenum value);
 
-void loadTexture(std::vector<GLuint>& textureCoords, const std::string& location, const std::string& name);
+void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUniforms, const std::string &location, const std::string &name);
 
 #endif //GLSL_H

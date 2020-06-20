@@ -218,7 +218,7 @@
 
     <!--phong1SG58-->
     <Texture name="wood1-group3_nurbsToPoly45.png" material="Wood">
-        <Bump name="bump3d1-group3_nurbsToPoly45">
+        <Bump name="bump3d1-group3_nurbsToPoly45.png">
         </Bump>
     </Texture>
 
@@ -422,7 +422,7 @@
 
     <!--phong1SG58-->
     <Texture name="wood1-group3_nurbsToPoly45.png" material="Wood">
-        <Bump name="bump3d1-group3_nurbsToPoly45">
+        <Bump name="bump3d1-group3_nurbsToPoly45.png">
         </Bump>
     </Texture>
 

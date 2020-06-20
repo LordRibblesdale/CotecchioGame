@@ -23,9 +23,11 @@ vec3 diffuse;
 vec3 specular;
 
 uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene texture
+uniform sampler2D bumpTexture;  //TODO implement normal mapping
 
 void main() {
-    vec3 newNormal = normalize(outNormalVector);
+    float normalDelta = texture(bumpTexture, outTextCoord).x -0.5f;
+    vec3 newNormal = normalize(outNormalVector) + vec3(0, 0, normalDelta);
     vec3 p2l = normalize(lightPos - sPos);
 
     // Moltiplico più tardi il fattore comune lightColor

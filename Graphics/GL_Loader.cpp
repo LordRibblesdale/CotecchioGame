@@ -367,8 +367,10 @@ void loadObjects() {
    vertexBufferObjects.reserve(verticesLenght);
    textureUniforms.reserve(texturesLength);
 
-   for (const auto& object : objects) {
+   //TODO check bump existence before initializing/reserving memory
+   bumpUniforms.reserve(texturesLength);
 
+   for (const auto& object : objects) {
       for (const auto& mesh : object.getMeshes()) {
          generateObjects(mesh);
       }
@@ -384,7 +386,7 @@ void loadObjects() {
          glUniform1i(textureUniform, 0);
          glUseProgram(0);
       */
-      loadTexture(textureUniforms, object.getLocation(), object.getName());
+      loadTexture(textureUniforms, bumpUniforms, object.getLocation(), object.getName());
    }
 }
 
@@ -473,7 +475,7 @@ void generateObjects(const Mesh &mesh) {
 }
 
 void render() {
-   glBindRenderbuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+   //glBindRenderbuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
 
    // Collezione indici per inviare dati allo shader
    GLuint projectionMatrixUniform = glGetUniformLocation(phongShaderProgram, "projection");
@@ -489,8 +491,6 @@ void render() {
    GLuint specularCoefficient = glGetUniformLocation(phongShaderProgram, "specularCoefficient");
    GLuint specularAlpha = glGetUniformLocation(phongShaderProgram, "specularAlpha");
    GLuint eyePosition = glGetUniformLocation(phongShaderProgram, "eye");
-
-   GLuint color = glGetUniformLocation(phongShaderProgram, "inColor");
 
    SquareMatrix p(4, {});
    SquareMatrix v(4, {});
@@ -536,7 +536,7 @@ void render() {
 
       glUniform3f(ambientCoefficient, 0, 0, 0);
       glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8f);
-      glUniform3f(specularCoefficient, 0.5f, 0.5f, 0.5f);
+      glUniform3f(specularCoefficient, 0.1f, 0.1f, 0.1f);
       glUniform1f(specularAlpha, 110);
 
       // Caricare vertexArrayObject interessato
@@ -545,6 +545,7 @@ void render() {
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
 
             //glBindTexture(GL_TEXTURE_2D, texture1);
