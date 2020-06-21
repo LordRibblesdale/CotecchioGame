@@ -643,11 +643,13 @@ void render() {
 
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
       glClearColor(1, 1, 1, 1);
-      glClear(GL_COLOR_BUFFER_BIT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
       glUseProgram(offlineShaderProgram);
       glBindVertexArray(sVAO);
+      glUniform1i(glGetUniformLocation(offlineShaderProgram, "offlineRendering"), 2);
+      glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
