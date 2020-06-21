@@ -1,51 +1,66 @@
 #ifndef COTECCHIOGAME_SCENEOBJECTS_H
 #define COTECCHIOGAME_SCENEOBJECTS_H
 
-#include "../Model/Light/SpotLight.h"
+#include <vector>
+#include <glfw3.h>
+
+#include "../Utilities/Camera.h"
 #include "../Animation/CameraRotation.h"
+#include "../Model/Model.h"
 
-GLFWwindow* window = nullptr;
+#include "../Model/Light/SpotLight.h"
+#include "../Matrix/StandardMatrix.h"
 
-//--------------------------------------------------------------//
-
-const unsigned short int PHONG_SHADER = 0;
-const unsigned short int COLOR_ONLY_SHADER = 1;
-
-GLuint phongShaderProgram;
-GLuint offlineShaderProgram;
-
-GLuint offlineFrameBuffer;
-
-std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
-std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
-std::vector<GLuint> elementBufferObjects;
-
-std::vector<GLuint> textureUniforms;
-std::vector<GLuint> bumpUniforms;
+extern GLFWwindow* window;
 
 //--------------------------------------------------------------//
 
-int WIDTH = 960;
-int HEIGHT = 540;
-float aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
+extern const unsigned short int PHONG_SHADER;
+extern const unsigned short int COLOR_ONLY_SHADER;
 
-Camera camera(std::move(Float3(0, 10, 15)), std::move(Float3(0, 0, 0)), std::move(Float3(0, 0, 1)),
-              0.4f, 1000, 35, aspectRatio);
-Float3 position1(0, 10, 0);
-double cameraAnimationTime;
+extern GLuint phongShaderProgram;
+extern GLuint offlineShaderProgram;
 
-double prevXPos, prevYPos;
-double prevTime, currTime, sumTime;
+extern GLuint offlineFrameBuffer;
+extern GLuint offlineTexture;
+extern GLuint offlineRenderBufferObject;
 
-bool TRANSFORM_CAMERA = false;
-std::unique_ptr<CameraRotation> cameraRotation;
+extern std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
+extern std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
+extern std::vector<GLuint> elementBufferObjects;
+
+extern std::vector<GLuint> textureUniforms;
+extern std::vector<GLuint> bumpUniforms;
+
+extern float screen[20];
+extern unsigned int screenIndices[6];
+extern GLuint sVAO;
+extern GLuint sVBO;
+extern GLuint sEBO;
 
 //--------------------------------------------------------------//
 
-std::vector<Model> objects;
+extern int WIDTH;
+extern int HEIGHT;
+extern float aspectRatio;
 
-const std::string TABLE_ASSETS_LOCATION("DATA_ASSETS\\Table_OBJ\\");
+extern Camera camera;
+extern Float3 position1;
 
-SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60));
+extern double cameraAnimationTime;
+
+extern double prevXPos, prevYPos;
+extern double prevTime, currTime, sumTime;
+
+extern bool TRANSFORM_CAMERA;
+extern std::unique_ptr<CameraRotation> cameraRotation;
+
+//--------------------------------------------------------------//
+
+extern std::vector<Model> objects;
+
+extern const std::string TABLE_ASSETS_LOCATION;
+
+extern SpotLight light;
 
 #endif //COTECCHIOGAME_SCENEOBJECTS_H

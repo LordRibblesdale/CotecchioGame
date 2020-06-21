@@ -27,11 +27,12 @@ add_executable(${PROJECT_NAME}
         ${GladLibraries}
         ${GLFWLibraries}
         ${XMLFolder}
-        ${MainFile})
+        ${MainFile} Graphics/SceneObjects.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")
 target_include_directories(${PROJECT_NAME} PRIVATE "IO/rapidxml-1.13")
+target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/freetype/include/freetype/config")
 
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glfw-3.3.2.bin.WIN64/include/GLFW")

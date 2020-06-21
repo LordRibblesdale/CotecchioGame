@@ -1,7 +1,19 @@
-#include <iostream>
-#include <thread>
-//#include <mutex>
+#include "glad.h"
+
 #include "Shaders.h"
+
+#include <iostream>
+#include <fstream>
+#include <unordered_map>
+//#include <thread>
+//#include <mutex>
+#include "SceneObjects.h"
+
+#include "rapidxml.hpp"
+
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
+#include "../IO/stb-master/stb_image.h"
 
 //std::mutex mutex;
 
@@ -12,13 +24,12 @@ void loadShader(std::string &string, const std::string &location) {
    string = const_cast<char *>(s.c_str());
 }
 
-GLuint createTextureUniform(GLenum value) {
+GLuint createTextureUniform() {
    GLuint uniform;
    // Creazione allocazione memoria texture
    glGenTextures(1, &uniform);
    // Bind della texture
 
-   glActiveTexture(value);
    glBindTexture(GL_TEXTURE_2D, uniform);
    /* Impostare come applicare texture su s e t
     *  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
@@ -39,7 +50,7 @@ void loadTextureFromFile(std::vector<GLuint>& textureCoords, std::unordered_map<
 void loadBumpTextureFromFile(std::vector<GLuint> &bumpUniforms, std::unordered_map<std::string, GLuint>& bMap, rapidxml::xml_node<>* bumpNode, std::string location) {}
  */
 
-void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUniforms, const std::string &location, const std::string &name) {
+void loadTexture(const std::string &location, const std::string &name) {
    std::unordered_map<std::string, GLuint> map;
    std::unordered_map<std::string, GLuint> bMap;
 
@@ -73,20 +84,17 @@ void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUn
       unsigned char* data;
       char* texFile;
 
-      GLuint texUniform;
+      GLuint texUniform = 0;
 
       for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
          if (std::string("Texture") == position->name()) {
             if (std::string("Empty") != position->value()) {
-               //TODO implement multithreading (if possible)
-               //loadTextureFromFile(textureCoords, map, position, location);
-               //thread1 = std::move(std::thread(loadTextureFromFile, std::ref(textureCoords), std::ref(map), position, location));
+               texUniform = createTextureUniform();
 
-               texUniform = createTextureUniform(GL_TEXTURE0);
                texFile = position->first_attribute("name")->value();
 
                if (map.find(texFile) != map.end()) {
-                  textureCoords.emplace_back(map.at(texFile));
+                  textureUniforms.emplace_back(map.at(texFile));
                } else {
                   data = stbi_load((location + texFile).c_str(), &width, &height, &channels, 0);
 
@@ -95,6 +103,7 @@ void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUn
                       *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
                       *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
                       */
+                     glActiveTexture(GL_TEXTURE0);
                      glBindTexture(GL_TEXTURE_2D, texUniform);
                      // TODO check channels
                      glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -108,17 +117,19 @@ void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUn
 
                   stbi_image_free(data);
 
-                  textureCoords.emplace_back(texUniform);
+                  textureUniforms.emplace_back(texUniform);
                   map.emplace(texFile, texUniform);
                }
+            } else {
+               textureUniforms.emplace_back(0);
             }
          }
 
          rapidxml::xml_node<>* bumpNode = position->first_node("Bump");
          if (bumpNode) {
             //thread2 = std::move(std::thread(loadBumpTextureFromFile, std::ref(bumpUniforms), std::ref(bMap), bumpNode, location));
-            texUniform = createTextureUniform(GL_TEXTURE1);
 
+            texUniform = createTextureUniform();
             texFile = bumpNode->first_attribute("name")->value();
 
             if (bMap.find(texFile) != bMap.end()) {
@@ -131,6 +142,7 @@ void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUn
                    *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
                    *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
                    */
+                  glActiveTexture(GL_TEXTURE1);
                   glBindTexture(GL_TEXTURE_2D, texUniform);
                   // TODO check channels
                   glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -148,6 +160,8 @@ void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUn
                bumpUniforms.emplace_back(texUniform);
                bMap.emplace(texFile, texUniform);
             }
+         } else {
+            bumpUniforms.emplace_back(0);
          }
 
          /*

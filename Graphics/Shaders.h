@@ -1,15 +1,17 @@
 #ifndef GLSL_H
 #define GLSL_H
 
-#include <fstream>
-#include <rapidxml.hpp>
-#include <unordered_map>
-#include <glad.h>
-#include <vector>
+#ifdef _WIN32
 
-#define STB_IMAGE_STATIC
-#define STB_IMAGE_IMPLEMENTATION
-#include "../IO/stb-master/stb_image.h"
+#include "glfw3.h"
+#endif
+
+#ifdef linux
+#include <GLFW/glfw3.h>
+#endif
+
+#include <string>
+#include <vector>
 
 /* Texture: acquisizione di immagine
  * -> Necessità di geometria con coordinate, per assegnare ai pixel le informazioni
@@ -74,8 +76,8 @@
 
 void loadShader(std::string& string, const std::string& location);
 
-GLuint createTextureUniform(GLenum value);
+GLuint createTextureUniform();
 
-void loadTexture(std::vector<GLuint>& textureCoords, std::vector<GLuint>& bumpUniforms, const std::string &location, const std::string &name);
+void loadTexture(const std::string &location, const std::string &name);
 
 #endif //GLSL_H

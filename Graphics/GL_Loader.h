@@ -5,22 +5,13 @@
 
 #ifdef _WIN32
 #include "glfw3.h"
+#include "../Model/Mesh.h"
+
 #endif
 
 #ifdef linux
 #include <GLFW/glfw3.h>
 #endif
-
-#include "../Vector/Float2.h"
-#include "../Vector/Float3.h"
-#include "../Utilities/Color.h"
-#include "../Matrix/SquareMatrix.h"
-#include "../Matrix/StandardMatrix.h"
-#include "../Utilities/Camera.h"
-#include "../Model/Model.h"
-
-#include <vector>
-#include <cmath>
 
 //#include "Settings.h"
 
@@ -57,13 +48,17 @@ void pollInput(GLFWwindow *window);
 
 void initializeGLFW();
 
-bool setUpWindowEnvironment();
+bool setupWindowEnvironment();
+
+bool setupOfflineRendering();
 
 void compileShaders();
 
 void loadObjects();
 
 void generateObjects(const Mesh& mesh);
+
+void prepareScreenForOfflineRendering();
 
 void render();
 
@@ -73,7 +68,13 @@ static int initialise() {
    // TODO add function for setting up all libraries and OpenGL (from settings file)
    initializeGLFW();
 
-   if (!setUpWindowEnvironment()) {
+   if (!setupWindowEnvironment()) {
+      std::cout << "Error GLFW_INITIALIZATION: cannot initialize window." << std::endl;
+      return EXIT_FAILURE;
+   }
+
+   if (!setupOfflineRendering()) {
+      std::cout << "Error OFFLINE_RENDERING_INITIALIZATION: cannot create framebuffer." << std::endl;
       return EXIT_FAILURE;
    }
 
@@ -83,10 +84,7 @@ static int initialise() {
    //TODO create method for specific OpenGL features
    glEnable(GL_MULTISAMPLE);
 
-   /* Chiamate di GLAD e di GLFW
-    * Creazione di Render Loop (infinito, finisce quando esce dalla finestra)
-    */
-
+   // Chiamate di GLAD e di GLFW: creazione di Render Loop (infinito, finisce quando esce dalla finestra)
    render();
    cleanMemory();
 

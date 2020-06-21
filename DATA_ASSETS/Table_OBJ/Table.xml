@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Table>
-    <Texture>Empty</Texture>
+    <!--<Texture>Empty</Texture>-->
 
     <!--phong1SG3-->
     <Texture name="wood1-nurbsToPoly1.png" material="Wood">

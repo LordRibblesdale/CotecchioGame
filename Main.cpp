@@ -4,8 +4,6 @@
 
 #include "rapidxml.hpp"
 
-
-
 // Argument as XML file importer
 int main(int argc, char** argv) {
    // TODO load from settings (or another file) all models to be loaded

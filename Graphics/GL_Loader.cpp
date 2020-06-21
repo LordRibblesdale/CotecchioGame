@@ -1,8 +1,7 @@
 #include "GL_Loader.h"
+
 #include "Shaders.h"
 #include "SceneObjects.h"
-
-#include <memory>
 
 #if (_MSC_VER >= 1500)
 #include "Graphics/assimp/include/assimp/Importer.hpp"
@@ -12,6 +11,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #endif
+
 
 void refreshWindowSize(GLFWwindow *window, int width, int height) {
    /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
@@ -82,6 +82,7 @@ void pollInput(GLFWwindow *window) {
       float tmp = vec.getX();
       vec.setX(-vec.getY());
       vec.setY(tmp);
+      vec.setZ(0);
       camera.setEye(camera.getEye() - speed*vec);
       camera.setLookAt(camera.getLookAt() - speed*vec);
    }
@@ -92,6 +93,7 @@ void pollInput(GLFWwindow *window) {
       float tmp = vec.getX();
       vec.setX(-vec.getY());
       vec.setY(tmp);
+      vec.setZ(0);
       camera.setEye(camera.getEye() + speed*vec);
       camera.setLookAt(camera.getLookAt() + speed*vec);
    }
@@ -153,7 +155,7 @@ void initializeGLFW() {
 #endif
 }
 
-bool setUpWindowEnvironment() {
+bool setupWindowEnvironment() {
    // Creazione finestra, con nome, monitor da assegnare e finestre da cui dipendere
    window = glfwCreateWindow(WIDTH, HEIGHT, "Cotecchio Game", nullptr, nullptr);
 
@@ -187,6 +189,49 @@ bool setUpWindowEnvironment() {
    //glGenFramebuffers(GL_FRAMEBUFFER, &offlineFrameBuffer);
 
    return true;
+}
+
+
+bool setupOfflineRendering() {
+   // Generazione del framebuffer
+   glGenFramebuffers(1, &offlineFrameBuffer);
+
+   /* Collego il bind col framebuffer che ho creato, per assegnargli tutto il necessario
+    * -> E' necessario almeno un buffer e almeno un color attachment
+    *    (Attachment, collegamento al buffer)
+    * -> Non verranno però inizializzati ma invece solo riservati in memoria
+    */
+   glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+
+   // Controllare se il framebuffer è stato creato correttamente
+   /* Imposta la viewport con una texture, cosicchè al momento del rendering, il risultato venga applicato
+   *  all'offline rendering e visualizzato a schermo
+   * La texture permetterà l'output su schermo, mentre il renderobject provvede a conservare le informazioni
+   */
+   glGenTextures(1, &offlineTexture);
+   glBindTexture(GL_TEXTURE_2D, offlineTexture);
+
+   // nullptr solo per riservare memoria, non inizializzare ora la texture (sarà il fragment shader a riempire la texture)
+   // Attenzione del tipo inserito (in questo caso è colore, quindi GL_RGB)
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+   // Nessuna distorsione: la texture sarà a tutto schermo visibile, inamovibile
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+   // Necessità di collegare il color attachment (l'"indirizzo" della texture)
+   // Stiamo collegando ora il colore(da definire il tipo di attach, ovvero GL_TEXTURE_2D
+   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offlineTexture, 0);
+   // Possibile utilizzo di Renderbuffer (buffer per il rendering, solo per scrittura ma non come lettura; unicamente assegnabile)
+
+   // Generazione del RenderBufferObject (l'uso del RBO è per la sua ottimizzazione interna a OpenGL nel conservare le informazioni colore
+   glGenRenderbuffers(1, &offlineRenderBufferObject);
+   glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
+
+   // Preparazione del RBO (creiamo il depth e stencil per il render (poichè stiamo creando il framebuffer per il rendering effettivo della scena)
+   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+
+   return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
 void compileShaders() {
@@ -273,10 +318,9 @@ void compileShaders() {
 
    //--------------------------OFFLINE RENDERING--------------------------------//
 
-   /*
    vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
-   loadShader(source, "Graphics/Shader Files/vertex.glsl");
+   loadShader(source, "Graphics/Shader Files/offline_vertex.glsl");
    charSource = const_cast<char *>(source.c_str());
 
    if (!charSource) {
@@ -295,7 +339,7 @@ void compileShaders() {
    }
 
 
-   loadShader(source, "Graphics/Shader Files/fragment.glsl");
+   loadShader(source, "Graphics/Shader Files/offline_fragment.glsl");
    charSource = const_cast<char *>(source.c_str());
 
    if (!charSource) {
@@ -314,7 +358,7 @@ void compileShaders() {
       std::cout << "Error INFOLOG_COMPILE_FRAGMENT: " << infoLog << std::endl;
    }
 
-   phongShaderProgram = glCreateProgram();
+   offlineShaderProgram = glCreateProgram();
 
    glAttachShader(offlineShaderProgram, vertexShader);
    glAttachShader(offlineShaderProgram, fragmentShader);
@@ -331,7 +375,6 @@ void compileShaders() {
 
    glDeleteShader(vertexShader);
    glDeleteShader(fragmentShader);
-    */
 }
 
 void loadObjects() {
@@ -365,10 +408,6 @@ void loadObjects() {
 
    vertexArrayObjects.reserve(verticesLenght);
    vertexBufferObjects.reserve(verticesLenght);
-   textureUniforms.reserve(texturesLength);
-
-   //TODO check bump existence before initializing/reserving memory
-   bumpUniforms.reserve(texturesLength);
 
    for (const auto& object : objects) {
       for (const auto& mesh : object.getMeshes()) {
@@ -386,8 +425,38 @@ void loadObjects() {
          glUniform1i(textureUniform, 0);
          glUseProgram(0);
       */
-      loadTexture(textureUniforms, bumpUniforms, object.getLocation(), object.getName());
+      loadTexture(object.getLocation(), object.getName());
    }
+
+   prepareScreenForOfflineRendering();
+}
+
+void prepareScreenForOfflineRendering() {
+   glGenVertexArrays(1, &sVAO);
+   glGenBuffers(1, &sVBO);
+   glGenBuffers(1, &sEBO);
+   glBindVertexArray(sVAO);
+
+   glBindBuffer(GL_ARRAY_BUFFER, sVBO);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sEBO);
+
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 20, screen, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, screenIndices, GL_DYNAMIC_DRAW);
+
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
+   glEnableVertexAttribArray(0);
+
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glEnableVertexAttribArray(1);
+
+   // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+   // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
+   glBindVertexArray(0);
+
+   // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -475,8 +544,6 @@ void generateObjects(const Mesh &mesh) {
 }
 
 void render() {
-   //glBindRenderbuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-
    // Collezione indici per inviare dati allo shader
    GLuint projectionMatrixUniform = glGetUniformLocation(phongShaderProgram, "projection");
    GLuint viewMatrixUniform = glGetUniformLocation(phongShaderProgram, "view");
@@ -502,6 +569,8 @@ void render() {
        */
       //prevTime = currTime;
       //currTime = glfwGetTime();
+
+      glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
 
       pollInput(window);
 
@@ -540,17 +609,26 @@ void render() {
       glUniform1f(specularAlpha, 110);
 
       // Caricare vertexArrayObject interessato
+
+      glUniform1i(glGetUniformLocation(phongShaderProgram, "texture1"), 0);
+      glUniform1i(glGetUniformLocation(phongShaderProgram, "bumpTexture"), 1);
+
       for (auto& object : objects) {
          m = std::move(object.getWorldCoordinates());
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
-
             //glBindTexture(GL_TEXTURE_2D, texture1);
             // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
             // glActiveTexture(GL_TEXTURE0);
+
+            // Imposto lo uniform interessato con la texture unit in cui è presente la texture
+            glActiveTexture(GL_TEXTURE0);
+            // Il bind sulla variabile texture1 ora si riverisce alla texture unit a cui è stata collegata
+            glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(j));
 
             glBindVertexArray(vertexArrayObjects.at(j));
             // Chamata di disegno della primitiva
@@ -560,6 +638,19 @@ void render() {
 
       // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
       glDisable(GL_DEPTH_TEST);
+
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+      // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
+      glClearColor(1, 1, 1, 1);
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
+      glUseProgram(offlineShaderProgram);
+      glBindVertexArray(sVAO);
+      glBindTexture(GL_TEXTURE_2D, offlineTexture);
+
+      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
       /* Necessità di modificare il buffer prima di inviarlo
        * prima, modifica il buffer B (sul successivo)
@@ -583,5 +674,10 @@ void cleanMemory() {
       glDeleteVertexArrays(1, &vertexArrayObjects.at(i));
    }
 
+   glDeleteBuffers(1, &sEBO);
+   glDeleteBuffers(1, &sVBO);
+   glDeleteVertexArrays(1, &sVAO);
+
    glDeleteProgram(phongShaderProgram);
+   glDeleteFramebuffers(1, &offlineFrameBuffer);
 }
