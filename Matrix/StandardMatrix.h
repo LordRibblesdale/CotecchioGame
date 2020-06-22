@@ -36,10 +36,13 @@ namespace Rotation {
 }
 
 namespace Transform {
+   // TODO optimise variable gathering
    SquareMatrix scaleMatrix4(float scaleX, float scaleY, float scaleZ);
    SquareMatrix scaleTransform3(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ);
 
    SquareMatrix translateMatrix4(float x, float y, float z);
+
+   Float3 scaleVector3(const Float3& vector, float scaleX, float scaleY, float scaleZ);
 }
 
 namespace Projection {

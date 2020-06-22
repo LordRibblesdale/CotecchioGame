@@ -6,6 +6,7 @@
 
 #include "../Utilities/Camera.h"
 #include "../Animation/CameraRotation.h"
+#include "../Animation/CameraTranslation.h"
 #include "../Model/Model.h"
 
 #include "../Model/Light/SpotLight.h"
@@ -45,15 +46,26 @@ extern int HEIGHT;
 extern float aspectRatio;
 
 extern Camera camera;
-extern Float3 position1;
+extern float maxX;
+extern float maxY;
+extern float maxZ;
 
-extern double cameraAnimationTime;
+extern std::vector<Float3> playerPositions;
 
 extern double prevXPos, prevYPos;
-extern double prevTime, currTime, sumTime;
+extern double prevTime, currTime, sumTimeCamera, sumTimeTranslCamera;
 
 extern bool TRANSFORM_CAMERA;
 extern std::unique_ptr<CameraRotation> cameraRotation;
+extern double cameraAnimationTime;
+
+extern bool MENU_TRANSLATION_CAMERA;
+extern bool PLAYER_TRANSLATION_CAMERA;
+extern std::unique_ptr<CameraTranslation> cameraTranslation;
+extern double cameraPlayerPositionTime;
+
+extern unsigned int playerIndex;
+extern unsigned short int sessionPlayers;
 
 //--------------------------------------------------------------//
 

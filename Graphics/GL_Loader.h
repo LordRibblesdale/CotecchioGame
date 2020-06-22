@@ -38,18 +38,11 @@
 
 void refreshWindowSize(GLFWwindow *window, int width, int height);
 
-void cursorPositionCallBack(GLFWwindow* window, double xPos, double yPos);
-
-void scrollCallBack(GLFWwindow* window, double xOffset, double yOffset);
-
-void pollInput(GLFWwindow *window);
-
 //------------------------------------------------------------------------------//
 
 void initializeGLFW();
 
 bool setupWindowEnvironment();
-
 bool setupOfflineRendering();
 
 void compileShaders();
@@ -57,7 +50,6 @@ void compileShaders();
 void loadObjects();
 
 void generateObjects(const Mesh& mesh);
-
 void prepareScreenForOfflineRendering();
 
 void render();

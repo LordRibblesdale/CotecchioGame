@@ -178,3 +178,18 @@ void loadTexture(const std::string &location, const std::string &name) {
       std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
    }
 }
+
+void loadIcon(const string &location) {
+   int width, height, channels;
+   std::unique_ptr<unsigned char> data(stbi_load(location.c_str(), &width, &height, &channels, 0));
+   GLFWimage icon[1];
+   icon[0].width = width;
+   icon[0].height = height;
+   icon[0].pixels = data.release();
+
+   if (icon->pixels) {
+      glfwSetWindowIcon(window, 1, icon);
+   } else {
+      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+   }
+}

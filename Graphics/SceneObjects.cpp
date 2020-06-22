@@ -38,17 +38,28 @@ int WIDTH = 960;
 int HEIGHT = 540;
 float aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
 
-Camera camera(std::move(Float3(0, 10, 25)), std::move(Float3(0, 0, 0)), std::move(Float3(0, 0, 1)),
+Camera camera(std::move(Float3(0, 20, 15)), std::move(Float3(0, 0, 5)), std::move(Float3(0, 0, 1)),
               0.4f, 1000, 35, aspectRatio);
-Float3 position1(0, 10, 0);
+float maxX = 0;
+float maxY = 0;
+float maxZ = 0;
 
-double cameraAnimationTime;
+std::vector<Float3> playerPositions;
 
 double prevXPos, prevYPos;
-double prevTime, currTime, sumTime;
+double prevTime, currTime, sumTime, sumTimeTranslCamera;
 
 bool TRANSFORM_CAMERA = false;
 std::unique_ptr<CameraRotation> cameraRotation;
+double cameraAnimationTime;
+
+bool MENU_TRANSLATION_CAMERA = false;
+bool PLAYER_TRANSLATION_CAMERA = false;
+std::unique_ptr<CameraTranslation> cameraTranslation;
+double cameraPlayerPositionTime;
+
+unsigned int playerIndex = 0;
+unsigned short int sessionPlayers = 0;
 
 std::vector<Model> objects;
 

@@ -37,6 +37,10 @@ public:
 
    SquareMatrix getWorldCoordinates() const;
 
+   float getHighestZPoint();
+
+   float getFurthestXPoint();
+
    const string &getName() const;
    const string &getLocation() const;
 

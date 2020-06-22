@@ -80,4 +80,6 @@ GLuint createTextureUniform();
 
 void loadTexture(const std::string &location, const std::string &name);
 
+void loadIcon(const std::string& location);
+
 #endif //GLSL_H

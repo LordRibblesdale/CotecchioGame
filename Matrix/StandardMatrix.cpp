@@ -118,6 +118,10 @@ SquareMatrix Transform::translateMatrix4(float x, float y, float z) {
                            0, 0, 0, 1});
 }
 
+Float3 Transform::scaleVector3(const Float3& vector, float scaleX, float scaleY, float scaleZ) {
+   return Float3(vector.getX()*scaleX, vector.getY()*scaleY, vector.getZ()*scaleZ);
+}
+
 SquareMatrix Projection::view2ClipProjectiveMatrix(const float& right, const float& left, const float &near, const float &far,
                                                    const float &top, const float &bottom) {
    float invRL = 1/(right-left);

@@ -56,6 +56,44 @@ SquareMatrix Model::getWorldCoordinates() const {
                            0, 0, 0, 1});
 }
 
+float Model::getHighestZPoint() {
+   float z = 0;
+
+   for (const Mesh& mesh : meshes) {
+      for (const Float3& vertex : mesh.getVertices()) {
+         float tmp = sinf(xRotation) * yScale * vertex.getY() + cosf(xRotation) * zScale * vertex.getZ();
+         float final = sinf(yRotation) * xScale * vertex.getX() + cosf(yRotation) * tmp + zTranslation;
+
+         if (z < final) {
+            z = final;
+         }
+      }
+   }
+
+   return z;
+}
+
+float Model::getFurthestXPoint() {
+   float x = 0;
+
+   for (const Mesh& mesh : meshes) {
+      for (const Float3& vertex : mesh.getVertices()) {
+         // TODO optimize
+         float final = (Rotation::axisZRotateVertex3(
+                 Rotation::axisYRotateVertex3(
+                         Rotation::axisXRotateVertex3(
+                                 Transform::scaleVector3(vertex, xScale, yScale, zScale), xRotation), yRotation), zRotation).getZ())
+                                         + zTranslation;
+
+         if (x < final) {
+            x = final;
+         }
+      }
+   }
+
+   return x;
+}
+
 const float& Model::getXTranslation() const {
    return xTranslation;
 }
