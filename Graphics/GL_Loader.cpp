@@ -17,9 +17,20 @@ void refreshWindowSize(GLFWwindow *window, int width, int height) {
    /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
     * glViewport è la funzione per la trasformazione da NDC a Screen
     */
+   WIDTH = width;
+   HEIGHT = height;
    glfwGetWindowSize(window, &WIDTH, &HEIGHT);
    aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
    camera.setAspectRatio(aspectRatio);
+
+   glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+   glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
+   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+   glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
    glViewport(0, 0, width, height);
 }
 
@@ -230,6 +241,8 @@ bool setupOfflineRendering() {
 
    // Preparazione del RBO (creiamo il depth e stencil per il render (poichè stiamo creando il framebuffer per il rendering effettivo della scena)
    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+   // Collego il RBO al Framebuffer creato, come buffer per Depth Test e Stencil Text
+   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, offlineRenderBufferObject, 0);
 
    return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }

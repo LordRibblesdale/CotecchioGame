@@ -131,6 +131,8 @@ float Camera::getAspectRatio() const {
 
 void Camera::setAspectRatio(float aspectRatio) {
    Camera::aspectRatio = aspectRatio;
+
+   top = aspectRatio * right;
 }
 
 const Float3 &Camera::getEye() const {

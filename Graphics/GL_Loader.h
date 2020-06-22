@@ -77,6 +77,7 @@ static int initialise() {
       std::cout << "Error OFFLINE_RENDERING_INITIALIZATION: cannot create framebuffer." << std::endl;
       return EXIT_FAILURE;
    }
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
    compileShaders();
    loadObjects();
