@@ -67,7 +67,11 @@ unsigned int playerIndex = 0;
 unsigned short int sessionPlayers = 0;
 
 std::vector<Model> objects;
+std::vector<Model> cards;
 
 const std::string TABLE_ASSETS_LOCATION("DATA_ASSETS\\Table_OBJ\\");
 
+// TODO setup light decay
 SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60));
+
+std::vector<Player> players;

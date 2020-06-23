@@ -146,140 +146,15 @@ void compileShaders() {
    * Operazione su valori binari, invia chiamata sulla scheda grafica
    */
 
-   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-   // Variabili per il controllo di errori
-   int report;
-   char infoLog[512];
-
-   std::string source;
-   loadShader(source, "Graphics/Shader Files/phong_texture_vertex.glsl");
-   char* charSource(const_cast<char *>(source.c_str()));
-
-   if (!charSource) {
-      std::cout << "Error VERTEX_FILE_IMPORT" << std::endl;
-   }
-
-   // Assegnazione codice allo shader (handle), assegnazione char* (codice GLSL da compilare)
-   glShaderSource(vertexShader, 1, &charSource, nullptr);
-   // Compilazione shader
-   glCompileShader(vertexShader);
-
-   /* Controllo errori di compilazione - controllo di un handle per ottenere informazioni sulla compilazione
-    * IV information value? restituisce in report il valore dello stato
-    */
-   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &report);
-
-   if (!report) {
-      // Errore nella compilazione
-      glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-
-      std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
-   }
-
-   loadShader(source, "Graphics/Shader Files/phong_texture_fragment.glsl");
-   charSource = const_cast<char *>(source.c_str());
-
-   if (!charSource) {
-      std::cout << "Error FRAGMENT_FILE_IMPORT" << std::endl;
-   }
-
-   /* FRAGMENT SHADER
-    * Restituisce GL unsigned int, indice dell'oggetto fragment shader creato dalla GPU
-    */
-   GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragmentShader, 1, &charSource, nullptr);
-   glCompileShader(fragmentShader);
-
-   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &report);
-
-   if (!report) {
-      glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-
-      std::cout << "Error INFOLOG_COMPILE_FRAGMENT: " << infoLog << std::endl;
-   }
-
-   // Creazione contenitore (program), rappresenta la pipeline di rendering (nel senso delle possibilità programmabili dall'utente)
-   phongShaderProgram = glCreateProgram();
-
-   // Aggiunta del programma dei vari shader
-   glAttachShader(phongShaderProgram, vertexShader);
-   glAttachShader(phongShaderProgram, fragmentShader);
-
-   // Link del programma, unisce le unità programmabili (shader)
-   glLinkProgram(phongShaderProgram);
-
-   // Controllo del link programma, status
-   glGetProgramiv(phongShaderProgram, GL_LINK_STATUS, &report);
-
-   if (!report) {
-      glGetProgramInfoLog(phongShaderProgram, 512, nullptr, infoLog);
-
-      std::cout << "Error INFOLOG_LINK_PROGRAM: " << infoLog << std::endl;
-   }
-
-   // Pulizia memoria dopo la compilazione e link
-   glDeleteShader(vertexShader);
-   glDeleteShader(fragmentShader);
+   compileShader("Graphics/Shader Files/phong_texture_vertex.glsl", "Graphics/Shader Files/phong_texture_fragment.glsl", phongShaderProgram);
 
    //--------------------------OFFLINE RENDERING--------------------------------//
 
-   vertexShader = glCreateShader(GL_VERTEX_SHADER);
+   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_fragment.glsl", offlineShaderProgram);
 
-   loadShader(source, "Graphics/Shader Files/offline_vertex.glsl");
-   charSource = const_cast<char *>(source.c_str());
+   //---------------------------CARD RENDERING--------------------------------//
 
-   if (!charSource) {
-      std::cout << "Error VERTEX_FILE_IMPORT" << std::endl;
-   }
-
-   glShaderSource(vertexShader, 1, &charSource, nullptr);
-   glCompileShader(vertexShader);
-
-   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &report);
-
-   if (!report) {
-      glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-
-      std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
-   }
-
-
-   loadShader(source, "Graphics/Shader Files/offline_fragment.glsl");
-   charSource = const_cast<char *>(source.c_str());
-
-   if (!charSource) {
-      std::cout << "Error FRAGMENT_FILE_IMPORT" << std::endl;
-   }
-
-   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragmentShader, 1, &charSource, nullptr);
-   glCompileShader(fragmentShader);
-
-   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &report);
-
-   if (!report) {
-      glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-
-      std::cout << "Error INFOLOG_COMPILE_FRAGMENT: " << infoLog << std::endl;
-   }
-
-   offlineShaderProgram = glCreateProgram();
-
-   glAttachShader(offlineShaderProgram, vertexShader);
-   glAttachShader(offlineShaderProgram, fragmentShader);
-
-   glLinkProgram(offlineShaderProgram);
-
-   glGetProgramiv(offlineShaderProgram, GL_LINK_STATUS, &report);
-
-   if (!report) {
-      glGetProgramInfoLog(offlineShaderProgram, 512, nullptr, infoLog);
-
-      std::cout << "Error INFOLOG_LINK_PROGRAM: " << infoLog << std::endl;
-   }
-
-   glDeleteShader(vertexShader);
-   glDeleteShader(fragmentShader);
+   //compileShader()
 }
 
 void loadObjects() {

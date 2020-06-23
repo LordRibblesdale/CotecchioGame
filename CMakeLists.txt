@@ -27,7 +27,7 @@ add_executable(${PROJECT_NAME}
         ${GladLibraries}
         ${GLFWLibraries}
         ${XMLFolder}
-        ${MainFile} Animation/Scripts.cpp Animation/Scripts.h)
+        ${MainFile} Animation/Scripts.cpp Animation/Scripts.h Model/Deck.cpp Model/Deck.h Player/Player.cpp Player/Player.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")

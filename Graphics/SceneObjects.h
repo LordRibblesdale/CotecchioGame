@@ -12,6 +12,8 @@
 #include "../Model/Light/SpotLight.h"
 #include "../Matrix/StandardMatrix.h"
 
+#include "../Player/Player.h"
+
 extern GLFWwindow* window;
 
 //--------------------------------------------------------------//
@@ -75,9 +77,15 @@ extern unsigned short int sessionPlayers;
 //--------------------------------------------------------------//
 
 extern std::vector<Model> objects;
+extern std::vector<Model> cards;
 
 extern const std::string TABLE_ASSETS_LOCATION;
 
 extern SpotLight light;
+
+//--------------------------------------------------------------//
+
+// Questa variabile è a solo scopo dimostrativo, nel progetto effettivo sarà uno solo il giocatore
+extern std::vector<Player> players;
 
 #endif //COTECCHIOGAME_SCENEOBJECTS_H
