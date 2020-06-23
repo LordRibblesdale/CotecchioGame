@@ -115,33 +115,60 @@ bool setupOfflineRendering() {
    * La texture permetterà l'output su schermo, mentre il renderobject provvede a conservare le informazioni
    */
    glGenTextures(1, &offlineTexture);
-   glBindTexture(GL_TEXTURE_2D, offlineTexture);
 
-   // nullptr solo per riservare memoria, non inizializzare ora la texture (sarà il fragment shader a riempire la texture)
-   // Attenzione del tipo inserito (in questo caso è colore, quindi GL_RGB)
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+   if (ENABLE_MULTISAMPLING) {
+      // Attivazione multisampling (va creato un nuovo buffer che contenga le informazioni di colore con l'azione dell'algoritmo di MSAA)
+      //IMPORTANTE: i sample per il Color Buffer DEVONO essere equivalenti a quelli del Depth e Color Buffer (per equivalenza di numero di pixel)
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, offlineTexture);
 
-   // Nessuna distorsione: la texture sarà a tutto schermo visibile, inamovibile
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      // false per fixed sample location (da tenere false?) [con true, parte, immagino sia da implementare la posizione casuale dei campioni]
+      // Si sceglie la funzione apposita per il Multisample
+      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MULTISAMPLING_LEVEL, GL_RGB, X_RESOLUTION, Y_RESOLUTION, GL_TRUE);
 
-   // Necessità di collegare il color attachment (l'"indirizzo" della texture)
-   // Stiamo collegando ora il colore(da definire il tipo di attach, ovvero GL_TEXTURE_2D
-   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offlineTexture, 0);
-   // Possibile utilizzo di Renderbuffer (buffer per il rendering, solo per scrittura ma non come lettura; unicamente assegnabile)
+      glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-   // Generazione del RenderBufferObject (l'uso del RBO è per la sua ottimizzazione interna a OpenGL nel conservare le informazioni colore
-   glGenRenderbuffers(1, &offlineRenderBufferObject);
-   glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, offlineTexture, 0);
 
-   // Preparazione del RBO (creiamo il depth e stencil per il render (poichè stiamo creando il framebuffer per il rendering effettivo della scena)
-   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
-   // Collego il RBO al Framebuffer creato, come buffer per Depth Test e Stencil Text
-   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, offlineRenderBufferObject);
+      // Utilizzo di Renderbuffer (buffer per il rendering, solo per scrittura ma non come lettura; unicamente assegnabile)
+      // Generazione del RenderBufferObject (l'uso del RBO è per la sua ottimizzazione interna a OpenGL nel conservare le informazioni colore
+      glGenRenderbuffers(1, &offlineRenderBufferObject);
+      glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
 
-   // Attivazione multisampling (va creato un nuovo buffer che contenga le informazioni di colore con l'azione dell'algoritmo di MSAA)
+      // Preparazione del RBO (creiamo il depth e stencil per il render (poichè stiamo creando il framebuffer per il rendering effettivo della scena)
+      // Si sceglie la funzione apposita per il Multisample
+      glRenderbufferStorageMultisample(GL_RENDERBUFFER, MULTISAMPLING_LEVEL, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
+      // Collego il RBO al Framebuffer creato, come buffer per Depth Test e Stencil Text
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, offlineRenderBufferObject);
 
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+   } else {
+      glBindTexture(GL_TEXTURE_2D, offlineTexture);
 
+      // nullptr solo per riservare memoria, non inizializzare ora la texture (sarà il fragment shader a riempire la texture)
+      // Attenzione del tipo inserito (in questo caso è colore, quindi GL_RGB)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+      // Nessuna distorsione: la texture sarà a tutto schermo visibile, inamovibile
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      // Necessità di collegare il color attachment (l'"indirizzo" della texture)
+      // Stiamo collegando ora il colore(da definire il tipo di attach, ovvero GL_TEXTURE_2D
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offlineTexture, 0);
+
+      // Utilizzo di Renderbuffer (buffer per il rendering, solo per scrittura ma non come lettura; unicamente assegnabile)
+      // Generazione del RenderBufferObject (l'uso del RBO è per la sua ottimizzazione interna a OpenGL nel conservare le informazioni colore
+      glGenRenderbuffers(1, &offlineRenderBufferObject);
+      glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
+
+      // Preparazione del RBO (creiamo il depth e stencil per il render (poichè stiamo creando il framebuffer per il rendering effettivo della scena)
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
+      // Collego il RBO al Framebuffer creato, come buffer per Depth Test e Stencil Text
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, offlineRenderBufferObject);
+
+      glBindTexture(GL_TEXTURE_2D, 0);
+   }
 
    return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
@@ -497,6 +524,7 @@ void render() {
 }
 
 void cleanMemory() {
+   // TODO complete adding remaining variables
    // Liberazione della memoria
    for (int i = 0; i < vertexArrayObjects.size(); ++i) {
       glDeleteBuffers(1, &vertexBufferObjects.at(i));
