@@ -1,5 +1,6 @@
 #include "Graphics/GL_Loader.h"
 #include "Graphics/Settings.h"
+#include "Graphics/SceneObjects.h"
 #include <fstream>
 
 #include "rapidxml.hpp"
@@ -8,8 +9,8 @@
 int main(int argc, char** argv) {
    // TODO load from settings (or another file) all models to be loaded
    // Creazione input buffer
-   /*
-   std::ifstream file("settings.xml");
+
+   std::ifstream file("CotecchioSettings.xml");
 
    if (file.is_open()) {
       // Creazione documento
@@ -27,15 +28,26 @@ int main(int argc, char** argv) {
 
       // Iterazioni tra i nodi
       // Creazione dal primo nodo, controllo che esista, imposto il successivo parente
-      for (rapidxml::xml_node<>* position = rootNode->first_node("Float3"); position; position = position->next_sibling()) {
+      X_RESOLUTION = std::stoi(rootNode->first_node("Resolution")->first_attribute("x")->value());
+      Y_RESOLUTION = std::stoi(rootNode->first_node("Resolution")->first_attribute("y")->value());
 
-      }
+      TEXTURE_QUALITY = std::stoi(rootNode->first_node("Texture")->first_attribute("quality")->value());
+      SHADOW_QUALITY = std::stoi(rootNode->first_node("Shadows")->first_attribute("quality")->value());
+
+      ENABLE_MULTISAMPLING = std::stoi(rootNode->first_node("MSAA")->first_attribute("enabled")->value()) == 1;
+      MULTISAMPLING_LEVEL = std::stoi(rootNode->first_node("MSAA")->first_attribute("quality")->value());
+
+      UNLOCK_FRAMERATE = std::stoi(rootNode->first_node("Framerate")->first_attribute("unlock")->value()) == 1;
+      GAMMA_CORRECTION = std::stof(rootNode->first_node("Gamma")->first_attribute("value")->value());
+
+      CAMERA_SENSIBILITY = std::stof(rootNode->first_node("Camera")->first_attribute("sensibility")->value());
 
       file.close();
+
+      camera.setAspectRatio(static_cast<float>(Y_RESOLUTION) / static_cast<float>(X_RESOLUTION));
    } else {
       std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
    }
-    */
 
    return initialise();
 }

@@ -74,9 +74,6 @@ static int initialise() {
    compileShaders();
    loadObjects();
 
-   //TODO create method for specific OpenGL features
-   glEnable(GL_MULTISAMPLE);
-
    // Chiamate di GLAD e di GLFW: creazione di Render Loop (infinito, finisce quando esce dalla finestra)
    render();
    cleanMemory();

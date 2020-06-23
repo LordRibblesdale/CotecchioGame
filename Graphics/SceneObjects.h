@@ -46,8 +46,6 @@ extern GLuint sEBO;
 
 //--------------------------------------------------------------//
 
-extern int WIDTH;
-extern int HEIGHT;
 extern float aspectRatio;
 
 extern Float3 lookAt;
@@ -94,5 +92,8 @@ extern SpotLight light;
 
 // Questa variabile è a solo scopo dimostrativo, nel progetto effettivo sarà uno solo il giocatore
 extern std::vector<Player> players;
+
+//--------------------------------------------------------------//
+
 
 #endif //COTECCHIOGAME_SCENEOBJECTS_H

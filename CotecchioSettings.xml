@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Settings>
+    <Resolution x="960" y="540"/>
+    <Texture quality="2"/>
+    <Shadows quality="2"/>
+    <MSAA enabled = "1" quality="4"/>
+    <Framerate unlock = "1"/>
+    <Gamma value = "2.2"/>
+    <Camera sensibility="0.5"/>
+</Settings>

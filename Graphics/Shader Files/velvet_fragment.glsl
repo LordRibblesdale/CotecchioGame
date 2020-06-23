@@ -13,21 +13,18 @@ uniform vec3 lightIntensity;
 
 uniform vec3 ambientCoefficient;
 uniform vec3 diffusiveCoefficient;
-uniform vec3 specularCoefficient;
-uniform float specularAlpha;
+
+uniform float roughness;
 
 uniform vec3 eye;
 
 vec3 ambiental;
 vec3 diffuse;
-vec3 specular;
 
 uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene texture
-uniform sampler2D bumpTexture;  //TODO implement normal mapping
 
 void main() {
-    float normalDelta = texture(bumpTexture, outTextCoord).x -0.5f;
-    vec3 newNormal = normalize(outNormalVector) + vec3(0, 0, normalDelta);
+    vec3 newNormal = normalize(outNormalVector);
     vec3 p2l = normalize(lightPos - sPos);
 
     // Moltiplico più tardi il fattore comune lightColor
@@ -36,6 +33,5 @@ void main() {
 
     vec3 view = normalize(eye - sPos);
     vec3 reflection = reflect(-p2l, newNormal);
-    specular = pow(max(0, abs(dot(view, reflection))), specularAlpha) * specularCoefficient;
-    fragColor = texture(texture1, outTextCoord) * vec4((ambiental + diffuse + specular) * lightColor, 1);
+    fragColor = texture(texture1, outTextCoord) * vec4((ambiental + diffuse) * lightColor, 1);
 }

@@ -38,9 +38,7 @@ GLuint sVAO;
 GLuint sVBO;
 GLuint sEBO;
 
-int WIDTH = 960;
-int HEIGHT = 540;
-float aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
+float aspectRatio;
 
 Float3 lookAt(0, 0, 5);
 Camera camera(std::move(Float3(0, 20, 15)), lookAt, std::move(Float3(0, 0, 1)),

@@ -3,6 +3,7 @@
 #include "Shaders.h"
 #include "SceneObjects.h"
 #include "../Animation/Scripts.h"
+#include "Settings.h"
 
 #if (_MSC_VER >= 1500)
 #include "Graphics/assimp/include/assimp/Importer.hpp"
@@ -20,17 +21,17 @@ void refreshWindowSize(GLFWwindow *window, int width, int height) {
    /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
     * glViewport è la funzione per la trasformazione da NDC a Screen
     */
-   WIDTH = width;
-   HEIGHT = height;
-   glfwGetWindowSize(window, &WIDTH, &HEIGHT);
-   aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
+   X_RESOLUTION = width;
+   Y_RESOLUTION = height;
+   glfwGetWindowSize(window, &X_RESOLUTION, &Y_RESOLUTION);
+   aspectRatio = static_cast<float>(Y_RESOLUTION) / static_cast<float>(X_RESOLUTION);
    camera.setAspectRatio(aspectRatio);
 
    glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
    glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
-   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -47,9 +48,11 @@ void initializeGLFW() {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+   /*
    // Attivazione multisampling
    // TODO manage this from program settings
    glfwWindowHint(GLFW_SAMPLES, 4);
+    */
 
 #ifdef __APPLE__
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -58,11 +61,11 @@ void initializeGLFW() {
 
 bool setupWindowEnvironment() {
    // Creazione finestra, con nome, monitor da assegnare e finestre da cui dipendere
-   window = glfwCreateWindow(WIDTH, HEIGHT, "Cotecchio Game", nullptr, nullptr);
+   window = glfwCreateWindow(X_RESOLUTION, Y_RESOLUTION, "Cotecchio Game", nullptr, nullptr);
 
    if (!window) {
       // Controllo in caso di errore di inizializzazione e pulizia del programma annessa
-      std::cout << "Error INITIALISATION: window cannot be initialised.";
+      std::cout << "Error INITIALISATION: window cannot be initialised." << std::endl;
       glfwTerminate();
 
       return false;
@@ -81,7 +84,7 @@ bool setupWindowEnvironment() {
 
    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
       // Controllo in caso di errore di caricamento puntatori alle funzioni della scheda video
-      std::cout << "Error LOADING_GL: libraries cannot be called";
+      std::cout << "Error LOADING_GL: libraries cannot be called" << std::endl;
       glfwTerminate();
 
       return false;
@@ -116,7 +119,7 @@ bool setupOfflineRendering() {
 
    // nullptr solo per riservare memoria, non inizializzare ora la texture (sarà il fragment shader a riempire la texture)
    // Attenzione del tipo inserito (in questo caso è colore, quindi GL_RGB)
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
    // Nessuna distorsione: la texture sarà a tutto schermo visibile, inamovibile
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -132,9 +135,13 @@ bool setupOfflineRendering() {
    glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
 
    // Preparazione del RBO (creiamo il depth e stencil per il render (poichè stiamo creando il framebuffer per il rendering effettivo della scena)
-   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
    // Collego il RBO al Framebuffer creato, come buffer per Depth Test e Stencil Text
    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, offlineRenderBufferObject);
+
+   // Attivazione multisampling (va creato un nuovo buffer che contenga le informazioni di colore con l'azione dell'algoritmo di MSAA)
+
+
 
    return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
@@ -355,6 +362,9 @@ void render() {
    SquareMatrix p(4, {});
    SquareMatrix v(4, {});
    SquareMatrix m(4, {});
+
+   //glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+   //glEnable(GL_MULTISAMPLE);
 
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
