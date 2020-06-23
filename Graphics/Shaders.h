@@ -82,4 +82,6 @@ void loadTexture(const std::string &location, const std::string &name);
 
 void loadIcon(const std::string& location);
 
+void loadIcon(const std::string& location, const std::string& location2);
+
 #endif //GLSL_H

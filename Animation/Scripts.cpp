@@ -72,7 +72,6 @@ void pollInput(GLFWwindow *window) {
 
    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
       cameraPlayerPositionTime = 1;
-      //cameraAnimationTime = 1;
 
       PLAYER_TRANSLATION_CAMERA = true;
    }
@@ -107,20 +106,24 @@ void pollInput(GLFWwindow *window) {
       double diff = currTime - prevTime;
 
       if (!cameraTranslation) {
-         // Quando necessario, 0 sarà l'indice del giocatore
-         prevTime = 0;
+         // Quando necessario, 0 diventerà l'indice del giocatore
          cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), playerPositions.at(0)));
+         cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), lookAt));
       }
 
       if (sumTimeTranslCamera + diff <= cameraPlayerPositionTime) {
          sumTimeTranslCamera += diff;
-         std::cout << sumTimeTranslCamera << std::endl;
 
          camera.setEye(cameraTranslation->translateCamera(sumTimeTranslCamera, cameraPlayerPositionTime));
+         camera.setLookAt(cameraTranslation2->translateCamera(sumTimeTranslCamera, cameraPlayerPositionTime));
+
+
+         blurValue = sumTimeTranslCamera/cameraPlayerPositionTime;
       } else {
          cameraTranslation.reset();
          camera.setEye(playerPositions.at(0));
          sumTimeTranslCamera = 0;
+         blurValue = 1;
          MENU_TRANSLATION_CAMERA = false;
       }
    }
@@ -129,17 +132,22 @@ void pollInput(GLFWwindow *window) {
       double diff = currTime - prevTime;
 
       if (!cameraTranslation) {
-         cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), playerPositions.at(playerIndex)));
          increaseIndex();
+
+         cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), playerPositions.at(playerIndex)));
+         cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), lookAt));
       }
 
       if (sumTimeTranslCamera + diff <= cameraPlayerPositionTime) {
          sumTimeTranslCamera += diff;
 
          camera.setEye(cameraTranslation->translateCamera(sumTimeTranslCamera, cameraPlayerPositionTime));
+         camera.setLookAt(cameraTranslation2->translateCamera(sumTimeTranslCamera, cameraPlayerPositionTime));
       } else {
          cameraTranslation.reset();
+         cameraTranslation2.reset();
          camera.setEye(playerPositions.at(playerIndex));
+         camera.setLookAt(lookAt);
          sumTimeTranslCamera = 0;
          PLAYER_TRANSLATION_CAMERA = false;
       }
@@ -184,8 +192,8 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
 
 void scrollCallBack(GLFWwindow *window, double xOffset, double yOffset) {
    if (yOffset > 0) {
-      camera.setNear(camera.getNear() + 0.175f);
+      camera.setNear(camera.getNear() + 0.075f);
    } else if (yOffset < 0) {
-      camera.setNear(camera.getNear() - 0.175f);
+      camera.setNear(camera.getNear() - 0.075f);
    }
 }

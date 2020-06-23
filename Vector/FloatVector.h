@@ -23,6 +23,10 @@ public:
 
    FloatVector& operator=(FloatVector&& vector);
 
+   bool operator==(const FloatVector& vector) const;
+
+   bool operator!=(const FloatVector& vector) const;
+
    FloatVector operator+(const FloatVector& vector);
 
    void operator+=(const FloatVector& vector);

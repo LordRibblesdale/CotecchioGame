@@ -53,6 +53,35 @@ FloatVector &FloatVector::operator=(FloatVector &&vector) {
    return *this;
 }
 
+bool FloatVector::operator==(const FloatVector &vector) const {
+   if (size_ == vector.getSize()) {
+      for (unsigned int i = 0; i < vector.getSize(); ++i) {
+         if (vector.vector_.get()[i] != vector.getVector().get()[i]) {
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   return false;
+}
+
+bool FloatVector::operator!=(const FloatVector &vector) const {
+   if (size_ == vector.getSize()) {
+      for (unsigned int i = 0; i < vector.getSize(); ++i) {
+         if (vector.vector_.get()[i] == vector.getVector().get()[i]) {
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   // TODO manage different size
+   return true;
+}
+
 FloatVector FloatVector::operator+(const FloatVector &vector) {
    std::unique_ptr<float> newData(new float[size_] {0});
 

@@ -38,7 +38,8 @@ int WIDTH = 960;
 int HEIGHT = 540;
 float aspectRatio = static_cast<float>(HEIGHT) / static_cast<float>(WIDTH);
 
-Camera camera(std::move(Float3(0, 20, 15)), std::move(Float3(0, 0, 5)), std::move(Float3(0, 0, 1)),
+Float3 lookAt(0, 0, 5);
+Camera camera(std::move(Float3(0, 20, 15)), lookAt, std::move(Float3(0, 0, 1)),
               0.4f, 1000, 35, aspectRatio);
 float maxX = 0;
 float maxY = 0;
@@ -56,7 +57,11 @@ double cameraAnimationTime;
 bool MENU_TRANSLATION_CAMERA = false;
 bool PLAYER_TRANSLATION_CAMERA = false;
 std::unique_ptr<CameraTranslation> cameraTranslation;
+std::unique_ptr<CameraTranslation> cameraTranslation2;
 double cameraPlayerPositionTime;
+
+GLuint blurUniform;
+float blurValue = 1;
 
 unsigned int playerIndex = 0;
 unsigned short int sessionPlayers = 0;

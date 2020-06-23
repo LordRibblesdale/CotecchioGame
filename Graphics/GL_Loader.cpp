@@ -89,6 +89,7 @@ bool setupWindowEnvironment() {
 
    glfwSetCursorPos(window, 0, 0);
    loadIcon("cotecchio.png");
+   //loadIcon("cotecchio.png", "cotecchio_small.png");
 
    return true;
 }
@@ -452,7 +453,7 @@ void renderText() {
 }
 
 void render() {
-   createPlayerPositions(4);
+   createPlayerPositions(3);
 
    // Collezione indici per inviare dati allo shader
    GLuint projectionMatrixUniform = glGetUniformLocation(phongShaderProgram, "projection");
@@ -468,6 +469,8 @@ void render() {
    GLuint specularCoefficient = glGetUniformLocation(phongShaderProgram, "specularCoefficient");
    GLuint specularAlpha = glGetUniformLocation(phongShaderProgram, "specularAlpha");
    GLuint eyePosition = glGetUniformLocation(phongShaderProgram, "eye");
+
+   blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
 
    SquareMatrix p(4, {});
    SquareMatrix v(4, {});
@@ -490,6 +493,12 @@ void render() {
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
       glUseProgram(phongShaderProgram);
+
+      // Abilito back culling face (non si elaborano facce non visibili in base alla normale
+      glEnable(GL_CULL_FACE);
+      // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
+      //glCullFace(GL_BACK);
+      //glFrontFace(GL_CW); // o CCW
 
       // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
       glEnable(GL_DEPTH_TEST);
@@ -557,14 +566,17 @@ void render() {
 
       // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
       glUseProgram(offlineShaderProgram);
+
+      if (MENU_TRANSLATION_CAMERA) {
+         glUniform1f(blurUniform, blurValue);
+      }
+
       glBindVertexArray(sVAO);
       glUniform1i(glGetUniformLocation(offlineShaderProgram, "offlineRendering"), 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-
 
       /* Necessità di modificare il buffer prima di inviarlo
        * prima, modifica il buffer B (sul successivo)

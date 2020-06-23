@@ -45,6 +45,7 @@ extern int WIDTH;
 extern int HEIGHT;
 extern float aspectRatio;
 
+extern Float3 lookAt;
 extern Camera camera;
 extern float maxX;
 extern float maxY;
@@ -62,7 +63,11 @@ extern double cameraAnimationTime;
 extern bool MENU_TRANSLATION_CAMERA;
 extern bool PLAYER_TRANSLATION_CAMERA;
 extern std::unique_ptr<CameraTranslation> cameraTranslation;
+extern std::unique_ptr<CameraTranslation> cameraTranslation2;
 extern double cameraPlayerPositionTime;
+
+extern GLuint blurUniform;
+extern float blurValue;
 
 extern unsigned int playerIndex;
 extern unsigned short int sessionPlayers;
