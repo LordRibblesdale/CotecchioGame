@@ -35,6 +35,9 @@ extern std::vector<GLuint> elementBufferObjects;
 extern std::vector<GLuint> textureUniforms;
 extern std::vector<GLuint> bumpUniforms;
 
+extern GLuint cardTexture;
+extern GLuint backCardTexture;
+
 extern float screen[20];
 extern unsigned int screenIndices[6];
 extern GLuint sVAO;
@@ -79,7 +82,11 @@ extern unsigned short int sessionPlayers;
 extern std::vector<Model> objects;
 extern std::vector<Model> cards;
 
+extern std::vector<Material> materials;
+extern std::vector<unsigned int> materialIndices;
+
 extern const std::string TABLE_ASSETS_LOCATION;
+extern const std::string DATA_ASSETS_LOCATION;
 
 extern SpotLight light;
 

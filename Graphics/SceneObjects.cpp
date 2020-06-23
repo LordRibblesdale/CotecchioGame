@@ -19,6 +19,10 @@ std::vector<GLuint> elementBufferObjects;
 std::vector<GLuint> textureUniforms;
 std::vector<GLuint> bumpUniforms;
 
+GLuint cardTexture;
+GLuint backCardTexture;
+
+
 float screen[20] {
    -1, 1, 0, 0, 1,
    -1, -1, 0, 0, 0,
@@ -69,7 +73,11 @@ unsigned short int sessionPlayers = 0;
 std::vector<Model> objects;
 std::vector<Model> cards;
 
+std::vector<Material> materials;
+std::vector<unsigned int> materialIndices;
+
 const std::string TABLE_ASSETS_LOCATION("DATA_ASSETS\\Table_OBJ\\");
+const std::string DATA_ASSETS_LOCATION("DATA_ASSETS\\");
 
 // TODO setup light decay
 SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60));

@@ -439,8 +439,8 @@
         </Specular>
     </Material>
 
-    <Material name="Velvet" valueR="1" valueG="1" valueB="1">
-        <PBR name="Velvet" valueR="1" valueG="1" valueB="1">
+    <Material name="Velvet">
+        <PBR roughness="5.4">
             TODO change here
         </PBR>
     </Material>

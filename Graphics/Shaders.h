@@ -82,6 +82,8 @@ GLuint createTextureUniform();
 
 void loadTexture(const std::string &location, const std::string &name);
 
+void loadCardTextures();
+
 void loadIcon(const std::string& location);
 
 void loadIcon(const std::string& location, const std::string& location2);

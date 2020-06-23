@@ -164,6 +164,31 @@ void loadTexture(const std::string &location, const std::string &name) {
 
       GLuint texUniform = 0;
 
+      for (rapidxml::xml_node<>* position = rootNode->first_node("Material"); position; position = position->next_sibling()) {
+         Material material;
+
+         if (std::string("Wood") == position->first_attribute("name")->value()) {
+            material.setDiffuseCoeff(Float3(
+                    std::stof(position->first_node("Diffuse")->first_attribute("valueR")->value()),
+                    std::stof(position->first_node("Diffuse")->first_attribute("valueG")->value()),
+                    std::stof(position->first_node("Diffuse")->first_attribute("valueB")->value())
+                    ));
+
+            material.setSpecularCoeff(Float3(
+                    std::stof(position->first_node("Specular")->first_attribute("valueR")->value()),
+                    std::stof(position->first_node("Specular")->first_attribute("valueG")->value()),
+                    std::stof(position->first_node("Specular")->first_attribute("valueB")->value())
+            ));
+
+            material.setShininess(std::stof(position->first_node("Specular")->first_attribute("specularExp")->value()));
+         } else if (std::string("Velvet") == position->first_attribute("name")->value()) {
+            material.setDiffuseCoeff(Float3(1, 1, 1));
+            material.setRoughness(std::stof(position->first_node("PBR")->first_attribute("roughness")->value()));
+         }
+
+         materials.push_back(material);
+      }
+
       for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
          if (std::string("Texture") == position->name()) {
             if (std::string("Empty") != position->value()) {
@@ -200,6 +225,12 @@ void loadTexture(const std::string &location, const std::string &name) {
                }
             } else {
                textureUniforms.emplace_back(0);
+            }
+
+            if (std::string("Wood") == position->first_attribute("material")->value()) {
+               materialIndices.emplace_back(0);
+            } else if (std::string("Velvet") == position->first_attribute("material")->value()) {
+               materialIndices.emplace_back(1);
             }
          }
 
@@ -241,7 +272,6 @@ void loadTexture(const std::string &location, const std::string &name) {
          } else {
             bumpUniforms.emplace_back(0);
          }
-
          /*
          if (thread1.joinable()) {
             thread1.join();
@@ -254,6 +284,29 @@ void loadTexture(const std::string &location, const std::string &name) {
       file.close();
    } else {
       std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
+   }
+}
+
+void loadCardTextures() {
+   int width, height, channels;
+   std::unique_ptr<unsigned char> data(stbi_load((DATA_ASSETS_LOCATION + "Cards.png").c_str(), &width, &height, &channels, 0));
+
+   if (data) {
+      cardTexture = createTextureUniform();
+
+      glBindTexture(GL_TEXTURE_2D, cardTexture);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.release());
+      glBindTexture(GL_TEXTURE_2D, 0);
+   }
+
+   data.reset(stbi_load((DATA_ASSETS_LOCATION + "Back.png").c_str(), &width, &height, &channels, 0));
+
+   if (data) {
+      backCardTexture = createTextureUniform();
+
+      glBindTexture(GL_TEXTURE_2D, backCardTexture);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.release());
+      glBindTexture(GL_TEXTURE_2D, 0);
    }
 }
 

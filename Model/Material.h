@@ -18,7 +18,7 @@
 #define M_SQRT1_2	0.70710678118654752440
 
 class Material {
-   //TODO check if names are correct (Factor =? Coeff), (Coeff =? Color)
+   //TODO check if names are correct (Factor =? Coeff)
    float ambientFactor;
    Float3 ambientCoeff;
    float diffuseFactor;
@@ -27,6 +27,8 @@ class Material {
    Float3 specularCoeff;
    float shininess;
 
+   float roughness;
+
 public:
    Material();
 
@@ -34,6 +36,38 @@ public:
    float getPhongBRDF();
    float getBlinnBRDF();
    float getApproxBlinnBRDF();
+
+   float getRoughness() const;
+
+   void setRoughness(float roughness);
+
+   float getAmbientFactor() const;
+
+   void setAmbientFactor(float ambientFactor);
+
+   const Float3 &getAmbientCoeff() const;
+
+   void setAmbientCoeff(const Float3 &ambientCoeff);
+
+   float getDiffuseFactor() const;
+
+   void setDiffuseFactor(float diffuseFactor);
+
+   const Float3 &getDiffuseCoeff() const;
+
+   void setDiffuseCoeff(const Float3 &diffuseCoeff);
+
+   float getSpecularFactor() const;
+
+   void setSpecularFactor(float specularFactor);
+
+   const Float3 &getSpecularCoeff() const;
+
+   void setSpecularCoeff(const Float3 &specularCoeff);
+
+   float getShininess() const;
+
+   void setShininess(float shininess);
 };
 
 #endif //MATERIAL_H

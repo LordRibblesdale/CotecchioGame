@@ -5,6 +5,7 @@
 #include "../Utilities/Color.h"
 #include "../Vector/Float2.h"
 #include "../Vector/Float3.h"
+#include "Material.h"
 
 class Mesh {
    std::vector<Float3> vertices;
@@ -12,11 +13,6 @@ class Mesh {
    std::vector<Float2> textureUnwrap;
    std::vector<Color> vertexColors;
    std::vector<unsigned int> indices;
-
-   Float3 diffusive;
-   Float3 specular;
-
-   bool pbr;
 
 public:
    // TODO rule of 5

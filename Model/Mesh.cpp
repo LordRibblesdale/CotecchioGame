@@ -55,27 +55,3 @@ const vector<Color> &Mesh::getVertexColors() const {
 const vector<unsigned int> &Mesh::getIndices() const {
    return indices;
 }
-
-const Float3 &Mesh::getDiffusive() const {
-   return diffusive;
-}
-
-void Mesh::setDiffusive(const Float3 &diffusive) {
-   Mesh::diffusive = diffusive;
-}
-
-const Float3 &Mesh::getSpecular() const {
-   return specular;
-}
-
-void Mesh::setSpecular(const Float3 &specular) {
-   Mesh::specular = specular;
-}
-
-bool Mesh::isPbr() const {
-   return pbr;
-}
-
-void Mesh::setPbr(bool pbr) {
-   Mesh::pbr = pbr;
-}

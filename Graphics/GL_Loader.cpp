@@ -188,6 +188,8 @@ void loadObjects() {
 
    vertexArrayObjects.reserve(verticesLenght);
    vertexBufferObjects.reserve(verticesLenght);
+   textureUniforms.reserve(texturesLength);
+   materialIndices.reserve(texturesLength);
 
    for (const auto& object : objects) {
       for (const auto& mesh : object.getMeshes()) {
@@ -205,8 +207,11 @@ void loadObjects() {
          glUniform1i(textureUniform, 0);
          glUseProgram(0);
       */
+
       loadTexture(object.getLocation(), object.getName());
    }
+
+   loadCardTextures();
 
    prepareScreenForOfflineRendering();
 }
@@ -372,7 +377,7 @@ void render() {
       // Abilito back culling face (non si elaborano facce non visibili in base alla normale
       glEnable(GL_CULL_FACE);
       // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
-      //glCullFace(GL_BACK);
+      glCullFace(GL_BACK);
       //glFrontFace(GL_CW); // o CCW
 
       // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
@@ -397,11 +402,6 @@ void render() {
       //TODO manage falloff
       glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
 
-      glUniform3f(ambientCoefficient, 0, 0, 0);
-      glUniform3f(diffusiveCoefficient, 0.8, 0.8f, 0.8f);
-      glUniform3f(specularCoefficient, 0.1f, 0.1f, 0.1f);
-      glUniform1f(specularAlpha, 110);
-
       // Caricare vertexArrayObject interessato
 
       glUniform1i(glGetUniformLocation(phongShaderProgram, "texture1"), 0);
@@ -412,6 +412,23 @@ void render() {
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
+            glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).getAmbientCoeff().getX(),
+                        materials.at(materialIndices.at(j)).getAmbientCoeff().getY(),
+                        materials.at(materialIndices.at(j)).getAmbientCoeff().getZ());
+            glUniform3f(diffusiveCoefficient, materials.at(materialIndices.at(j)).getDiffuseCoeff().getX(),
+                        materials.at(materialIndices.at(j)).getDiffuseCoeff().getY(),
+                        materials.at(materialIndices.at(j)).getDiffuseCoeff().getZ());
+            glUniform3f(specularCoefficient, materials.at(materialIndices.at(j)).getSpecularCoeff().getX(),
+                        materials.at(materialIndices.at(j)).getSpecularCoeff().getY(),
+                        materials.at(materialIndices.at(j)).getSpecularCoeff().getZ());
+            glUniform1f(specularAlpha, materials.at(materialIndices.at(j)).getShininess());
+
+            /*
+            if (materialIndices.at(j) == 1) {
+
+            }
+             */
+
             //glBindTexture(GL_TEXTURE_2D, texture1);
             // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
             // glActiveTexture(GL_TEXTURE0);
@@ -432,6 +449,8 @@ void render() {
 
       // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
       glDisable(GL_DEPTH_TEST);
+
+      glDisable(GL_CULL_FACE);
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

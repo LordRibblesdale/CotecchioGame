@@ -2,16 +2,15 @@
 #define MODEL_H
 
 #include <assimp/scene.h>
-#include "Material.h"
 #include "Mesh.h"
 #include "../Matrix/SquareMatrix.h"
+
+// TODO check if possible to change model loading pipeline (assigning texture GLuint & Material here)
 
 class Model {
    std::string location;
    std::string name;
    std::vector<Mesh> meshes;
-
-   // TODO check if some kind of texture file access is necessary
 
    float xTranslation = 0;
    float yTranslation = 0;
@@ -24,8 +23,6 @@ class Model {
    float xScale = 1;
    float yScale = 1;
    float zScale = 1;
-
-   // TODO add booleans for properties
 
 public:
    Model(std::string location, std::string name);
