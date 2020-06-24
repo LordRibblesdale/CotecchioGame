@@ -46,7 +46,7 @@ float aspectRatio;
 
 Float3 lookAt(0, 0, 5);
 Camera camera(std::move(Float3(0, 20, 15)), lookAt, std::move(Float3(0, 0, 1)),
-              0.4f, 1000, 35, aspectRatio);
+              0.3f, 1000, 40, aspectRatio);
 float maxX = 0;
 float maxY = 0;
 float maxZ = 0;
@@ -83,3 +83,7 @@ const std::string DATA_ASSETS_LOCATION("DATA_ASSETS\\");
 SpotLight light(std::move(Float3(0, 0, 20)), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60));
 
 std::vector<Player> players;
+
+bool DEVELOPER_MODE = false;
+bool IS_ANIMATION_BUSY = false;
+bool IS_GAME_STARTED = false;

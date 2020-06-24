@@ -332,7 +332,7 @@ void prepareCardRendering() {
    glEnableVertexAttribArray(1);
 
    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
-   glEnableVertexAttribArray(1);
+   glEnableVertexAttribArray(2);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -452,6 +452,9 @@ void render() {
    blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
 
    GLuint cardModelMatrix = glGetUniformLocation(cardsShader, "model");
+   GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
+   GLuint cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
+   GLuint cardEyePosition = glGetUniformLocation(cardsShader, "eye");
 
    SquareMatrix p(4, {});
    SquareMatrix v(4, {});
@@ -558,22 +561,25 @@ void render() {
       glUseProgram(cardsShader);
       glDisable(GL_CULL_FACE);
       glBindVertexArray(cardVAO);
-      //glBindBuffer(GL_ARRAY_BUFFER, cardVBO);
-      //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cardEBO);
 
-      //glActiveTexture(GL_TEXTURE3);
-      //glBindTexture(GL_TEXTURE_2D, cardTexture);
+      // TODO optimize by setting uniform locally in RAM
+      glUniform1i(glGetUniformLocation(cardsShader, "cardTexture"), 3);
+      glUniform1i(glGetUniformLocation(cardsShader, "backTexture"), 4);
 
-      //glActiveTexture(GL_TEXTURE4);
-      //glBindTexture(GL_TEXTURE_2D, backCardTexture);
+      glActiveTexture(GL_TEXTURE3);
+      glBindTexture(GL_TEXTURE_2D, cardTexture);
 
-      glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
-      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
-      glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
+      glActiveTexture(GL_TEXTURE4);
+      glBindTexture(GL_TEXTURE_2D, backCardTexture);
+
+      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
+      glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, p.getArray());
+      glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, v.getArray());
 
       for (auto& player : players) {
          for (auto& card : player.getCards()) {
             cM = std::move(card.getWorldCoordinates());
+            // TODO import coordinates on vertex shader (via uniform)
             card.updateCoords();
 
             glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());

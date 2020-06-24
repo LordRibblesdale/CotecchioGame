@@ -100,5 +100,8 @@ extern std::vector<Player> players;
 
 //--------------------------------------------------------------//
 
+extern bool DEVELOPER_MODE;
+extern bool IS_ANIMATION_BUSY;
+extern bool IS_GAME_STARTED;
 
 #endif //COTECCHIOGAME_SCENEOBJECTS_H

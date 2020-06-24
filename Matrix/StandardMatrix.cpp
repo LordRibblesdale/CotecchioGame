@@ -65,6 +65,27 @@ SquareMatrix Rotation::rotationZAxisMatrix(const float &angleZ) {
    return SquareMatrix(3, {cosAngle, -sinAngle, 0, sinAngle, cosAngle, 0, 0, 0, 1});
 }
 
+SquareMatrix Rotation::rotationXAxisMatrix4(const float &angleX) {
+   float cosAngle = cosf(angleX);
+   float sinAngle = sinf(angleX);
+
+   return SquareMatrix(4, {1, 0, 0, 0, 0, cosAngle, -sinAngle, 0, 0, sinAngle, cosAngle, 0, 0, 0, 0, 1});
+}
+
+SquareMatrix Rotation::rotationYAxisMatrix4(const float &angleY) {
+   float cosAngle = cosf(angleY);
+   float sinAngle = sinf(angleY);
+
+   return SquareMatrix(4, {cosAngle, 0, sinAngle, 0, 0, 1, 0, 0, -sinAngle, 0, cosAngle, 0, 0, 0, 0, 1});
+}
+
+SquareMatrix Rotation::rotationZAxisMatrix4(const float &angleZ) {
+   float cosAngle = cosf(angleZ);
+   float sinAngle = sinf(angleZ);
+   return SquareMatrix(4, {cosAngle, -sinAngle, 0, 0, sinAngle, cosAngle, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1});
+}
+
+
 SquareMatrix Rotation::rotationByQuaternion(const Float4& direction, const float &angle) {
    if (direction.l2Norm() != 0 && remainder(angle, 2 * M_PI) != 0) {
       float sin = sinf(angle * 0.5);

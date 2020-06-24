@@ -1,6 +1,4 @@
 #include "Card.h"
-
-#include <cmath>
 #include "../Matrix/StandardMatrix.h"
 #include "../Graphics/SceneObjects.h"
 
@@ -17,13 +15,15 @@ unsigned int vIndices[6] {
 
 SquareMatrix Card::getWorldCoordinates() const {
    // TODO optimize memory & operations
-   float angle = degree2Radiants(45);
-   Float3 t(std::move(players.at(playerID).getPosition() + (players.at(playerID).getPosition() - lookAt).getNormalized()));
+   float angle = degree2Radiants(-45);
+   float tmp = players.at(playerID).getCards().size();
+   Float3 t(std::move(players.at(playerID).getPosition() - 3*(players.at(playerID).getPosition() - lookAt).getNormalized()));
    SquareMatrix translate(std::move(Transform::translateMatrix4(t.getX(), t.getY(), t.getZ())));
-   SquareMatrix rotate(std::move(Rotation::rotationByQuaternion(Float4(t, true), -angle + (angle/(2.0f*players.at(playerID).getCards().size()))*playerCardNum)));
-   SquareMatrix scale(std::move(Transform::scaleMatrix4(0.25, 0.25, 0.25)));
+   SquareMatrix qRotate(std::move(Rotation::rotationByQuaternion(Float4(t.getX(), t.getY(), 0, 1), (angle/(tmp))*playerCardNum)));
+   SquareMatrix rotate(std::move(Rotation::rotationZAxisMatrix4(M_PI_2 - ((M_PI/static_cast<float>(sessionPlayers))*(sessionPlayers-2)*playerID))));
+   SquareMatrix scale(std::move(Transform::scaleMatrix4(0.4, 0.4, 0.4)));
 
-   return (translate * (rotate * scale));
+   return (translate * (qRotate * (rotate * scale)));
 }
 
 void Card::updateCoords() const {

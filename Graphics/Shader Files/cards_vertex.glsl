@@ -15,10 +15,11 @@ uniform mat4 projection;
 uniform mat4 view;
 // Model Matrix
 uniform mat4 model;
+
 void main() {
-    vec4 tmp = /* * */vec4(vertexPosition, 1.0f);
+    vec4 tmp = model * vec4(vertexPosition, 1.0f);
     sPos = vec3(tmp);
-    gl_Position = /*projection * view * */tmp;   // Posizione in Clip Space/NDC
+    gl_Position = projection * view * tmp;
 
     outNormalVector = normalize(mat3(transpose(inverse(model))) * normal);
     outTextCoord = inUV;

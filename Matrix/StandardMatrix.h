@@ -26,6 +26,10 @@ namespace Rotation {
    SquareMatrix rotationXAxisMatrix(const float& angleX);
    SquareMatrix rotationYAxisMatrix(const float& angleY);
    SquareMatrix rotationZAxisMatrix(const float& angleZ);
+   SquareMatrix rotationXAxisMatrix4(const float& angleX);
+   SquareMatrix rotationYAxisMatrix4(const float& angleY);
+   SquareMatrix rotationZAxisMatrix4(const float& angleZ);
+
    SquareMatrix rotationByQuaternion(const Float4& direction, const float& angle);
 
    Float3 axisXRotateVertex3(const Float3 &vector, const float& angleX);

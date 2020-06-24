@@ -9,10 +9,15 @@ CameraRotation::CameraRotation(const Float3& initialPosition, const Float3& fina
 
    Float3 tmp1(initialPosition - center);
    Float3 tmp2(finalPosition - center);
+
    tmp1.normalize();
    tmp2.normalize();
 
-   angle = acosf(tmp1.dotProduct(tmp2));
+   float dot = tmp1.dotProduct(tmp2);
+   dot = dot < -1 ? -1 : dot;
+   dot = dot > 1 ? 1 : dot;
+
+   angle = acosf(dot);
 }
 
 Float3 CameraRotation::rotateCamera(const Float3 &position, double duration) {
