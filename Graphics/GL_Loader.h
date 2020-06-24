@@ -48,16 +48,17 @@ bool setupOfflineRendering();
 void compileShaders();
 
 void loadObjects();
+void loadCards();
 
 void generateObjects(const Mesh& mesh);
 void prepareScreenForOfflineRendering();
+void prepareCardRendering();
 
 void render();
 
 void cleanMemory();
 
 static int initialise() {
-   // TODO add function for setting up all libraries and OpenGL (from settings file)
    initializeGLFW();
 
    if (!setupWindowEnvironment()) {

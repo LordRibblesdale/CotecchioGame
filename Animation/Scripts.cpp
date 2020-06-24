@@ -8,20 +8,20 @@ void increaseIndex() {
    }
 }
 
-void createPlayerPositions(unsigned short int players) {
-   sessionPlayers = players;
+void createPlayerPositions(unsigned short int nPlayers) {
+   sessionPlayers = nPlayers;
 
-   float angle = (M_PI * 2.0f) / static_cast<float>(players);
+   float angle = (M_PI * 2.0f) / static_cast<float>(nPlayers);
 
    maxZ = objects.at(0).getHighestZPoint();
    // TODO fix FurthestPoint
    //maxX = objects.at(0).getFurthestXPoint();
 
-   playerPositions.reserve(players);
+   players.reserve(nPlayers);
 
    //TODO use maxX for effective radius
-   for (int i = 0; i < players; ++i) {
-      playerPositions.emplace_back(Float3(10* cosf(i * angle), 10*sinf(i * angle), maxZ+2));
+   for (int i = 0; i < nPlayers; ++i) {
+      players.emplace_back(Player(40/nPlayers, Float3(10* cosf(i * angle), 10*sinf(i * angle), maxZ+2)));
    }
 }
 
@@ -107,7 +107,7 @@ void pollInput(GLFWwindow *window) {
 
       if (!cameraTranslation) {
          // Quando necessario, 0 diventerà l'indice del giocatore
-         cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), playerPositions.at(0)));
+         cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), players.at(0).getPosition()));
          cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), lookAt));
       }
 
@@ -121,7 +121,7 @@ void pollInput(GLFWwindow *window) {
          blurValue = sumTimeTranslCamera/cameraPlayerPositionTime;
       } else {
          cameraTranslation.reset();
-         camera.setEye(playerPositions.at(0));
+         camera.setEye(players.at(0).getPosition());
          sumTimeTranslCamera = 0;
          blurValue = 1;
          MENU_TRANSLATION_CAMERA = false;
@@ -134,7 +134,7 @@ void pollInput(GLFWwindow *window) {
       if (!cameraTranslation) {
          increaseIndex();
 
-         cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), playerPositions.at(playerIndex)));
+         cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), players.at(playerIndex).getPosition()));
          cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), lookAt));
       }
 
@@ -146,7 +146,7 @@ void pollInput(GLFWwindow *window) {
       } else {
          cameraTranslation.reset();
          cameraTranslation2.reset();
-         camera.setEye(playerPositions.at(playerIndex));
+         camera.setEye(players.at(playerIndex).getPosition());
          camera.setLookAt(lookAt);
          sumTimeTranslCamera = 0;
          PLAYER_TRANSLATION_CAMERA = false;
@@ -179,9 +179,10 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
       Float3 tmp(move((camera.getLookAt() - camera.getEye()).getNormalized()));
 
       //TODO fix angle rotation
-      tmp = move(Rotation::axisZRotateVertex3(tmp, camera.getYawAngle()*0.5f));
-      tmp = move(Rotation::axisXRotateVertex3(tmp, angle));
-      tmp = move(Rotation::axisZRotateVertex3(tmp, -camera.getYawAngle()*0.5f));
+      //tmp = move(Rotation::axisZRotateVertex3(tmp, camera.getYawAngle()*0.5f));
+      tmp = (tmp.getY() < 0 ? std::move(Rotation::axisXRotateVertex3(tmp, angle)) : std::move(Rotation::axisXRotateVertex3(tmp, -angle)))
+              + (tmp.getX() > 0 ? std::move(Rotation::axisYRotateVertex3(tmp, angle)) : std::move(Rotation::axisYRotateVertex3(tmp, -angle)));// + std::move(Rotation::axisYRotateVertex3(tmp, -angle));
+      //tmp = move(Rotation::axisZRotateVertex3(tmp, -camera.getYawAngle()*0.5f));
       tmp += camera.getEye();
 
       camera.setLookAt(tmp);

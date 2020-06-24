@@ -24,11 +24,12 @@ add_executable(${PROJECT_NAME}
         ${UtilitiesFolder}
         ${GraphicsFolder}
         ${ModelFolder}
+        ${PlayerFolder}
         ${AnimationFolder}
         ${GladLibraries}
         ${GLFWLibraries}
         ${XMLFolder}
-        ${MainFile} Graphics/Settings.cpp)
+        ${MainFile})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")

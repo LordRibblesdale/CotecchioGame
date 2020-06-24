@@ -17,6 +17,10 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <random>
+
+#include "../Model/Card.h"
+
 void refreshWindowSize(GLFWwindow *window, int width, int height) {
    /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
     * glViewport è la funzione per la trasformazione da NDC a Screen
@@ -188,12 +192,39 @@ void compileShaders() {
 
    //---------------------------CARD RENDERING--------------------------------//
 
-   //compileShader()
+   compileShader("Graphics/Shader Files/cards_vertex.glsl", "Graphics/Shader Files/cards_fragment.glsl", cardsShader);
+}
+
+void loadCards() {
+   unsigned int values[40] {0};
+
+   std::mt19937_64 gen(glfwGetTime());
+
+   // TODO fix with correct cards from game rules
+   for (unsigned int i = 10; i < 50; ++i) {
+      values[i] = i+1;
+   }
+
+   std::shuffle(values, values+39, gen);
+
+   for (auto& value : values) {
+      cardsValue.push(value);
+   }
+
+   int playerID = 0;
+   for (auto& player : players) {
+      int j = 0;
+      for (unsigned int i = 0; i < 40/sessionPlayers; ++i) {
+         player.getCards().emplace_back(Card(cardsValue.top(), playerID, j++));
+         cardsValue.pop();
+      }
+
+      ++playerID;
+   }
 }
 
 void loadObjects() {
-   // TODO setup diffusive & specular - initial translation, rotation and scale
-
+   // TODO initial translation, rotation and scale
    const char* TABLE_NAME = "Table";
    std::string s(TABLE_ASSETS_LOCATION + TABLE_NAME + ".obj");
    Assimp::Importer importer;
@@ -245,9 +276,13 @@ void loadObjects() {
       loadTexture(object.getLocation(), object.getName());
    }
 
+   createPlayerPositions(3);
+   loadCards();
    loadCardTextures();
 
    prepareScreenForOfflineRendering();
+
+   prepareCardRendering();
 }
 
 void prepareScreenForOfflineRendering() {
@@ -276,6 +311,38 @@ void prepareScreenForOfflineRendering() {
 
    // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void prepareCardRendering() {
+   glGenVertexArrays(1, &cardVAO);
+   glGenBuffers(1, &cardVBO);
+   glGenBuffers(1, &cardEBO);
+   glBindVertexArray(cardVAO);
+
+   glBindBuffer(GL_ARRAY_BUFFER, cardVBO);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cardEBO);
+
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 32, cardVertices, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, vIndices, GL_DYNAMIC_DRAW);
+
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) 0);
+   glEnableVertexAttribArray(0);
+
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glEnableVertexAttribArray(1);
+
+   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
+   glEnableVertexAttribArray(1);
+
+   // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+   // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
+   glBindVertexArray(0);
+
+   // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -367,8 +434,6 @@ void renderText() {
 }
 
 void render() {
-   createPlayerPositions(3);
-
    // Collezione indici per inviare dati allo shader
    GLuint projectionMatrixUniform = glGetUniformLocation(phongShaderProgram, "projection");
    GLuint viewMatrixUniform = glGetUniformLocation(phongShaderProgram, "view");
@@ -386,9 +451,13 @@ void render() {
 
    blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
 
+   GLuint cardModelMatrix = glGetUniformLocation(cardsShader, "model");
+
    SquareMatrix p(4, {});
    SquareMatrix v(4, {});
    SquareMatrix m(4, {});
+
+   SquareMatrix cM(4, {});
 
    //glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
    //glEnable(GL_MULTISAMPLE);
@@ -399,6 +468,8 @@ void render() {
        */
       prevTime = currTime;
       currTime = glfwGetTime();
+
+      light.setOrigin(light.getOrigin() + Float3(0, 0, 0.5f*sinf(glfwGetTime())));
 
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
 
@@ -484,10 +555,35 @@ void render() {
          }
       }
 
+      glUseProgram(cardsShader);
+      glDisable(GL_CULL_FACE);
+      glBindVertexArray(cardVAO);
+      //glBindBuffer(GL_ARRAY_BUFFER, cardVBO);
+      //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cardEBO);
+
+      //glActiveTexture(GL_TEXTURE3);
+      //glBindTexture(GL_TEXTURE_2D, cardTexture);
+
+      //glActiveTexture(GL_TEXTURE4);
+      //glBindTexture(GL_TEXTURE_2D, backCardTexture);
+
+      glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
+      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
+      glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
+
+      for (auto& player : players) {
+         for (auto& card : player.getCards()) {
+            cM = std::move(card.getWorldCoordinates());
+            card.updateCoords();
+
+            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+         }
+      }
+
       // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
       glDisable(GL_DEPTH_TEST);
-
-      glDisable(GL_CULL_FACE);
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

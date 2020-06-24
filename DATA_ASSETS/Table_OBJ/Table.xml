@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Table>
-    <!--<Texture>Empty</Texture>-->
-
     <!--phong1SG3-->
     <Texture name="wood1-nurbsToPoly1.png" material="Wood">
         <Bump name="bump3d1-nurbsToPoly1.png">
@@ -435,7 +433,7 @@
     <Material name="Wood">
         <Diffuse valueR="1" valueG="1" valueB="1">
         </Diffuse>
-        <Specular valueR="0.5" valueG="0.5" valueB="0.5" specularExp="13.19">
+        <Specular valueR="0.2" valueG="0.2" valueB="0.2" specularExp="13.19">
         </Specular>
     </Material>
 

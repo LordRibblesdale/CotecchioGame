@@ -2,6 +2,7 @@
 #define COTECCHIOGAME_SCENEOBJECTS_H
 
 #include <vector>
+#include <stack>
 #include <glfw3.h>
 
 #include "../Utilities/Camera.h"
@@ -13,6 +14,7 @@
 #include "../Matrix/StandardMatrix.h"
 
 #include "../Player/Player.h"
+#include "../Model/Card.h"
 
 extern GLFWwindow* window;
 
@@ -23,6 +25,7 @@ extern const unsigned short int COLOR_ONLY_SHADER;
 
 extern GLuint phongShaderProgram;
 extern GLuint offlineShaderProgram;
+extern GLuint cardsShader;
 
 extern GLuint offlineFrameBuffer;
 extern GLuint offlineTexture;
@@ -30,13 +33,17 @@ extern GLuint offlineRenderBufferObject;
 
 extern std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
 extern std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto
-extern std::vector<GLuint> elementBufferObjects;
+extern std::vector<GLuint> elementBufferObjects; // Element Buffer Object, buffer per la lettura dei vertici nel senso di topologia/mesh
 
 extern std::vector<GLuint> textureUniforms;
 extern std::vector<GLuint> bumpUniforms;
 
 extern GLuint cardTexture;
 extern GLuint backCardTexture;
+
+extern GLuint cardVAO;
+extern GLuint cardVBO;
+extern GLuint cardEBO;
 
 extern float screen[20];
 extern unsigned int screenIndices[6];
@@ -53,8 +60,6 @@ extern Camera camera;
 extern float maxX;
 extern float maxY;
 extern float maxZ;
-
-extern std::vector<Float3> playerPositions;
 
 extern double prevXPos, prevYPos;
 extern double prevTime, currTime, sumTimeCamera, sumTimeTranslCamera;
@@ -78,7 +83,7 @@ extern unsigned short int sessionPlayers;
 //--------------------------------------------------------------//
 
 extern std::vector<Model> objects;
-extern std::vector<Model> cards;
+extern std::stack<unsigned int> cardsValue;
 
 extern std::vector<Material> materials;
 extern std::vector<unsigned int> materialIndices;

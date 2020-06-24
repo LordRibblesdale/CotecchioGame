@@ -5,7 +5,7 @@
 
 void increaseIndex();
 
-void createPlayerPositions(unsigned short int players);
+void createPlayerPositions(unsigned short int nPlayers);
 
 void pollInput(GLFWwindow *window);
 

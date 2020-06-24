@@ -1,10 +1,17 @@
 #version 330 core
 
-in vec2 textureUV;
+in vec3 outNormalVector;
+in vec2 outTextCoord;
+in vec3 sPos;
+
 out vec4 fragColor;
 
 uniform sampler2D cardTexture;
+uniform sampler2D backTexture;
+
+uniform vec3 eye;
 
 void main() {
-    fragColor = texture(offlineRendering, textureUV); // Funzione per identificare il colore dalla texture, sampling della texture
+    float k = dot(normalize(eye - sPos), outNormalVector) >= 0 ? 1 : 0;
+    fragColor = k * texture(cardTexture, outTextCoord) + (1 - k) * texture(backTexture, outTextCoord);
 }

@@ -7,6 +7,7 @@ const unsigned short int COLOR_ONLY_SHADER = 1;
 
 GLuint phongShaderProgram;
 GLuint offlineShaderProgram;
+GLuint cardsShader;
 
 GLuint offlineFrameBuffer;
 GLuint offlineTexture;
@@ -22,6 +23,9 @@ std::vector<GLuint> bumpUniforms;
 GLuint cardTexture;
 GLuint backCardTexture;
 
+GLuint cardVAO;
+GLuint cardVBO;
+GLuint cardEBO;
 
 float screen[20] {
    -1, 1, 0, 0, 1,
@@ -47,8 +51,6 @@ float maxX = 0;
 float maxY = 0;
 float maxZ = 0;
 
-std::vector<Float3> playerPositions;
-
 double prevXPos, prevYPos;
 double prevTime, currTime, sumTime, sumTimeTranslCamera;
 
@@ -69,7 +71,7 @@ unsigned int playerIndex = 0;
 unsigned short int sessionPlayers = 0;
 
 std::vector<Model> objects;
-std::vector<Model> cards;
+std::stack<unsigned int> cardsValue;
 
 std::vector<Material> materials;
 std::vector<unsigned int> materialIndices;

@@ -45,6 +45,7 @@ int main(int argc, char** argv) {
       file.close();
 
       camera.setAspectRatio(static_cast<float>(Y_RESOLUTION) / static_cast<float>(X_RESOLUTION));
+      camera.setSensibility(CAMERA_SENSIBILITY);
    } else {
       std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
    }

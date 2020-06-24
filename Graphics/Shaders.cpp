@@ -294,6 +294,7 @@ void loadCardTextures() {
    if (data) {
       cardTexture = createTextureUniform();
 
+      glActiveTexture(GL_TEXTURE4);
       glBindTexture(GL_TEXTURE_2D, cardTexture);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.release());
       glBindTexture(GL_TEXTURE_2D, 0);
@@ -304,6 +305,7 @@ void loadCardTextures() {
    if (data) {
       backCardTexture = createTextureUniform();
 
+      glActiveTexture(GL_TEXTURE5);
       glBindTexture(GL_TEXTURE_2D, backCardTexture);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.release());
       glBindTexture(GL_TEXTURE_2D, 0);
