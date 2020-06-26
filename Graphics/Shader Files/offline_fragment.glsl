@@ -9,8 +9,8 @@ uniform sampler2D offlineRendering;
 
 float blurOffset = 1.0f / 300.0f;   // Offset per spostarsi tra i pixel vicini al pixel sul quale effettuare il blur
 
-// TODO change here (copia del vettore da learnopengl unicamente per scopi di test
-vec2 offsets[9] = vec2[](
+// TODO change here (copia del vettore da learnopengl unicamente per scopi di test)
+vec2 offsets[9] = vec2[] (
     vec2(-blurOffset,  blurOffset), // top-left
     vec2( 0.0f,    blurOffset), // top-center
     vec2( blurOffset,  blurOffset), // top-right

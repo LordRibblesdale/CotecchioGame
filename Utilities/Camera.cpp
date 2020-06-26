@@ -23,7 +23,7 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
                : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
    Camera::near = near;
    Camera::far = far;
-   Camera::viewAngle = degree2Radiants(35);
+   Camera::viewAngle = degree2Radiants(angle);
    Camera::aspectRatio = aspectRatio;
 
    Camera::right = near * tanf(Camera::viewAngle * 0.5f);

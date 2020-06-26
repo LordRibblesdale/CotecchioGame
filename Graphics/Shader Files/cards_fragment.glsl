@@ -1,5 +1,7 @@
 #version 330 core
 
+// https://www.blenderguru.com/articles/cycles-shader-encyclopedia
+
 in vec3 outNormalVector;
 in vec2 outTextCoord;
 in vec3 sPos;

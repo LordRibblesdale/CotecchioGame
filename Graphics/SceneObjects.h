@@ -26,6 +26,7 @@ extern const unsigned short int COLOR_ONLY_SHADER;
 extern GLuint phongShaderProgram;
 extern GLuint offlineShaderProgram;
 extern GLuint cardsShader;
+extern GLuint colorShader;
 
 extern GLuint offlineFrameBuffer;
 extern GLuint offlineTexture;

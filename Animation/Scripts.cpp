@@ -150,10 +150,16 @@ void pollInput(GLFWwindow *window) {
    }
 
    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
-      DEVELOPER_MODE = true;
+      DEVELOPER_MODE = !DEVELOPER_MODE;
+
+      if (DEVELOPER_MODE) {
+         glfwSetCursorPosCallback(window, cursorPositionCallBack);
+         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      } else {
+         glfwSetCursorPosCallback(window, nullptr);
+         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+      }
    }
-
-
 
    //---------------------------------------------------------------------------------------------------//
 

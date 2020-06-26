@@ -80,9 +80,11 @@ bool setupWindowEnvironment() {
    // Chiamare determinate callbacks per ogni azione (funzioni da richiamare in un certo evento)
    glfwSetWindowSizeCallback(window, refreshWindowSize);
 
+   /*
    // Imposto input tramite mouse
    glfwSetCursorPosCallback(window, cursorPositionCallBack);
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    */
 
    glfwSetScrollCallback(window, scrollCallBack);
 
@@ -193,6 +195,10 @@ void compileShaders() {
    //---------------------------CARD RENDERING--------------------------------//
 
    compileShader("Graphics/Shader Files/cards_vertex.glsl", "Graphics/Shader Files/cards_fragment.glsl", cardsShader);
+
+   //---------------------------STENCIL RENDERING--------------------------------//
+
+   compileShader("Graphics/Shader Files/color_vertex.glsl", "Graphics/Shader Files/color_fragment.glsl", colorShader);
 }
 
 void loadCards() {
@@ -201,11 +207,15 @@ void loadCards() {
    std::mt19937_64 gen(glfwGetTime());
 
    // TODO fix with correct cards from game rules
-   for (unsigned int i = 10; i < 50; ++i) {
-      values[i] = i+1;
+   int j = 10;
+   for (unsigned int & value : values) {
+      value = j++;
    }
 
-   std::shuffle(values, values+39, gen);
+   // Si mischiano così le carte in C++?
+   std::shuffle(values, values+40, gen);
+   std::shuffle(values, values+40, gen);
+   std::shuffle(values, values+40, gen);
 
    for (auto& value : values) {
       cardsValue.push(value);
@@ -213,9 +223,8 @@ void loadCards() {
 
    int playerID = 0;
    for (auto& player : players) {
-      int j = 0;
       for (unsigned int i = 0; i < 40/sessionPlayers; ++i) {
-         player.getCards().emplace_back(Card(cardsValue.top(), playerID, j++));
+         player.getCards().emplace_back(Card(cardsValue.top(), playerID));
          cardsValue.pop();
       }
 
@@ -465,14 +474,15 @@ void render() {
    GLuint cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
    GLuint cardEyePosition = glGetUniformLocation(cardsShader, "eye");
 
+   GLuint cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
+   GLuint backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
+
    SquareMatrix p(4, {});
    SquareMatrix v(4, {});
    SquareMatrix m(4, {});
 
    SquareMatrix cM(4, {});
 
-   //glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-   //glEnable(GL_MULTISAMPLE);
 
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
@@ -489,7 +499,7 @@ void render() {
 
       glClearColor(0.2, 0.2, 0.2, 1.0f);
       // Pulizia buffer colore e depth
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
       glUseProgram(phongShaderProgram);
@@ -523,7 +533,7 @@ void render() {
       glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
 
       // Caricare vertexArrayObject interessato
-
+      // TODO optimize by setting uniform locally in RAM
       glUniform1i(glGetUniformLocation(phongShaderProgram, "texture1"), 0);
       glUniform1i(glGetUniformLocation(phongShaderProgram, "bumpTexture"), 1);
 
@@ -570,15 +580,27 @@ void render() {
       glUseProgram(cardsShader);
 
       glDisable(GL_CULL_FACE);
+
+      // Abilito Stencil test per l'outlining
+      glEnable(GL_STENCIL_TEST);
+      // Imposto le modalità di scrittura dello stencil test
+      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+      /*
+      // Discard - Se valori di stencil < 1, rifiutato
+      glStencilFunc(GL_LESS, 1, 0xFF);
+       */
+      glStencilMask(0x00);
+
+      // Blend di trasparenza
+      // TODO implement order-dependent transparency
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
       glBindVertexArray(cardVAO);
       glBindBuffer(GL_ARRAY_BUFFER, cardVBO2);
 
-      // TODO optimize by setting uniform locally in RAM
-      glUniform1i(glGetUniformLocation(cardsShader, "cardTexture"), 3);
-      glUniform1i(glGetUniformLocation(cardsShader, "backTexture"), 4);
+      glUniform1i(cardTexUnif, 3);
+      glUniform1i(backTexUnif, 4);
 
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, cardTexture);
@@ -591,9 +613,13 @@ void render() {
       glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, v.getArray());
 
       for (auto& player : players) {
-         for (auto& card : player.getCards()) {
-            cM = std::move(card.getWorldCoordinates());
-            card.updateCoords();
+         glStencilFunc(GL_ALWAYS, 1, 0xFF);
+         glStencilMask(0xFF);
+
+         for (unsigned int i = 0; i < player.getCards().size(); ++i) {
+
+            cM = std::move(player.getCards().at(i).getWorldCoordinates(i));
+            player.getCards().at(i).updateCoords();
 
             // TODO fix input (reduce GPU usage)
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
@@ -604,8 +630,25 @@ void render() {
          }
       }
 
+      glStencilMask(0x00);
+
       // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
       glDisable(GL_DEPTH_TEST);
+
+      // Genero outlining tramite Stencil test
+      glUseProgram(colorShader);
+
+      /*
+      for (auto& player : players) {
+         for (unsigned int i = 0; i < player.getCards().size(); ++i) {
+            cM = std::move(player.getCards().at(i).getWorldCoordinates(i));
+
+            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+         }
+      }
+       */
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

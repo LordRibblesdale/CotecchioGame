@@ -102,7 +102,7 @@ SquareMatrix Rotation::rotationByQuaternion(const Float4& direction, const float
 
    }
 
-   return SquareMatrix(4, {});
+   return Transform::scaleMatrix4(1, 1, 1);
 }
 
 SquareMatrix Transform::scaleMatrix4(float scaleX, float scaleY, float scaleZ) {
