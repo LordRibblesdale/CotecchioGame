@@ -2,11 +2,27 @@
 #include "../Matrix/StandardMatrix.h"
 #include "../Graphics/SceneObjects.h"
 
+/*
 float cardVertices[32] {
         -0.5f, 0, -0.825f, 0, 0, 0, 1, 0,
         0.5f, 0, -0.825f, 1, 0, 0, 1, 0,
         -0.5f, 0, 0.825f, 0, 1, 0, 1, 0,
         0.5f, 0, 0.825f, 1, 1, 0, 1, 0,
+};
+ */
+
+float cardVertices[24] {
+        -0.5f, 0, -0.825f, 0, 1, 0,
+        0.5f, 0, -0.825f, 0, 1, 0,
+        -0.5f, 0, 0.825f, 0, 1, 0,
+        0.5f, 0, 0.825f, 0, 1, 0
+};
+
+float cardUVArray[8] {
+        0, 0,
+        1, 0,
+        0, 1,
+        1, 1
 };
 
 unsigned int vIndices[6] {
@@ -27,14 +43,23 @@ SquareMatrix Card::getWorldCoordinates() const {
 }
 
 void Card::updateCoords() const {
-   cardVertices[3] = u;
-   cardVertices[4] = v;
-   cardVertices[8 + 3] = u + 0.1f;
-   cardVertices[8 + 4] = v;
-   cardVertices[16 + 3] = u;
-   cardVertices[16 + 4] = v + 0.25f;
-   cardVertices[24 + 3] = u + 0.1f;
-   cardVertices[24 + 4] = v + 0.25f;
+   //cardVertices[3] = u;
+   //cardVertices[4] = v;
+   //cardVertices[8 + 3] = u + 0.1f;
+   //cardVertices[8 + 4] = v;
+   //cardVertices[16 + 3] = u;
+   //cardVertices[16 + 4] = v + 0.25f;
+   //cardVertices[24 + 3] = u + 0.1f;
+   //cardVertices[24 + 4] = v + 0.25f;
+   //TODO optimize here;
+   cardUVArray[0] = u;
+   cardUVArray[1] = v;
+   cardUVArray[2] = u + 0.1f;
+   cardUVArray[3] = v;
+   cardUVArray[4] = u;
+   cardUVArray[5] = v + 0.25f;
+   cardUVArray[6] = u + 0.1f;
+   cardUVArray[7] = v + 0.25f;
 }
 
 

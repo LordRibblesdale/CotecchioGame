@@ -25,6 +25,8 @@ GLuint backCardTexture;
 
 GLuint cardVAO;
 GLuint cardVBO;
+GLuint cardVBO2;
+GLuint cardVBO3;
 GLuint cardEBO;
 
 float screen[20] {

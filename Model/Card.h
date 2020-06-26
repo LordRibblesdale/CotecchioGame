@@ -4,7 +4,9 @@
 #include <iostream>
 #include "../Matrix/SquareMatrix.h"
 
-extern float cardVertices[32];
+//extern float cardVertices[32];
+extern float cardVertices[24];
+extern float cardUVArray[8];
 extern unsigned int vIndices[6];
 
 struct Card {

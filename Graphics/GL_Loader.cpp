@@ -316,22 +316,32 @@ void prepareScreenForOfflineRendering() {
 void prepareCardRendering() {
    glGenVertexArrays(1, &cardVAO);
    glGenBuffers(1, &cardVBO);
+   glGenBuffers(1, &cardVBO2);
+   glGenBuffers(1, &cardVBO3);
    glGenBuffers(1, &cardEBO);
+
    glBindVertexArray(cardVAO);
+
+   glBindBuffer(GL_ARRAY_BUFFER, cardVBO2);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, cardUVArray, GL_DYNAMIC_DRAW);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
+   glEnableVertexAttribArray(1);
+
+   glBindBuffer(GL_ARRAY_BUFFER, cardVBO3);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, cardUVArray, GL_STATIC_DRAW);
+   glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
+   glEnableVertexAttribArray(3);
 
    glBindBuffer(GL_ARRAY_BUFFER, cardVBO);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cardEBO);
 
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 32, cardVertices, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, cardVertices, GL_DYNAMIC_DRAW);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, vIndices, GL_DYNAMIC_DRAW);
 
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) 0);
    glEnableVertexAttribArray(0);
 
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
-   glEnableVertexAttribArray(1);
-
-   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
+   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
    glEnableVertexAttribArray(2);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
@@ -342,7 +352,6 @@ void prepareCardRendering() {
 
    // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -559,8 +568,13 @@ void render() {
       }
 
       glUseProgram(cardsShader);
+
       glDisable(GL_CULL_FACE);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
       glBindVertexArray(cardVAO);
+      glBindBuffer(GL_ARRAY_BUFFER, cardVBO2);
 
       // TODO optimize by setting uniform locally in RAM
       glUniform1i(glGetUniformLocation(cardsShader, "cardTexture"), 3);
@@ -579,8 +593,10 @@ void render() {
       for (auto& player : players) {
          for (auto& card : player.getCards()) {
             cM = std::move(card.getWorldCoordinates());
-            // TODO import coordinates on vertex shader (via uniform)
             card.updateCoords();
+
+            // TODO fix input (reduce GPU usage)
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
 
             glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());
 

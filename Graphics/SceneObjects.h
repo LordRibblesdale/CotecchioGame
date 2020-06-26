@@ -43,6 +43,8 @@ extern GLuint backCardTexture;
 
 extern GLuint cardVAO;
 extern GLuint cardVBO;
+extern GLuint cardVBO2;
+extern GLuint cardVBO3;
 extern GLuint cardEBO;
 
 extern float screen[20];
