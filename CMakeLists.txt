@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(CotecchioGame)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB_RECURSE VectorFolder "Vector/*.cpp" "Vector/*.h")
 file(GLOB_RECURSE MatrixFolder "Matrix/*.cpp" "Matrix/*.h")
@@ -12,6 +12,8 @@ file(GLOB_RECURSE PlayerFolder "Player/*.cpp" "Player/*.h")
 file(GLOB_RECURSE AnimationFolder "Animation/*.cpp" "Animation/*.h")
 file(GLOB_RECURSE ExceptionFolder "Exception/*.h")
 file(GLOB_RECURSE XMLFolder "IO/rapidxml-1.13/*.hpp")
+#file(GLOB_RECURSE ThreadPool "IO/ThreadPool/header/*.hpp" "IO/ThreadPool/src/*.cpp")
+#file(GLOB_RECURSE ThreadPoolLib "IO/lib/header/*.hpp" "IO/lib/src/*.cpp")
 file(GLOB_RECURSE MainFile "Main.cpp")
 
 file(GLOB_RECURSE GladLibraries "Graphics/glad/include/*.h" "Graphics/glad/src/*.c")
@@ -29,11 +31,15 @@ add_executable(${PROJECT_NAME}
         ${GladLibraries}
         ${GLFWLibraries}
         ${XMLFolder}
+        #${ThreadPool}
+        #${ThreadPoolLib}
         ${MainFile})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")
 target_include_directories(${PROJECT_NAME} PRIVATE "IO/rapidxml-1.13")
+#target_include_directories(${PROJECT_NAME} PRIVATE "IO/ThreadPool/header")
+#target_include_directories(${PROJECT_NAME} PRIVATE "IO/lib/header")
 
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glfw-3.3.2.bin.WIN64/include/GLFW")

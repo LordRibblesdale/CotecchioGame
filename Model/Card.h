@@ -4,7 +4,6 @@
 #include <iostream>
 #include "../Matrix/SquareMatrix.h"
 
-//extern float cardVertices[32];
 extern float cardVertices[24];
 extern float cardUVArray[8];
 extern unsigned int vIndices[6];
@@ -15,8 +14,10 @@ struct Card {
    unsigned int value;
    float u = 0,  v = 0;
 
+   SquareMatrix local2World;
+
    // value è del tipo NM (10, 11, 20, 39, ....)
-   Card(unsigned int vaule, unsigned short int playerID) {
+   Card(unsigned int vaule, unsigned short int playerID) : local2World(std::move(SquareMatrix(4, {}))) {
       Card::value = vaule;
       Card::playerID = playerID;
 
@@ -24,9 +25,12 @@ struct Card {
       v = ((value/10)-1)*0.25f;
    }
 
-   SquareMatrix getWorldCoordinates(unsigned int cardIndex) const;
+   SquareMatrix getWorldCoordinates(unsigned int cardIndex);
 
    void updateCoords() const;
+
+   // Scritta appositamente per crearla come copia
+   SquareMatrix getLocal2World() const;
 };
 
 #endif //COTECCHIOGAME_CARD_H

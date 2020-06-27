@@ -19,8 +19,6 @@
 
 #include <random>
 
-#include "../Model/Card.h"
-
 void refreshWindowSize(GLFWwindow *window, int width, int height) {
    /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
     * glViewport è la funzione per la trasformazione da NDC a Screen
@@ -477,6 +475,10 @@ void render() {
    GLuint cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
    GLuint backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
 
+   GLuint colorModelMatrix = glGetUniformLocation(colorShader, "model");
+   GLuint colorViewMatrix = glGetUniformLocation(colorShader, "view");
+   GLuint colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
+
    SquareMatrix p(4, {});
    SquareMatrix v(4, {});
    SquareMatrix m(4, {});
@@ -585,11 +587,10 @@ void render() {
       glEnable(GL_STENCIL_TEST);
       // Imposto le modalità di scrittura dello stencil test
       glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-      /*
+
       // Discard - Se valori di stencil < 1, rifiutato
-      glStencilFunc(GL_LESS, 1, 0xFF);
-       */
       glStencilMask(0x00);
+      //glStencilFunc(GL_NEVER, 1, 0xFF);
 
       // Blend di trasparenza
       // TODO implement order-dependent transparency
@@ -612,31 +613,61 @@ void render() {
       glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, v.getArray());
 
-      for (auto& player : players) {
-         glStencilFunc(GL_ALWAYS, 1, 0xFF);
-         glStencilMask(0xFF);
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
-         for (unsigned int i = 0; i < player.getCards().size(); ++i) {
+      for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
+         if (pIndex == playerIndex) {
+            glStencilMask(0xFF);
+         }
 
-            cM = std::move(player.getCards().at(i).getWorldCoordinates(i));
-            player.getCards().at(i).updateCoords();
+         for (unsigned int i = 0; i < players.at(pIndex).getCards().size(); ++i) {
+            cM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
+            players.at(pIndex).getCards().at(i).updateCoords();
 
-            // TODO fix input (reduce GPU usage)
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
 
             glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          }
+
+         if (pIndex == playerIndex) {
+            glStencilMask(0x00);
+         }
       }
 
-      glStencilMask(0x00);
+      // Genero outlining tramite Stencil test
+      glUseProgram(colorShader);
 
       // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
       glDisable(GL_DEPTH_TEST);
 
-      // Genero outlining tramite Stencil test
-      glUseProgram(colorShader);
+      // Verrà stampato qualcosa su schermo solo se supera il controllo sottostante
+      // Ovvero quando l'oggetto si trova fuori dalla maschera, ovvero il tratto per l'outlining
+
+      // TODO fix here
+      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+      glStencilMask(0x00);
+
+      glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, p.getArray());
+      glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, v.getArray());
+
+      for (auto & i : players.at(playerIndex).getCards()) {
+         cM = std::move(i.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
+
+         glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cM.getArray());
+
+         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+      }
+
+      // Da riattivare per permettere le modifiche al buffer
+      glEnable(GL_DEPTH_TEST);
+      glStencilMask(0xFF);
+
+      /*
+      double x, y;
+      glfwGetCursorPos(window, &x, &y);
+       */
 
       /*
       for (auto& player : players) {
@@ -653,11 +684,12 @@ void render() {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
+      glUseProgram(offlineShaderProgram);
+
       glClearColor(1, 1, 1, 1);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
       // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
-      glUseProgram(offlineShaderProgram);
 
       if (MENU_TRANSLATION_CAMERA) {
          glUniform1f(blurUniform, blurValue);
