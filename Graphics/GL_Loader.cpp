@@ -664,7 +664,6 @@ void render() {
       glfwGetCursorPos(window, &x, &y);
        */
 
-      /*
       for (auto& player : players) {
          for (unsigned int i = 0; i < player.getCards().size(); ++i) {
             cM = std::move(player.getCards().at(i).getWorldCoordinates(i));
@@ -674,7 +673,6 @@ void render() {
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          }
       }
-       */
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
