@@ -561,11 +561,8 @@ void render() {
             }
              */
 
-            //glBindTexture(GL_TEXTURE_2D, texture1);
-            // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
-            // glActiveTexture(GL_TEXTURE0);
-
             // Imposto lo uniform interessato con la texture unit in cui è presente la texture
+            // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
             glActiveTexture(GL_TEXTURE0);
             // Il bind sulla variabile texture1 ora si riverisce alla texture unit a cui è stata collegata
             glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
@@ -587,10 +584,8 @@ void render() {
       glEnable(GL_STENCIL_TEST);
       // Imposto le modalità di scrittura dello stencil test
       glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-      // Discard - Se valori di stencil < 1, rifiutato
+      // Per ora viene disattivata la scrittura sul buffer
       glStencilMask(0x00);
-      //glStencilFunc(GL_NEVER, 1, 0xFF);
 
       // Blend di trasparenza
       // TODO implement order-dependent transparency
