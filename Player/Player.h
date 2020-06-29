@@ -2,7 +2,7 @@
 #define COTECCHIOGAME_PLAYER_H
 
 #include <vector>
-#include "../Model/Card.h"
+#include "../Model/Cards/Card.h"
 #include "../Vector/Float3.h"
 
 class Player {

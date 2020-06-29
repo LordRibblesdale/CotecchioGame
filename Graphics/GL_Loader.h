@@ -54,6 +54,8 @@ void generateObjects(const Mesh& mesh);
 void prepareScreenForOfflineRendering();
 void prepareCardRendering();
 
+void prepareSceneLights();
+
 void render();
 
 void cleanMemory();

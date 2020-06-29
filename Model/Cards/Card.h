@@ -2,7 +2,7 @@
 #define COTECCHIOGAME_CARD_H
 
 #include <iostream>
-#include "../Matrix/SquareMatrix.h"
+#include "../../Matrix/SquareMatrix.h"
 
 extern float cardVertices[24];
 extern float cardUVArray[8];

@@ -1,6 +1,6 @@
 #include "Card.h"
-#include "../Matrix/StandardMatrix.h"
-#include "../Graphics/SceneObjects.h"
+#include "../../Matrix/StandardMatrix.h"
+#include "../../Graphics/SceneObjects.h"
 
 /*
 float cardVertices[32] {

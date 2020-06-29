@@ -14,7 +14,7 @@
 #include "../Matrix/StandardMatrix.h"
 
 #include "../Player/Player.h"
-#include "../Model/Card.h"
+#include "../Model/Cards/Card.h"
 
 extern GLFWwindow* window;
 
@@ -94,7 +94,7 @@ extern std::vector<unsigned int> materialIndices;
 extern const std::string TABLE_ASSETS_LOCATION;
 extern const std::string DATA_ASSETS_LOCATION;
 
-extern SpotLight light;
+extern std::vector<std::unique_ptr<Light>> lights;
 
 //--------------------------------------------------------------//
 

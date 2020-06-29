@@ -290,6 +290,8 @@ void loadObjects() {
    prepareScreenForOfflineRendering();
 
    prepareCardRendering();
+
+   prepareSceneLights();
 }
 
 void prepareScreenForOfflineRendering() {
@@ -359,6 +361,11 @@ void prepareCardRendering() {
 
    // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void prepareSceneLights() {
+   lights.reserve(1);
+   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 20)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -485,6 +492,11 @@ void render() {
 
    SquareMatrix cM(4, {});
 
+   // Abilito Stencil test per l'outlining
+   glEnable(GL_STENCIL_TEST);
+
+   // Imposto le modalità di scrittura dello stencil test
+   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
@@ -493,7 +505,7 @@ void render() {
       prevTime = currTime;
       currTime = glfwGetTime();
 
-      light.setOrigin(light.getOrigin() + Float3(0, 0, 0.5f*sinf(glfwGetTime())));
+      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + Float3(0, 0, 0.5f*sinf(glfwGetTime())));
 
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
 
@@ -516,6 +528,9 @@ void render() {
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LESS);
 
+      // Per ora viene disattivata la scrittura sul buffer
+      glStencilMask(0x00);
+
       /* Scrivere nella location della variabile i valori del colore da assegnare al pixel;
        * Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
        * Quindi attenzione al posizionamento delle chiamate di modifica stato
@@ -529,8 +544,9 @@ void render() {
 
       glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
-      glUniform3f(lightPosUniform, light.getOrigin().getX(), light.getOrigin().getY(), light.getOrigin().getZ());
-      glUniform3f(lightColorUniform, light.getColor().getRed(), light.getColor().getGreen(), light.getColor().getBlue());
+      // TODO set multiple lights
+      glUniform3f(lightPosUniform, lights.at(0).get()->getOrigin().getX(), lights.at(0).get()->getOrigin().getY(), lights.at(0).get()->getOrigin().getZ());
+      glUniform3f(lightColorUniform, lights.at(0).get()->getColor().getRed(), lights.at(0).get()->getColor().getGreen(), lights.at(0).get()->getColor().getBlue());
       //TODO manage falloff
       glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
 
@@ -580,13 +596,6 @@ void render() {
 
       glDisable(GL_CULL_FACE);
 
-      // Abilito Stencil test per l'outlining
-      glEnable(GL_STENCIL_TEST);
-      // Imposto le modalità di scrittura dello stencil test
-      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-      // Per ora viene disattivata la scrittura sul buffer
-      glStencilMask(0x00);
-
       // Blend di trasparenza
       // TODO implement order-dependent transparency
       glEnable(GL_BLEND);
@@ -613,7 +622,7 @@ void render() {
       for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
          if (pIndex == playerIndex) {
             glStencilMask(0xFF);
-         }
+         } // TODO check email (else?)
 
          for (unsigned int i = 0; i < players.at(pIndex).getCards().size(); ++i) {
             cM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
@@ -640,9 +649,9 @@ void render() {
       // Verrà stampato qualcosa su schermo solo se supera il controllo sottostante
       // Ovvero quando l'oggetto si trova fuori dalla maschera, ovvero il tratto per l'outlining
 
-      // TODO fix here
+      glStencilMask(0x00);    // solo in lettura del buffer, non attiva la scrittura
       glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-      glStencilMask(0x00);
+      glEnable(GL_DEPTH_TEST);
 
       glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, v.getArray());
@@ -655,8 +664,8 @@ void render() {
          glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
       }
 
-      // Da riattivare per permettere le modifiche al buffer
-      glEnable(GL_DEPTH_TEST);
+      // Da riattivare per permettere le modifiche al buffer (pulizia)
+      //glEnable(GL_DEPTH_TEST);
       glStencilMask(0xFF);
 
       /*
