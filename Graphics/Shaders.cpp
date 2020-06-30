@@ -283,7 +283,7 @@ void loadTexture(const std::string &location, const std::string &name) {
 
       file.close();
    } else {
-      std::cout << "Error XML_FILE_INPUT: settings file not loaded.";
+      std::cout << "Error XML_FILE_INPUT_SHADER: settings file not loaded.";
    }
 }
 

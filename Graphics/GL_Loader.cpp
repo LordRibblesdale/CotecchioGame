@@ -121,6 +121,7 @@ bool setupOfflineRendering() {
    glGenTextures(1, &offlineTexture);
 
    if (ENABLE_MULTISAMPLING) {
+      // TODO fix multisampling
       // Attivazione multisampling (va creato un nuovo buffer che contenga le informazioni di colore con l'azione dell'algoritmo di MSAA)
       //IMPORTANTE: i sample per il Color Buffer DEVONO essere equivalenti a quelli del Depth e Color Buffer (per equivalenza di numero di pixel)
       glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, offlineTexture);
@@ -232,18 +233,35 @@ void loadCards() {
 
 void loadObjects() {
    // TODO initial translation, rotation and scale
-   const char* TABLE_NAME = "Table";
-   std::string s(TABLE_ASSETS_LOCATION + TABLE_NAME + ".obj");
+   const char* OBJ_NAME = "Table";
+   std::string s(TABLE_ASSETS_LOCATION + OBJ_NAME + ".obj");
    Assimp::Importer importer;
    const aiScene* scene(importer.ReadFile(s, aiProcess_Triangulate));
 
    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
       std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
    } else {
-      Model table(TABLE_ASSETS_LOCATION, TABLE_NAME);
+      Model table(TABLE_ASSETS_LOCATION, OBJ_NAME);
       table.processNode(scene->mRootNode, scene);
 
+      table.setTexturesEnabled(true);
       table.setXRotation(degree2Radiants(90));
+      objects.emplace_back(table);
+   }
+
+   // TODO optimize callings
+   OBJ_NAME = "World";
+   s = std::move(DATA_ASSETS_LOCATION + OBJ_NAME + ".obj");
+   scene = importer.ReadFile(s, aiProcess_Triangulate);
+
+   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
+   } else {
+      Model table(TABLE_ASSETS_LOCATION, OBJ_NAME);
+      table.processNode(scene->mRootNode, scene);
+
+      table.setTexturesEnabled(false);
+      table.setNeedsNoCulling(true);
       objects.emplace_back(table);
    }
 
@@ -255,7 +273,9 @@ void loadObjects() {
          verticesLenght += mesh.getVertices().size();
       }
 
-      texturesLength += model.getMeshes().size();
+      if (model.doesHaveTextures()) {
+         texturesLength += model.getMeshes().size();
+      }
    }
 
    vertexArrayObjects.reserve(verticesLenght);
@@ -264,6 +284,8 @@ void loadObjects() {
    materialIndices.reserve(texturesLength);
 
    for (const auto& object : objects) {
+      std::cout << "SES" << std::endl;
+
       for (const auto& mesh : object.getMeshes()) {
          generateObjects(mesh);
       }
@@ -280,7 +302,9 @@ void loadObjects() {
          glUseProgram(0);
       */
 
-      loadTexture(object.getLocation(), object.getName());
+      if (object.doesHaveTextures()) {
+         loadTexture(object.getLocation(), object.getName());
+      }
    }
 
    createPlayerPositions(3);
@@ -472,7 +496,9 @@ void render() {
    GLuint specularAlpha = glGetUniformLocation(phongShaderProgram, "specularAlpha");
    GLuint eyePosition = glGetUniformLocation(phongShaderProgram, "eye");
 
-   blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
+   GLuint gammaUniform = glGetUniformLocation(phongShaderProgram, "gammaCorrection");
+
+   GLuint blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
 
    GLuint cardModelMatrix = glGetUniformLocation(cardsShader, "model");
    GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
@@ -555,40 +581,52 @@ void render() {
       glUniform1i(glGetUniformLocation(phongShaderProgram, "texture1"), 0);
       glUniform1i(glGetUniformLocation(phongShaderProgram, "bumpTexture"), 1);
 
+      glUniform1i(gammaUniform, GAMMA_CORRECTION);
+
       for (auto& object : objects) {
          m = std::move(object.getWorldCoordinates());
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
-            glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).getAmbientCoeff().getX(),
-                        materials.at(materialIndices.at(j)).getAmbientCoeff().getY(),
-                        materials.at(materialIndices.at(j)).getAmbientCoeff().getZ());
-            glUniform3f(diffusiveCoefficient, materials.at(materialIndices.at(j)).getDiffuseCoeff().getX(),
-                        materials.at(materialIndices.at(j)).getDiffuseCoeff().getY(),
-                        materials.at(materialIndices.at(j)).getDiffuseCoeff().getZ());
-            glUniform3f(specularCoefficient, materials.at(materialIndices.at(j)).getSpecularCoeff().getX(),
-                        materials.at(materialIndices.at(j)).getSpecularCoeff().getY(),
-                        materials.at(materialIndices.at(j)).getSpecularCoeff().getZ());
-            glUniform1f(specularAlpha, materials.at(materialIndices.at(j)).getShininess());
+            if (object.doesHaveTextures()) {
+               glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).getAmbientCoeff().getX(),
+                       materials.at(materialIndices.at(j)).getAmbientCoeff().getY(),
+                       materials.at(materialIndices.at(j)).getAmbientCoeff().getZ());
+               glUniform3f(diffusiveCoefficient, materials.at(materialIndices.at(j)).getDiffuseCoeff().getX(),
+                       materials.at(materialIndices.at(j)).getDiffuseCoeff().getY(),
+                       materials.at(materialIndices.at(j)).getDiffuseCoeff().getZ());
+               glUniform3f(specularCoefficient, materials.at(materialIndices.at(j)).getSpecularCoeff().getX(),
+                       materials.at(materialIndices.at(j)).getSpecularCoeff().getY(),
+                       materials.at(materialIndices.at(j)).getSpecularCoeff().getZ());
+               glUniform1f(specularAlpha, materials.at(materialIndices.at(j)).getShininess());
 
-            /*
-            if (materialIndices.at(j) == 1) {
+               /*
+               if (materialIndices.at(j) == 1) {
 
+               }
+               */
+
+               // Imposto lo uniform interessato con la texture unit in cui è presente la texture
+               // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
+               glActiveTexture(GL_TEXTURE0);
+               // Il bind sulla variabile texture1 ora si riverisce alla texture unit a cui è stata collegata
+               glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
+
+               glActiveTexture(GL_TEXTURE1);
+               glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(j));
             }
-             */
 
-            // Imposto lo uniform interessato con la texture unit in cui è presente la texture
-            // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
-            glActiveTexture(GL_TEXTURE0);
-            // Il bind sulla variabile texture1 ora si riverisce alla texture unit a cui è stata collegata
-            glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
-
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(j));
+            if (object.doesNeedNoCulling()) {
+               glDisable(GL_CULL_FACE);
+            }
 
             glBindVertexArray(vertexArrayObjects.at(j));
             // Chamata di disegno della primitiva
             glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
+
+            if (object.doesNeedNoCulling()) {
+               glEnable(GL_CULL_FACE);
+            }
          }
       }
 

@@ -18,6 +18,8 @@ uniform float specularAlpha;
 
 uniform vec3 eye;
 
+uniform float gammaCorrection;
+
 vec3 ambiental;
 vec3 diffuse;
 vec3 specular;
@@ -43,5 +45,5 @@ void main() {
     //specular = pow(max(0, abs(dot(view, reflection))), specularAlpha) * specularCoefficient;
     specular = pow(max(0, abs(dot(halfway, newNormal))), specularAlpha) * specularCoefficient;
 
-    fragColor = texture(texture1, outTextCoord) * vec4((ambiental + diffuse + specular) * lightColor, 1);
+    fragColor = texture(texture1, outTextCoord) * vec4((ambiental + pow(diffuse, vec3(gammaCorrection)) + specular) * lightColor, 1);
 }

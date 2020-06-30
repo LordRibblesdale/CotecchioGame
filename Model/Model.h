@@ -24,6 +24,9 @@ class Model {
    float yScale = 1;
    float zScale = 1;
 
+   bool hasTextures;
+   bool needsNoCulling;
+
 public:
    Model(std::string location, std::string name);
 
@@ -40,6 +43,12 @@ public:
 
    const string &getName() const;
    const string &getLocation() const;
+
+   bool doesHaveTextures() const;
+   void setTexturesEnabled(bool hasTextures);
+
+   bool doesNeedNoCulling() const;
+   void setNeedsNoCulling(bool needsNoCulling);
 
    const float& getXTranslation() const;
    void setXTranslation(const float& xTranslation);

@@ -77,7 +77,6 @@ extern std::unique_ptr<CameraTranslation> cameraTranslation;
 extern std::unique_ptr<CameraTranslation> cameraTranslation2;
 extern double cameraPlayerPositionTime;
 
-extern GLuint blurUniform;
 extern float blurValue;
 
 extern unsigned int playerIndex;

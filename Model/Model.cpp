@@ -173,3 +173,19 @@ const string &Model::getName() const {
 const string &Model::getLocation() const {
    return location;
 }
+
+bool Model::doesHaveTextures() const {
+   return hasTextures;
+}
+
+void Model::setTexturesEnabled(bool hasTextures) {
+   Model::hasTextures = hasTextures;
+}
+
+bool Model::doesNeedNoCulling() const {
+   return needsNoCulling;
+}
+
+void Model::setNeedsNoCulling(bool needsNoCulling) {
+   Model::needsNoCulling = needsNoCulling;
+}
