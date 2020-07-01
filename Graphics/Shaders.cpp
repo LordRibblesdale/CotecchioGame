@@ -128,7 +128,7 @@ void loadTextureFromFile(std::vector<GLuint>& textureCoords, std::unordered_map<
 void loadBumpTextureFromFile(std::vector<GLuint> &bumpUniforms, std::unordered_map<std::string, GLuint>& bMap, rapidxml::xml_node<>* bumpNode, std::string location) {}
  */
 
-void loadTexture(const std::string &location, const std::string &name) {
+void loadTexture(const std::string &location, const std::string &name, bool loadFiles) {
    std::unordered_map<std::string, GLuint> map;
    std::unordered_map<std::string, GLuint> bMap;
 
@@ -184,20 +184,67 @@ void loadTexture(const std::string &location, const std::string &name) {
          } else if (std::string("Velvet") == position->first_attribute("name")->value()) {
             material.setDiffuseCoeff(Float3(1, 1, 1));
             material.setRoughness(std::stof(position->first_node("PBR")->first_attribute("roughness")->value()));
+         } else if (std::string("Generic") == position->first_attribute("name")->value()) {
+            material.setDiffuseCoeff(Float3(1, 1, 1));
          }
 
          materials.push_back(material);
       }
 
-      for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
-         if (std::string("Texture") == position->name()) {
-            if (std::string("Empty") != position->value()) {
+      if (loadFiles) {
+         for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
+            if (std::string("Texture") == position->name()) {
+               if (std::string("Empty") != position->value()) {
+                  texUniform = createTextureUniform();
+
+                  texFile = position->first_attribute("name")->value();
+
+                  if (map.find(texFile) != map.end()) {
+                     textureUniforms.emplace_back(map.at(texFile));
+                  } else {
+                     data = stbi_load((location + texFile).c_str(), &width, &height, &channels, 0);
+
+                     if (data) {
+                        /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
+                         *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
+                         *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
+                         */
+                        glActiveTexture(GL_TEXTURE0);
+                        glBindTexture(GL_TEXTURE_2D, texUniform);
+                        glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
+                        // Creazione della mipmap della texture bindata
+                        glGenerateMipmap(GL_TEXTURE_2D);
+
+                        glBindTexture(GL_TEXTURE_2D, 0);
+                     } else {
+                        std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+                     }
+
+                     stbi_image_free(data);
+
+                     textureUniforms.emplace_back(texUniform);
+                     map.emplace(texFile, texUniform);
+                  }
+               } else {
+                  textureUniforms.emplace_back(0);
+               }
+
+               if (std::string("Wood") == position->first_attribute("material")->value()) {
+                  materialIndices.emplace_back(0);
+               } else if (std::string("Velvet") == position->first_attribute("material")->value()) {
+                  materialIndices.emplace_back(1);
+               }
+            }
+
+            rapidxml::xml_node<>* bumpNode = position->first_node("Bump");
+            if (bumpNode) {
+               //thread2 = std::move(std::thread(loadBumpTextureFromFile, std::ref(bumpUniforms), std::ref(bMap), bumpNode, location));
+
                texUniform = createTextureUniform();
+               texFile = bumpNode->first_attribute("name")->value();
 
-               texFile = position->first_attribute("name")->value();
-
-               if (map.find(texFile) != map.end()) {
-                  textureUniforms.emplace_back(map.at(texFile));
+               if (bMap.find(texFile) != bMap.end()) {
+                  bumpUniforms.emplace_back(bMap.at(texFile));
                } else {
                   data = stbi_load((location + texFile).c_str(), &width, &height, &channels, 0);
 
@@ -206,77 +253,34 @@ void loadTexture(const std::string &location, const std::string &name) {
                       *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
                       *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
                       */
-                     glActiveTexture(GL_TEXTURE0);
+                     glActiveTexture(GL_TEXTURE1);
                      glBindTexture(GL_TEXTURE_2D, texUniform);
-                     // TODO check channels
                      glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
                      // Creazione della mipmap della texture bindata
                      glGenerateMipmap(GL_TEXTURE_2D);
 
                      glBindTexture(GL_TEXTURE_2D, 0);
                   } else {
+                     std::cout << texFile << std::endl;
                      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
                   }
 
                   stbi_image_free(data);
 
-                  textureUniforms.emplace_back(texUniform);
-                  map.emplace(texFile, texUniform);
+                  bumpUniforms.emplace_back(texUniform);
+                  bMap.emplace(texFile, texUniform);
                }
             } else {
-               textureUniforms.emplace_back(0);
+               bumpUniforms.emplace_back(0);
             }
-
-            if (std::string("Wood") == position->first_attribute("material")->value()) {
-               materialIndices.emplace_back(0);
-            } else if (std::string("Velvet") == position->first_attribute("material")->value()) {
-               materialIndices.emplace_back(1);
+            /*
+            if (thread1.joinable()) {
+               thread1.join();
             }
+             */
          }
-
-         rapidxml::xml_node<>* bumpNode = position->first_node("Bump");
-         if (bumpNode) {
-            //thread2 = std::move(std::thread(loadBumpTextureFromFile, std::ref(bumpUniforms), std::ref(bMap), bumpNode, location));
-
-            texUniform = createTextureUniform();
-            texFile = bumpNode->first_attribute("name")->value();
-
-            if (bMap.find(texFile) != bMap.end()) {
-               bumpUniforms.emplace_back(bMap.at(texFile));
-            } else {
-               data = stbi_load((location + texFile).c_str(), &width, &height, &channels, 0);
-
-               if (data) {
-                  /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
-                   *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
-                   *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
-                   */
-                  glActiveTexture(GL_TEXTURE1);
-                  glBindTexture(GL_TEXTURE_2D, texUniform);
-                  // TODO check channels
-                  glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
-                  // Creazione della mipmap della texture bindata
-                  glGenerateMipmap(GL_TEXTURE_2D);
-
-                  glBindTexture(GL_TEXTURE_2D, 0);
-               } else {
-                  std::cout << texFile << std::endl;
-                  std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
-               }
-
-               stbi_image_free(data);
-
-               bumpUniforms.emplace_back(texUniform);
-               bMap.emplace(texFile, texUniform);
-            }
-         } else {
-            bumpUniforms.emplace_back(0);
-         }
-         /*
-         if (thread1.joinable()) {
-            thread1.join();
-         }
-          */
+      } else {
+         materialIndices.emplace_back(2);
       }
 
       //thread2.join();

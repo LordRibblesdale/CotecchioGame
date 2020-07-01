@@ -56,6 +56,14 @@ public:
    void setColor(const Color &color) {
       Light::color = color;
    }
+
+   float getIntensity() const {
+      return intensity;
+   }
+
+   void setIntensity(float intensity) {
+      Light::intensity = intensity;
+   }
 };
 
 #endif //LIGHT_H

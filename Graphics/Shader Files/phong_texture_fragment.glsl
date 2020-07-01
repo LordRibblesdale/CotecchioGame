@@ -9,7 +9,7 @@ out vec4 fragColor; // Colore da rappresentare - in questo caso tramite
 // Scrittura di variabili uniform per ottenere informazioni delle luci (pos, color e coeff)
 uniform vec3 lightPos;
 uniform vec3 lightColor;
-uniform vec3 lightIntensity;
+uniform float lightIntensity;
 
 uniform vec3 ambientCoefficient;
 uniform vec3 diffusiveCoefficient;
@@ -29,21 +29,26 @@ uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene
 uniform sampler2D bumpTexture;  //TODO implement normal mapping
 
 void main() {
-    float normalDelta = texture(bumpTexture, outTextCoord).x -0.5f;
-    vec3 newNormal = normalize(outNormalVector) + vec3(0, 0, 1.5f*normalDelta);
+    float normalDelta = texture(bumpTexture, outTextCoord).x -0.25f;
+    vec3 newNormal = (1 + 2.5*normalDelta) * outNormalVector;
     vec3 p2l = normalize(lightPos - sPos);
 
     // Moltiplico più tardi il fattore comune lightColor
-    ambiental = ambientCoefficient * lightIntensity;
-    diffuse = max(0, abs(dot(newNormal, p2l))) * diffusiveCoefficient * lightIntensity;
+    // TODO implement multiple types of light attenuation
+    float pointDistance = distance(lightPos, sPos);
+    float attenuation = lightIntensity / (pointDistance);
+
+    ambiental = ambientCoefficient * attenuation;
+    diffuse = max(0, dot(newNormal, p2l)) * diffusiveCoefficient * attenuation;
 
     vec3 view = normalize(eye - sPos);
     //Blinn
     halfway = normalize(p2l + view);
     //Phong
     //vec3 reflection = reflect(-p2l, newNormal);
-    //specular = pow(max(0, abs(dot(view, reflection))), specularAlpha) * specularCoefficient;
-    specular = pow(max(0, abs(dot(halfway, newNormal))), specularAlpha) * specularCoefficient;
+    //specular = pow(max(0, dot(view, reflection)), specularAlpha) * specularCoefficient;
+    specular = pow(max(0, dot(halfway, newNormal)), specularAlpha) * specularCoefficient;
 
-    fragColor = texture(texture1, outTextCoord) * vec4((ambiental + pow(diffuse, vec3(gammaCorrection)) + specular) * lightColor, 1);
+    vec4 txIn = texture(texture1, outTextCoord);
+    fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + diffuse + specular), txIn.a);
 }

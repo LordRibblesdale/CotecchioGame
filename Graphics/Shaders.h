@@ -80,7 +80,7 @@ void loadShader(std::string& string, const std::string& location);
 
 GLuint createTextureUniform();
 
-void loadTexture(const std::string &location, const std::string &name);
+void loadTexture(const std::string &location, const std::string &name, bool loadFiles);
 
 void loadCardTextures();
 

@@ -252,16 +252,18 @@ void loadObjects() {
    // TODO optimize callings
    OBJ_NAME = "World";
    s = std::move(DATA_ASSETS_LOCATION + OBJ_NAME + ".obj");
+   importer.FreeScene();
    scene = importer.ReadFile(s, aiProcess_Triangulate);
 
    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
       std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
    } else {
-      Model table(TABLE_ASSETS_LOCATION, OBJ_NAME);
+      Model table(DATA_ASSETS_LOCATION, OBJ_NAME);
       table.processNode(scene->mRootNode, scene);
 
       table.setTexturesEnabled(false);
       table.setNeedsNoCulling(true);
+      table.setXRotation(degree2Radiants(90));
       objects.emplace_back(table);
    }
 
@@ -284,8 +286,6 @@ void loadObjects() {
    materialIndices.reserve(texturesLength);
 
    for (const auto& object : objects) {
-      std::cout << "SES" << std::endl;
-
       for (const auto& mesh : object.getMeshes()) {
          generateObjects(mesh);
       }
@@ -302,9 +302,7 @@ void loadObjects() {
          glUseProgram(0);
       */
 
-      if (object.doesHaveTextures()) {
-         loadTexture(object.getLocation(), object.getName());
-      }
+      loadTexture(object.getLocation(), object.getName(), object.doesHaveTextures());
    }
 
    createPlayerPositions(3);
@@ -389,7 +387,7 @@ void prepareCardRendering() {
 
 void prepareSceneLights() {
    lights.reserve(1);
-   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 20)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
+   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 15)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -531,7 +529,7 @@ void render() {
       prevTime = currTime;
       currTime = glfwGetTime();
 
-      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + Float3(0, 0, 0.5f*sinf(glfwGetTime())));
+      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + Float3(0, 0, 0.05f*sinf(glfwGetTime())));
 
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
 
@@ -574,14 +572,14 @@ void render() {
       glUniform3f(lightPosUniform, lights.at(0).get()->getOrigin().getX(), lights.at(0).get()->getOrigin().getY(), lights.at(0).get()->getOrigin().getZ());
       glUniform3f(lightColorUniform, lights.at(0).get()->getColor().getRed(), lights.at(0).get()->getColor().getGreen(), lights.at(0).get()->getColor().getBlue());
       //TODO manage falloff
-      glUniform3f(lightIntensity, 1.0f, 1.0f, 1.0f);
+      glUniform1f(lightIntensity, lights.at(0).get()->getIntensity());
 
       // Caricare vertexArrayObject interessato
       // TODO optimize by setting uniform locally in RAM
       glUniform1i(glGetUniformLocation(phongShaderProgram, "texture1"), 0);
       glUniform1i(glGetUniformLocation(phongShaderProgram, "bumpTexture"), 1);
 
-      glUniform1i(gammaUniform, GAMMA_CORRECTION);
+      glUniform1f(gammaUniform, GAMMA_CORRECTION);
 
       for (auto& object : objects) {
          m = std::move(object.getWorldCoordinates());
@@ -614,6 +612,10 @@ void render() {
 
                glActiveTexture(GL_TEXTURE1);
                glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(j));
+            } else {
+               glUniform3f(ambientCoefficient, materials.at(materials.size()-1).getAmbientCoeff().getX(),
+                           materials.at(materials.size()-1).getAmbientCoeff().getY(),
+                           materials.at(materials.size()-1).getAmbientCoeff().getZ());
             }
 
             if (object.doesNeedNoCulling()) {
