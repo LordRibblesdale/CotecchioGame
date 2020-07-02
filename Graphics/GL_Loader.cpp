@@ -122,6 +122,8 @@ bool setupOfflineRendering() {
 
    if (ENABLE_MULTISAMPLING) {
       // TODO fix multisampling
+      glEnable(GL_MULTISAMPLE);
+
       // Attivazione multisampling (va creato un nuovo buffer che contenga le informazioni di colore con l'azione dell'algoritmo di MSAA)
       //IMPORTANTE: i sample per il Color Buffer DEVONO essere equivalenti a quelli del Depth e Color Buffer (per equivalenza di numero di pixel)
       glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, offlineTexture);
@@ -189,7 +191,11 @@ void compileShaders() {
 
    //--------------------------OFFLINE RENDERING--------------------------------//
 
-   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_fragment.glsl", offlineShaderProgram);
+   if (ENABLE_MULTISAMPLING) {
+      compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_msaa_fragment.glsl", offlineShaderProgram);
+   } else {
+      compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_fragment.glsl", offlineShaderProgram);
+   }
 
    //---------------------------CARD RENDERING--------------------------------//
 
@@ -498,6 +504,11 @@ void render() {
 
    GLuint blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
 
+   GLuint samplesUniform = 0;
+   if (ENABLE_MULTISAMPLING) {
+      samplesUniform = glGetUniformLocation(offlineShaderProgram, "samples");
+   }
+
    GLuint cardModelMatrix = glGetUniformLocation(cardsShader, "model");
    GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
    GLuint cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
@@ -727,6 +738,10 @@ void render() {
 
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
       glUseProgram(offlineShaderProgram);
+
+      if (ENABLE_MULTISAMPLING) {
+         glUniform1i(samplesUniform, MULTISAMPLING_LEVEL);
+      }
 
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
