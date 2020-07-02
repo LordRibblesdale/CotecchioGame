@@ -1,4 +1,4 @@
--> TODO import texture with premultiplied alpha
+-> TODO check positions when window size are changed
 -> TODO Implement XML reading-writing system
 
 -> Add matrix conversion in upper dimension (example: projective-4)
@@ -14,3 +14,4 @@
 -> Make all stream operators "friend" and  - DONE
 -> vector reserve - DONE
 -> Normalise all vectors (especially if involved into orthogonal matrices) [ex: world->view] - DONE
+-> Import texture with premultiplied alpha - DONE

@@ -14,8 +14,8 @@
 #include <assimp/postprocess.h>
 #endif
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+//#include <ft2build.h>
+//#include FT_FREETYPE_H
 
 #include <random>
 
@@ -256,6 +256,7 @@ void loadObjects() {
    }
 
    // TODO optimize callings
+   // TODO fix rendering
    OBJ_NAME = "World";
    s = std::move(DATA_ASSETS_LOCATION + OBJ_NAME + ".obj");
    importer.FreeScene();

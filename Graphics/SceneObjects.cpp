@@ -67,7 +67,7 @@ std::unique_ptr<CameraTranslation> cameraTranslation;
 std::unique_ptr<CameraTranslation> cameraTranslation2;
 double cameraPlayerPositionTime;
 
-float blurValue = 1;
+float blurValue;
 
 unsigned int playerIndex = 0;
 unsigned short int sessionPlayers = 0;
