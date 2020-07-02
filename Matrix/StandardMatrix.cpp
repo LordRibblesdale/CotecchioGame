@@ -166,7 +166,6 @@ SquareMatrix Projection::onAxisFOV2ClipProjectiveMatrix(const Camera& camera) {
    return onAxisView2ClipProjectiveMatrix(camera.getRight(), camera.getTop(), camera.getNear(), camera.getFar());
 }
 
-
 SquareMatrix Projection::orthogonalProjection(const float &right, const float &left, const float &near, const float &far,
                                  const float &top, const float &bottom) {
    float invRL = 1/(right-left);

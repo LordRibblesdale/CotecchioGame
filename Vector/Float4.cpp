@@ -160,7 +160,7 @@ void Float4::setW(const float &w) {
    getVector().get()[3] = w;
 }
 
-Float3 Float4::getFloat3() {
+Float3 Float4::getFloat3() const {
    if (vector_.get()[3] != 0) {
       float inv = 1 / getW();
 

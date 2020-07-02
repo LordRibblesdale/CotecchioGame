@@ -64,4 +64,12 @@ SquareMatrix Card::getLocal2World() const {
    return local2World;
 }
 
+bool Card::isSelected1() const {
+   return isSelected;
+}
+
+void Card::setIsSelected(bool isSelected) {
+   Card::isSelected = isSelected;
+}
+
 

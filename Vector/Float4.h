@@ -42,7 +42,7 @@ public:
    void setZ(const float& z);
    void setW(const float& w);
 
-   Float3 getFloat3();
+   Float3 getFloat3() const;
 };
 
 #endif //FLOAT4_H

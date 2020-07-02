@@ -50,7 +50,7 @@ public:
 
    bool isIntersecting(const Box& box) const;
 
-   TriangleIntersection& getTriangleIntersection(const Triangle& triangle) const;
+   TriangleIntersection getTriangleIntersection(const Triangle& triangle) const;
 
    Ray getReflectionOn(const Triangle& triangle, const TriangleIntersection& intersection);
    Ray getRefractionOn(const Triangle& triangle, const TriangleIntersection& intersection);

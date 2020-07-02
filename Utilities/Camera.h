@@ -31,8 +31,8 @@ public:
 
    Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left, float right, float angle);
 
-
    SquareMatrix world2ViewMatrix();
+   SquareMatrix view2WorldMatrix();
 
    float getNear() const;
 

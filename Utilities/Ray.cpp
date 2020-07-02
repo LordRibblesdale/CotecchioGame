@@ -37,32 +37,34 @@ bool Ray::isIntersecting(const Box &box) const {
    return true;
 }
 
-TriangleIntersection& Ray::getTriangleIntersection(const Triangle &triangle) const {
-   std::unique_ptr<TriangleIntersection> intersection(new TriangleIntersection(false, nullptr, nullptr));
+TriangleIntersection Ray::getTriangleIntersection(const Triangle &triangle) const {
+   TriangleIntersection intersection(false, nullptr, nullptr);
 
    //TODO optimise memory?
-   Float3 q(direction_.crossProduct(triangle.getPoints()[2] - triangle.getPoints()[0]));
-   float determinant = q.dotProduct(triangle.getPoints()[1]);
+   Float3 e2(std::move(triangle.getPoints()[2] - triangle.getPoints()[0]));
+   Float3 e1(std::move(triangle.getPoints()[1] - triangle.getPoints()[0]));
+   Float3 q(direction_.crossProduct(e2));
+   float determinant = q.dotProduct(e1);
 
-   if (determinant != 0 || (determinant > -EPSILON && determinant < EPSILON)) {
-      Float3 s(origin_ - triangle.getPoints()[2]);
+   if (determinant != 0 || (determinant < -EPSILON || determinant > EPSILON)) {
+      Float3 s(origin_ - triangle.getPoints()[0]);
       float a = 1 / determinant;
 
       float u = a*(q.dotProduct(s));
 
       if (u >= 0) {
-         Float3 r(s.crossProduct(triangle.getPoints()[1] - triangle.getPoints()[0]));
+         Float3 r(std::move(s.crossProduct(e1)));
          float v = a*(r.dotProduct(direction_));
 
          if (v >= 0 && (u+v) <= 1) {
-            float t = a*(r.dotProduct(triangle.getPoints()[2] - triangle.getPoints()[0]));
+            float t = a*(r.dotProduct(e2));
 
-            intersection = std::move(std::make_unique<TriangleIntersection>(true, new Float3(origin_ + t*direction_), new Float3(t, u, v)));
+            intersection = std::move(TriangleIntersection(true, new Float3(origin_ + t*direction_), new Float3(t, u, v)));
          }
        }
    }
 
-   return *intersection.release();
+   return intersection;
 }
 
 Ray Ray::getReflectionOn(const Triangle &triangle, const TriangleIntersection &intersection) {
@@ -70,7 +72,7 @@ Ray Ray::getReflectionOn(const Triangle &triangle, const TriangleIntersection &i
 }
 
 Ray Ray::getRefractionOn(const Triangle &triangle, const TriangleIntersection &intersection) {
-   //TODO implement Schlick equations
+   //TODO implement refraction
    return Ray(Float3(), Float3());
 }
 

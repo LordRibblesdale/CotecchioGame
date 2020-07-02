@@ -4,6 +4,8 @@
 #include "SceneObjects.h"
 #include "../Animation/Scripts.h"
 #include "Settings.h"
+#include "../Model/Triangle.h"
+#include "../Utilities/Ray.h"
 
 #if (_MSC_VER >= 1500)
 #include "Graphics/assimp/include/assimp/Importer.hpp"
@@ -34,6 +36,17 @@ void refreshWindowSize(GLFWwindow *window, int width, int height) {
 
    glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
+
+   if (ENABLE_MULTISAMPLING) {
+      glBindFramebuffer(GL_FRAMEBUFFER, secondaryFrameBuffer);
+      glRenderbufferStorageMultisample(GL_RENDERBUFFER, MULTISAMPLING_LEVEL, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
+
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaOfflineTexture);
+      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MULTISAMPLING_LEVEL, GL_RGB, X_RESOLUTION, Y_RESOLUTION, GL_TRUE);
+
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+   }
+
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -676,14 +689,64 @@ void render() {
       glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, v.getArray());
 
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
+      glStencilMask(0x00);
+
+      bool hasSelectedCard = false;
+      double x, y;
+      glfwGetCursorPos(window, &x, &y);
 
       for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
-         if (pIndex == playerIndex) {
-            glStencilMask(0xFF);
-         } // TODO check email (else?)
+         //if (pIndex == playerIndex) {
+         //   glStencilMask(0xFF);
+         //} // TODO check email (else?)
 
          for (unsigned int i = 0; i < players.at(pIndex).getCards().size(); ++i) {
             cM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
+
+            if (pIndex == playerIndex) {
+               if (!hasSelectedCard) {
+                  Float4 p0(cM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
+                  Float4 p1(cM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
+                  Float4 p2(cM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
+                  Float4 p3(cM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1)));
+
+                  Triangle cardT1(p0, p1, p2);
+                  Triangle cardT2(p2, p1, p3);
+
+                  // NDC -> Clip Space
+                  float xProj = (((2*x)/static_cast<float>(X_RESOLUTION)) -1)*(-camera.getNear());
+                  float yProj = (((2*y)/static_cast<float>(Y_RESOLUTION)) -1)*(-camera.getNear());
+                  float zProj = camera.getNear();
+
+                  SquareMatrix invProj(std::move(SquareMatrix::calculateInverse(Projection::onAxisFOV2ClipProjectiveMatrix(camera))));
+                  Float4 clipPoint(xProj, yProj, zProj, 1);
+
+                  // Clip Space -> View Space
+                  clipPoint = std::move(invProj.multiplyVector(clipPoint));
+                  // View Space -> World Space
+                  clipPoint = std::move(camera.view2WorldMatrix().multiplyVector(clipPoint));
+
+                  Ray ray(camera.getEye(), Float3(clipPoint.getFloat3()));
+
+                  TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
+                  TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
+
+                  if (i1.getHasIntersected() || i2.getHasIntersected()) {
+                     if (i1.getHasIntersected())
+                        std::cout << i1.getIntersectedPoint().toString() << std::endl;
+
+                     if (i2.getHasIntersected())
+                        std::cout << i2.getIntersectedPoint().toString() << std::endl;
+
+                     players.at(pIndex).getCards().at(i).setIsSelected(true);
+
+                     hasSelectedCard = true;
+
+                     glStencilMask(0xFF);
+                  }
+               }
+            }
+
             players.at(pIndex).getCards().at(i).updateCoords();
 
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
@@ -691,11 +754,13 @@ void render() {
             glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //glStencilMask(0x00);
          }
 
-         if (pIndex == playerIndex) {
-            glStencilMask(0x00);
-         }
+         //if (pIndex == playerIndex) {
+         //   glStencilMask(0x00);
+         //}
       }
 
       // Genero outlining tramite Stencil test
@@ -714,33 +779,23 @@ void render() {
       glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, p.getArray());
       glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, v.getArray());
 
-      for (auto & i : players.at(playerIndex).getCards()) {
-         cM = std::move(i.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
+      for (Card& card : players.at(playerIndex).getCards()) {
+         if (card.isSelected1()) {
+            cM = std::move(card.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
 
-         glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cM.getArray());
-
-         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-      }
-
-      // Da riattivare per permettere le modifiche al buffer (pulizia)
-      //glEnable(GL_DEPTH_TEST);
-      glStencilMask(0xFF);
-
-      /*
-      double x, y;
-      glfwGetCursorPos(window, &x, &y);
-       */
-
-      for (auto& player : players) {
-         for (unsigned int i = 0; i < player.getCards().size(); ++i) {
-            cM = std::move(player.getCards().at(i).getWorldCoordinates(i));
-
-            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());
+            glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cM.getArray());
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            card.setIsSelected(false);
+            break;
          }
       }
 
+      // Da riattivare per permettere le modifiche al buffer (pulizia)
+      glStencilMask(0xFF);
+
+      // Downsampling del color buffer MSAA per riportarlo a risoluzione non upscalata
       if (ENABLE_MULTISAMPLING) {
          glBindFramebuffer(GL_READ_FRAMEBUFFER, offlineFrameBuffer);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, secondaryFrameBuffer);

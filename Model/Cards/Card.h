@@ -16,6 +16,8 @@ struct Card {
 
    SquareMatrix local2World;
 
+   bool isSelected;
+
    // value è del tipo NM (10, 11, 20, 39, ....)
    Card(unsigned int vaule, unsigned short int playerID) : local2World(std::move(SquareMatrix(4, {}))) {
       Card::value = vaule;
@@ -31,6 +33,10 @@ struct Card {
 
    // Scritta appositamente per crearla come copia
    SquareMatrix getLocal2World() const;
+
+   bool isSelected1() const;
+
+   void setIsSelected(bool isSelected);
 };
 
 #endif //COTECCHIOGAME_CARD_H

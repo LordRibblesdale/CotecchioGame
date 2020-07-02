@@ -69,6 +69,22 @@ SquareMatrix Camera::world2ViewMatrix() {
    return SquareMatrix::calculateInverse(view2WorldMatrix);
 }
 
+SquareMatrix Camera::view2WorldMatrix() {
+   Float3 zView(std::move(eye - lookAt));
+   zView.normalize();
+   Float3 xView(std::move(up.crossProduct(zView)));
+   xView.normalize();
+   Float3 yView(std::move(zView.crossProduct(xView)));
+   yView.normalize();
+
+   SquareMatrix view2WorldMatrix(4, {xView.getX(), yView.getX(), zView.getX(), eye.getX(),
+                                     xView.getY(), yView.getY(), zView.getY(), eye.getY(),
+                                     xView.getZ(), yView.getZ(), zView.getZ(), eye.getZ(),
+                                     0, 0, 0, 1});
+
+   return view2WorldMatrix;
+}
+
 float Camera::getNear() const {
    return near;
 }
