@@ -31,6 +31,8 @@ extern GLuint colorShader;
 extern GLuint offlineFrameBuffer;
 extern GLuint offlineTexture;
 extern GLuint offlineRenderBufferObject;
+extern GLuint secondaryFrameBuffer;
+extern GLuint msaaOfflineTexture;
 
 extern std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
 extern std::vector<GLuint> vertexBufferObjects;  // Vertex Array Object, contenitore per inserire array, vertici e topologia, usandolo come definizione logica dell'oggetto

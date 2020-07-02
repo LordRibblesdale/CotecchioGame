@@ -103,6 +103,8 @@ bool setupWindowEnvironment() {
 
 
 bool setupOfflineRendering() {
+   bool status = true;
+
    // Generazione del framebuffer
    glGenFramebuffers(1, &offlineFrameBuffer);
 
@@ -122,11 +124,10 @@ bool setupOfflineRendering() {
 
    if (ENABLE_MULTISAMPLING) {
       // TODO fix multisampling
-      glEnable(GL_MULTISAMPLE);
-
       // Attivazione multisampling (va creato un nuovo buffer che contenga le informazioni di colore con l'azione dell'algoritmo di MSAA)
       //IMPORTANTE: i sample per il Color Buffer DEVONO essere equivalenti a quelli del Depth e Color Buffer (per equivalenza di numero di pixel)
-      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, offlineTexture);
+      glGenTextures(1, &msaaOfflineTexture);
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaOfflineTexture);
 
       // false per fixed sample location (da tenere false?) [con true, parte, immagino sia da implementare la posizione casuale dei campioni]
       // Si sceglie la funzione apposita per il Multisample
@@ -134,8 +135,8 @@ bool setupOfflineRendering() {
 
       glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, offlineTexture, 0);
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, msaaOfflineTexture, 0);
 
       // Utilizzo di Renderbuffer (buffer per il rendering, solo per scrittura ma non come lettura; unicamente assegnabile)
       // Generazione del RenderBufferObject (l'uso del RBO è per la sua ottimizzazione interna a OpenGL nel conservare le informazioni colore
@@ -146,24 +147,17 @@ bool setupOfflineRendering() {
       // Si sceglie la funzione apposita per il Multisample
       glRenderbufferStorageMultisample(GL_RENDERBUFFER, MULTISAMPLING_LEVEL, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
       // Collego il RBO al Framebuffer creato, come buffer per Depth Test e Stencil Text
+      glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
       glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, offlineRenderBufferObject);
 
-      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+      status = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+      // Nuovo framebuffer per applicare post processing al risultato elaborato da antialiasing
+      glGenFramebuffers(1, &secondaryFrameBuffer);
+      glBindFramebuffer(GL_FRAMEBUFFER, secondaryFrameBuffer);
    } else {
-      glBindTexture(GL_TEXTURE_2D, offlineTexture);
-
-      // nullptr solo per riservare memoria, non inizializzare ora la texture (sarà il fragment shader a riempire la texture)
-      // Attenzione del tipo inserito (in questo caso è colore, quindi GL_RGB)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-      // Nessuna distorsione: la texture sarà a tutto schermo visibile, inamovibile
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-      // Necessità di collegare il color attachment (l'"indirizzo" della texture)
-      // Stiamo collegando ora il colore(da definire il tipo di attach, ovvero GL_TEXTURE_2D
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offlineTexture, 0);
-
       // Utilizzo di Renderbuffer (buffer per il rendering, solo per scrittura ma non come lettura; unicamente assegnabile)
       // Generazione del RenderBufferObject (l'uso del RBO è per la sua ottimizzazione interna a OpenGL nel conservare le informazioni colore
       glGenRenderbuffers(1, &offlineRenderBufferObject);
@@ -173,11 +167,27 @@ bool setupOfflineRendering() {
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
       // Collego il RBO al Framebuffer creato, come buffer per Depth Test e Stencil Text
       glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, offlineRenderBufferObject);
-
-      glBindTexture(GL_TEXTURE_2D, 0);
    }
 
-   return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+   glBindTexture(GL_TEXTURE_2D, offlineTexture);
+
+   // nullptr solo per riservare memoria, non inizializzare ora la texture (sarà il fragment shader a riempire la texture)
+   // Attenzione del tipo inserito (in questo caso è colore, quindi GL_RGB)
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+   // Nessuna distorsione: la texture sarà a tutto schermo visibile, inamovibile
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+   // Necessità di collegare il color attachment (l'"indirizzo" della texture)
+   // Stiamo collegando ora il colore(da definire il tipo di attach, ovvero GL_TEXTURE_2D
+   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offlineTexture, 0);
+
+   status = status && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+   return status;
 }
 
 void compileShaders() {
@@ -191,11 +201,7 @@ void compileShaders() {
 
    //--------------------------OFFLINE RENDERING--------------------------------//
 
-   if (ENABLE_MULTISAMPLING) {
-      compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_msaa_fragment.glsl", offlineShaderProgram);
-   } else {
-      compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_fragment.glsl", offlineShaderProgram);
-   }
+   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_fragment.glsl", offlineShaderProgram);
 
    //---------------------------CARD RENDERING--------------------------------//
 
@@ -733,6 +739,12 @@ void render() {
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          }
+      }
+
+      if (ENABLE_MULTISAMPLING) {
+         glBindFramebuffer(GL_READ_FRAMEBUFFER, offlineFrameBuffer);
+         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, secondaryFrameBuffer);
+         glBlitFramebuffer(0, 0, X_RESOLUTION, Y_RESOLUTION, 0, 0, X_RESOLUTION, Y_RESOLUTION, GL_COLOR_BUFFER_BIT, GL_NEAREST);
       }
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0);

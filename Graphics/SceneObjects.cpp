@@ -13,6 +13,8 @@ GLuint colorShader;
 GLuint offlineFrameBuffer;
 GLuint offlineTexture;
 GLuint offlineRenderBufferObject;
+GLuint secondaryFrameBuffer;
+GLuint msaaOfflineTexture;
 
 std::vector<GLuint> vertexArrayObjects;
 std::vector<GLuint> vertexBufferObjects;
