@@ -16,4 +16,7 @@ extern float GAMMA_CORRECTION;               //Default: 2.2       (Range 1-2.2)?
 
 extern float CAMERA_SENSIBILITY;             //Default: 0.5f      (Range 0.1f-2f)
 
+extern unsigned int TABLE_TYPE;
+extern unsigned int WORLD_TYPE;
+
 #endif //SETTINGS_H

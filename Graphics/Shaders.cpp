@@ -17,11 +17,12 @@
 
 //std::mutex mutex;
 
+int report;
+
 void compileShader(const string &vLocation, const string &fLocation,
                    GLuint &program) {
    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
    // Variabili per il controllo di errori
-   int report;
    char infoLog[512];
 
    std::string source;
@@ -122,6 +123,23 @@ GLuint createTextureUniform() {
    return uniform;
 }
 
+void createTextureUniform(GLuint& texture) {
+   // Creazione allocazione memoria texture
+   glGenTextures(1, &texture);
+   // Bind della texture
+
+   glBindTexture(GL_TEXTURE_2D, texture);
+   /* Impostare come applicare texture su s e t
+    *  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    *  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    * Impostare come comportarsi con dimensioni più o meno piccole in base alla distanza (es usando mipmap)
+    */
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+   glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 /*
 void loadTextureFromFile(std::vector<GLuint>& textureCoords, std::unordered_map<std::string, GLuint>& map, rapidxml::xml_node<>* position, std::string location) {}
 
@@ -195,7 +213,7 @@ void loadTexture(const std::string &location, const std::string &name, bool load
          for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
             if (std::string("Texture") == position->name()) {
                if (std::string("Empty") != position->value()) {
-                  texUniform = createTextureUniform();
+                  createTextureUniform(texUniform);
 
                   texFile = position->first_attribute("name")->value();
 
@@ -240,7 +258,7 @@ void loadTexture(const std::string &location, const std::string &name, bool load
             if (bumpNode) {
                //thread2 = std::move(std::thread(loadBumpTextureFromFile, std::ref(bumpUniforms), std::ref(bMap), bumpNode, location));
 
-               texUniform = createTextureUniform();
+               createTextureUniform(texUniform);
                texFile = bumpNode->first_attribute("name")->value();
 
                if (bMap.find(texFile) != bMap.end()) {
@@ -296,7 +314,7 @@ void loadCardTextures() {
    std::unique_ptr<unsigned char> data(stbi_load((DATA_ASSETS_LOCATION + "Cards.png").c_str(), &width, &height, &channels, 0));
 
    if (data) {
-      cardTexture = createTextureUniform();
+      createTextureUniform(cardTexture);
 
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, cardTexture);
@@ -308,7 +326,7 @@ void loadCardTextures() {
    data.reset(stbi_load((DATA_ASSETS_LOCATION + "Back.png").c_str(), &width, &height, &channels, 0));
 
    if (data) {
-      backCardTexture = createTextureUniform();
+      createTextureUniform(backCardTexture);
 
       glActiveTexture(GL_TEXTURE4);
       glBindTexture(GL_TEXTURE_2D, backCardTexture);

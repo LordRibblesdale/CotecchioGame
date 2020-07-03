@@ -23,6 +23,7 @@ void main() {
     sPos = vec3(tmp);
     gl_Position = projection * view * tmp;
 
+    // TODO optimise call (move to CPU)
     outNormalVector = normalize(mat3(transpose(inverse(model))) * normal);
     outTextCoord = inUV;
     outBackUV = backUV;

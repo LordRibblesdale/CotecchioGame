@@ -60,8 +60,6 @@ namespace Projection {
                                      const float& bottom);
 
    SquareMatrix onAxisOrthogonalProjection(const float& right, const float& top, const float& near, const float& far);
-
-
 }
 
 static float degree2Radiants(float degree) {

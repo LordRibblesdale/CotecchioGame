@@ -2,9 +2,6 @@
 
 GLFWwindow* window = nullptr;
 
-const unsigned short int PHONG_SHADER = 0;
-const unsigned short int COLOR_ONLY_SHADER = 1;
-
 GLuint phongShaderProgram;
 GLuint offlineShaderProgram;
 GLuint cardsShader;
@@ -47,7 +44,7 @@ GLuint sVAO;
 GLuint sVBO;
 GLuint sEBO;
 
-float aspectRatio;
+float aspectRatio = 540.0f/960.0f;
 
 Float3 lookAt(0, 0, 5);
 Camera camera(std::move(Float3(0, 20, 15)), lookAt, std::move(Float3(0, 0, 1)),

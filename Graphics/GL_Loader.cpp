@@ -136,7 +136,6 @@ bool setupOfflineRendering() {
    glGenTextures(1, &offlineTexture);
 
    if (ENABLE_MULTISAMPLING) {
-      // TODO fix multisampling
       // Attivazione multisampling (va creato un nuovo buffer che contenga le informazioni di colore con l'azione dell'algoritmo di MSAA)
       //IMPORTANTE: i sample per il Color Buffer DEVONO essere equivalenti a quelli del Depth e Color Buffer (per equivalenza di numero di pixel)
       glGenTextures(1, &msaaOfflineTexture);
@@ -256,42 +255,40 @@ void loadCards() {
    }
 }
 
-void loadObjects() {
-   // TODO initial translation, rotation and scale
-   const char* OBJ_NAME = "Table";
-   std::string s(TABLE_ASSETS_LOCATION + OBJ_NAME + ".obj");
+void loadObject(const std::string& location, const std::string& objName, const unsigned int& objType) {
+   std::string s(location + objName + ".obj");
    Assimp::Importer importer;
    const aiScene* scene(importer.ReadFile(s, aiProcess_Triangulate));
 
-   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+   if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
       std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
    } else {
-      Model table(TABLE_ASSETS_LOCATION, OBJ_NAME);
+      Model table(location, objName);
       table.processNode(scene->mRootNode, scene);
 
-      table.setTexturesEnabled(true);
-      table.setXRotation(degree2Radiants(90));
+      if (objType == TABLE_TYPE) {
+         table.setTexturesEnabled(true);
+         table.setXRotation(degree2Radiants(90));
+      } else if (objType == WORLD_TYPE) {
+         table.setTexturesEnabled(false);
+         table.setNeedsNoCulling(true);
+         table.setXScale(0.5f);
+         table.setYScale(0.5f);
+         table.setZScale(0.5f);
+         table.setXTranslation(1);
+         table.setXRotation(degree2Radiants(90));
+      }
+
       objects.emplace_back(table);
    }
+}
 
-   // TODO optimize callings
-   // TODO fix rendering
-   OBJ_NAME = "World";
-   s = std::move(DATA_ASSETS_LOCATION + OBJ_NAME + ".obj");
-   importer.FreeScene();
-   scene = importer.ReadFile(s, aiProcess_Triangulate);
+void loadObjects() {
+   // TODO initial translation, rotation and scale
+   loadObject(TABLE_ASSETS_LOCATION, "Table", TABLE_TYPE);
 
-   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
-   } else {
-      Model table(DATA_ASSETS_LOCATION, OBJ_NAME);
-      table.processNode(scene->mRootNode, scene);
-
-      table.setTexturesEnabled(false);
-      table.setNeedsNoCulling(true);
-      table.setXRotation(degree2Radiants(90));
-      objects.emplace_back(table);
-   }
+   // TODO FIX
+   loadObject(DATA_ASSETS_LOCATION, "World", WORLD_TYPE);
 
    unsigned long verticesLenght = 0;
    unsigned long texturesLength = 0;
@@ -309,7 +306,6 @@ void loadObjects() {
    vertexArrayObjects.reserve(verticesLenght);
    vertexBufferObjects.reserve(verticesLenght);
    textureUniforms.reserve(texturesLength);
-   materialIndices.reserve(texturesLength);
 
    for (const auto& object : objects) {
       for (const auto& mesh : object.getMeshes()) {
@@ -319,19 +315,19 @@ void loadObjects() {
       /* Richiesta della posizione della texture
        * Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
          GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-      * Assegnazione e modifica uniform a prescindere
-      * Uso glUseProgram per assegnare texture
+       * Assegnazione e modifica uniform a prescindere
+       * Uso glUseProgram per assegnare texture
          glUseProgram(shaderProgram);
-      * Assegnazione valore della texture a uno specifico canale di OpenGL
-      * Canali limitati, massimo un certo numero di texture contemporaneamente
+       * Assegnazione valore della texture a uno specifico canale di OpenGL
+       * Canali limitati, massimo un certo numero di texture contemporaneamente
          glUniform1i(textureUniform, 0);
          glUseProgram(0);
-      */
+       */
 
       loadTexture(object.getLocation(), object.getName(), object.doesHaveTextures());
    }
 
-   createPlayerPositions(3);
+   createPlayerPositions(4);
    loadCards();
    loadCardTextures();
 
@@ -686,7 +682,6 @@ void render() {
       glActiveTexture(GL_TEXTURE4);
       glBindTexture(GL_TEXTURE_2D, backCardTexture);
 
-      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
       glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
 
@@ -698,16 +693,43 @@ void render() {
       glfwGetCursorPos(window, &x, &y);
 
       for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
-         //if (pIndex == playerIndex) {
-         //   glStencilMask(0xFF);
-         //} // TODO check email (else?)
-
          for (unsigned int i = 0; i < players.at(pIndex).getCards().size(); ++i) {
+            //std::vector<SquareMatrix> matrices;
+            //matrices.reserve(4);
+
+            //players.at(pIndex).getCards().at(i).getWorldCoordinates(i, matrices);
+
             cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
 
             if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
                if (pIndex == playerIndex) {
                   if (!hasSelectedCard) {
+                     // Increase performance from ([3*n^3 + 4*n^2] to [12*n^2])
+                     // n = 4 -> 256 to 192 operations
+
+                     /*
+                     Float4 p0(matrices.at(0).multiplyVector(
+                             matrices.at(1).multiplyVector(
+                                     matrices.at(2).multiplyVector(
+                                             matrices.at(3).multiplyVector(
+                                                     Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1))))));
+                     Float4 p1(matrices.at(0).multiplyVector(
+                             matrices.at(1).multiplyVector(
+                                     matrices.at(2).multiplyVector(
+                                             matrices.at(3).multiplyVector(
+                                                     Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1))))));
+                     Float4 p2(matrices.at(0).multiplyVector(
+                             matrices.at(1).multiplyVector(
+                                     matrices.at(2).multiplyVector(
+                                             matrices.at(3).multiplyVector(
+                                             Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1))))));
+                     Float4 p3(matrices.at(0).multiplyVector(
+                             matrices.at(1).multiplyVector(
+                                     matrices.at(2).multiplyVector(
+                                             matrices.at(3).multiplyVector(
+                                             Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1))))));
+                                             */
+
                      Float4 p0(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
                      Float4 p1(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
                      Float4 p2(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
@@ -752,13 +774,7 @@ void render() {
             glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-            //glStencilMask(0x00);
          }
-
-         //if (pIndex == playerIndex) {
-         //   glStencilMask(0x00);
-         //}
       }
 
       // Genero outlining tramite Stencil test
@@ -776,6 +792,7 @@ void render() {
 
       glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
+      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
       for (Card& card : players.at(playerIndex).getCards()) {
          if (card.isSelected1()) {

@@ -20,9 +20,6 @@ extern GLFWwindow* window;
 
 //--------------------------------------------------------------//
 
-extern const unsigned short int PHONG_SHADER;
-extern const unsigned short int COLOR_ONLY_SHADER;
-
 extern GLuint phongShaderProgram;
 extern GLuint offlineShaderProgram;
 extern GLuint cardsShader;

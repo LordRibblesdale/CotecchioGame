@@ -2,6 +2,7 @@
 #define COTECCHIOGAME_CARD_H
 
 #include <iostream>
+#include <vector>
 #include "../../Matrix/SquareMatrix.h"
 
 extern float cardVertices[24];
@@ -28,6 +29,7 @@ struct Card {
    }
 
    SquareMatrix getWorldCoordinates(unsigned int cardIndex);
+   void getWorldCoordinates(unsigned int cardIndex, std::vector<SquareMatrix>& matrices);
 
    void updateCoords() const;
 
