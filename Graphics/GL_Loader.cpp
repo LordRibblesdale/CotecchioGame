@@ -541,11 +541,12 @@ void render() {
    GLuint colorViewMatrix = glGetUniformLocation(colorShader, "view");
    GLuint colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
 
-   SquareMatrix p(4, {});
-   SquareMatrix v(4, {});
-   SquareMatrix m(4, {});
+   SquareMatrix projM_V2C(4, {});
+   SquareMatrix viewM_W2V(4, {});
+   SquareMatrix viewM_V2W(4, {});
+   SquareMatrix modelM_L2W(4, {});
 
-   SquareMatrix cM(4, {});
+   SquareMatrix cardModelM(4, {});
 
    // Abilito Stencil test per l'outlining
    glEnable(GL_STENCIL_TEST);
@@ -591,11 +592,12 @@ void render() {
        * Quindi attenzione al posizionamento delle chiamate di modifica stato
        */
 
-      p = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera));
-      v = std::move(camera.world2ViewMatrix());
+      projM_V2C = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera));
+      viewM_V2W = std::move(camera.view2WorldMatrix());
+      viewM_W2V = std::move(SquareMatrix::calculateInverse(viewM_V2W));
 
-      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, p.getArray());
-      glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, v.getArray());
+      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, projM_V2C.getArray());
+      glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, viewM_W2V.getArray());
 
       glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
@@ -613,8 +615,8 @@ void render() {
       glUniform1f(gammaUniform, GAMMA_CORRECTION);
 
       for (auto& object : objects) {
-         m = std::move(object.getWorldCoordinates());
-         glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, m.getArray());
+         modelM_L2W = std::move(object.getWorldCoordinates());
+         glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, modelM_L2W.getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
             if (object.doesHaveTextures()) {
@@ -685,8 +687,8 @@ void render() {
       glBindTexture(GL_TEXTURE_2D, backCardTexture);
 
       glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
-      glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, p.getArray());
-      glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, v.getArray());
+      glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
+      glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
 
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
       glStencilMask(0x00);
@@ -701,43 +703,44 @@ void render() {
          //} // TODO check email (else?)
 
          for (unsigned int i = 0; i < players.at(pIndex).getCards().size(); ++i) {
-            cM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
+            cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
 
-            if (pIndex == playerIndex) {
-               if (!hasSelectedCard) {
-                  Float4 p0(cM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
-                  Float4 p1(cM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
-                  Float4 p2(cM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
-                  Float4 p3(cM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1)));
+            if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
+               if (pIndex == playerIndex) {
+                  if (!hasSelectedCard) {
+                     Float4 p0(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
+                     Float4 p1(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
+                     Float4 p2(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
+                     Float4 p3(cardModelM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1)));
 
-                  Triangle cardT1(p0, p1, p2);
-                  Triangle cardT2(p2, p1, p3);
+                     Triangle cardT1(p0, p1, p2);
+                     Triangle cardT2(p2, p1, p3);
 
-                  // NDC -> Clip Space
-                  float xProj = (((2*x)/static_cast<float>(X_RESOLUTION)) -1);//*(-camera.getNear()); // Normalization not necessary, why?
-                  float yProj = (((2*y)/static_cast<float>(Y_RESOLUTION)) -1);//*(-camera.getNear()); // Normalization not necessary, why?
-                  float zProj = -camera.getNear();
+                     // NDC -> Clip Space
+                     float xProj = (((2*x)/static_cast<float>(X_RESOLUTION)) -1);
+                     float yProj = -(((2*y)/static_cast<float>(Y_RESOLUTION)) -1);  // MINUS per via dell'asse invertito Y SCREEN rispetto a Y CLIP
+                     float zProj = -camera.getNear();
 
-                  SquareMatrix invProj(std::move(SquareMatrix::calculateInverse(p)));
-                  Float4 clipPoint(xProj, yProj, zProj, 1);
+                     // NDC Space -> View Space
+                     // ON-AXIS CAMERA
+                     Float4 clipPoint(xProj * camera.getRight(), yProj * camera.getTop(), zProj, 1);
 
-                  // Clip Space -> View Space
-                  clipPoint = std::move(invProj.multiplyVector(clipPoint));
-                  // View Space -> World Space
-                  clipPoint = std::move(camera.view2WorldMatrix().multiplyVector(clipPoint));
+                     // View Space -> World Space
+                     clipPoint = std::move(viewM_V2W.multiplyVector(clipPoint));
 
-                  Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
+                     Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
 
-                  // Implement multithreading w/ sync for better performance?
-                  TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
-                  TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
+                     // Implement multithreading w/ sync for better performance?
+                     TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
+                     TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
 
-                  if (i1.getHasIntersected() || i2.getHasIntersected()) {
-                     players.at(pIndex).getCards().at(i).setIsSelected(true);
+                     if (i1.getHasIntersected() || i2.getHasIntersected()) {
+                        players.at(pIndex).getCards().at(i).setIsSelected(true);
 
-                     hasSelectedCard = true;
+                        hasSelectedCard = true;
 
-                     glStencilMask(0xFF);
+                        glStencilMask(0xFF);
+                     }
                   }
                }
             }
@@ -746,7 +749,7 @@ void render() {
 
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
 
-            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cM.getArray());
+            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -771,14 +774,14 @@ void render() {
       glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
       glEnable(GL_DEPTH_TEST);
 
-      glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, p.getArray());
-      glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, v.getArray());
+      glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
+      glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
 
       for (Card& card : players.at(playerIndex).getCards()) {
          if (card.isSelected1()) {
-            cM = std::move(card.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
+            cardModelM = std::move(card.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
 
-            glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cM.getArray());
+            glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
