@@ -714,11 +714,11 @@ void render() {
                   Triangle cardT2(p2, p1, p3);
 
                   // NDC -> Clip Space
-                  float xProj = (((2*x)/static_cast<float>(X_RESOLUTION)) -1)*(-camera.getNear());
-                  float yProj = (((2*y)/static_cast<float>(Y_RESOLUTION)) -1)*(-camera.getNear());
-                  float zProj = camera.getNear();
+                  float xProj = (((2*x)/static_cast<float>(X_RESOLUTION)) -1);//*(-camera.getNear()); // Normalization not necessary, why?
+                  float yProj = (((2*y)/static_cast<float>(Y_RESOLUTION)) -1);//*(-camera.getNear()); // Normalization not necessary, why?
+                  float zProj = -camera.getNear();
 
-                  SquareMatrix invProj(std::move(SquareMatrix::calculateInverse(Projection::onAxisFOV2ClipProjectiveMatrix(camera))));
+                  SquareMatrix invProj(std::move(SquareMatrix::calculateInverse(p)));
                   Float4 clipPoint(xProj, yProj, zProj, 1);
 
                   // Clip Space -> View Space
@@ -726,18 +726,13 @@ void render() {
                   // View Space -> World Space
                   clipPoint = std::move(camera.view2WorldMatrix().multiplyVector(clipPoint));
 
-                  Ray ray(camera.getEye(), Float3(clipPoint.getFloat3()));
+                  Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
 
+                  // Implement multithreading w/ sync for better performance?
                   TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
                   TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
 
                   if (i1.getHasIntersected() || i2.getHasIntersected()) {
-                     if (i1.getHasIntersected())
-                        std::cout << i1.getIntersectedPoint().toString() << std::endl;
-
-                     if (i2.getHasIntersected())
-                        std::cout << i2.getIntersectedPoint().toString() << std::endl;
-
                      players.at(pIndex).getCards().at(i).setIsSelected(true);
 
                      hasSelectedCard = true;

@@ -1,4 +1,5 @@
 #include <limits>
+#include <iostream>
 #include "Ray.h"
 
 Ray::Ray(Float3 origin, Float3 direction) : origin_(std::move(origin)), direction_(std::move(direction)) {}
@@ -46,20 +47,21 @@ TriangleIntersection Ray::getTriangleIntersection(const Triangle &triangle) cons
    Float3 q(direction_.crossProduct(e2));
    float determinant = q.dotProduct(e1);
 
-   if (determinant != 0 || (determinant < -EPSILON || determinant > EPSILON)) {
+   if (determinant < -EPSILON || determinant > EPSILON) {
       Float3 s(origin_ - triangle.getPoints()[0]);
       float a = 1 / determinant;
-
       float u = a*(q.dotProduct(s));
 
-      if (u >= 0) {
+      if (u >= 0 && u <= 1) {
          Float3 r(std::move(s.crossProduct(e1)));
          float v = a*(r.dotProduct(direction_));
 
          if (v >= 0 && (u+v) <= 1) {
             float t = a*(r.dotProduct(e2));
 
-            intersection = std::move(TriangleIntersection(true, new Float3(origin_ + t*direction_), new Float3(t, u, v)));
+            if (t > EPSILON) {
+               intersection = std::move(TriangleIntersection(true, new Float3(origin_ + t*direction_), new Float3(t, u, v)));
+            }
          }
        }
    }

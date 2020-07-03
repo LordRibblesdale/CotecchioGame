@@ -51,7 +51,7 @@ float aspectRatio;
 
 Float3 lookAt(0, 0, 5);
 Camera camera(std::move(Float3(0, 20, 15)), lookAt, std::move(Float3(0, 0, 1)),
-              0.2f, 1000, 57, aspectRatio);
+              0.2f, 1000, 60, aspectRatio);
 float maxX = 0;
 float maxY = 0;
 float maxZ = 0;
