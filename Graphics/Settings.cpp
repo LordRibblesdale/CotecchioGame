@@ -1,8 +1,8 @@
 int X_RESOLUTION = 960;                     //Default: 960       (Range 960-3840)
 int Y_RESOLUTION = 540;                     //Default: 540       (Range 540-2160)
 
-unsigned short TEXTURE_QUALITY;       //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
-unsigned short SHADOW_QUALITY;        //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
+unsigned int TEXTURE_QUALITY;       //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
+unsigned int SHADOW_QUALITY = 1024;        //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
 
 bool ENABLE_MULTISAMPLING = false;            //Default: false
 unsigned int MULTISAMPLING_LEVEL = 4;     //Default: 4         (Range 4-8-16)

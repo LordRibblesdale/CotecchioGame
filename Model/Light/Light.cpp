@@ -1,1 +1,43 @@
 #include "Light.h"
+
+float Light::degree2Radiants(float degree) {
+   float inv = 1.0/180;
+
+   return degree * inv * M_PI;
+}
+
+float Light::radiants2Degree(float radiants) {
+   return radiants * 180 * M_1_PI;
+}
+
+const Color &Light::getColor() const {
+   return color;
+}
+
+const Float3 &Light::getOrigin() const {
+   return origin;
+}
+
+void Light::setOrigin(const Float3 &origin) {
+   if (camera) {
+      camera->setEye(origin);
+   }
+
+   Light::origin = origin;
+}
+
+void Light::setColor(const Color &color) {
+   Light::color = color;
+}
+
+float Light::getIntensity() const {
+   return intensity;
+}
+
+void Light::setIntensity(float intensity) {
+   Light::intensity = intensity;
+}
+
+std::unique_ptr<Camera>& Light::getCamera() {
+   return camera;
+}

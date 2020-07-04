@@ -433,7 +433,7 @@
     <Material name="Wood">
         <Diffuse valueR="1" valueG="1" valueB="1">
         </Diffuse>
-        <Specular valueR="0.2" valueG="0.2" valueB="0.2" specularExp="13.19">
+        <Specular valueR="0.2" valueG="0.2" valueB="0.2" specularExp="7.19">
         </Specular>
     </Material>
 

@@ -34,7 +34,7 @@ SquareMatrix &SquareMatrix::operator=(const SquareMatrix &matrix) {
    return *this;
 }
 
-SquareMatrix &SquareMatrix::operator=(SquareMatrix && matrix) {
+SquareMatrix& SquareMatrix::operator=(SquareMatrix && matrix) {
    data_ = std::move(std::make_unique<FloatArray>(*matrix.data_.release()));
 
    return *this;
@@ -115,6 +115,19 @@ void SquareMatrix::operator*=(float scalar) {
 SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) noexcept(false) {
    if (getDimension() == matrix.getDimension()) {
       return SquareMatrix(std::move((Matrix) *this * matrix));
+   } else {
+      std::string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
+      s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");
+
+      throw ExceptionNotifier(s.c_str());
+   }
+}
+
+void SquareMatrix::operator*=(const SquareMatrix& matrix) {
+   if (getDimension() == matrix.getDimension()) {
+      SquareMatrix tmp(std::move((Matrix) *this * matrix));
+
+      data_.reset(tmp.data_.release());
    } else {
       std::string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
       s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");

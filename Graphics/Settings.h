@@ -4,8 +4,8 @@
 extern int X_RESOLUTION;                     //Default: 960       (Range 960-3840)
 extern int Y_RESOLUTION;                     //Default: 540       (Range 540-2160)
 
-extern unsigned short TEXTURE_QUALITY;       //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
-extern unsigned short SHADOW_QUALITY;        //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
+extern unsigned int TEXTURE_QUALITY;         //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
+extern unsigned int SHADOW_QUALITY;          //Default: 2         (Range 1-4)       256x256 512x512 1024x1024 2048x2048
 
 extern bool ENABLE_MULTISAMPLING;            //Default: false
 extern unsigned int MULTISAMPLING_LEVEL;     //Default: 4         (Range 4-8-16)

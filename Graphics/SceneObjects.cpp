@@ -5,7 +5,9 @@ GLFWwindow* window = nullptr;
 GLuint phongShaderProgram;
 GLuint offlineShaderProgram;
 GLuint cardsShader;
+GLuint backShader;
 GLuint colorShader;
+GLuint lightShader;
 
 GLuint offlineFrameBuffer;
 GLuint offlineTexture;

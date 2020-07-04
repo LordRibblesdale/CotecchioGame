@@ -27,6 +27,8 @@ class Model {
    bool hasTextures;
    bool needsNoCulling;
 
+
+   SquareMatrix local2World;
 public:
    Model(std::string location, std::string name);
 
@@ -35,7 +37,7 @@ public:
    void processNode(aiNode* node, const aiScene* scene);
    void processMesh(aiMesh* mesh);
 
-   SquareMatrix getWorldCoordinates() const;
+   SquareMatrix getWorldCoordinates();
 
    float getHighestZPoint();
 
@@ -49,6 +51,8 @@ public:
 
    bool doesNeedNoCulling() const;
    void setNeedsNoCulling(bool needsNoCulling);
+
+   const SquareMatrix &getLocal2World() const;
 
    const float& getXTranslation() const;
    void setXTranslation(const float& xTranslation);

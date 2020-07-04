@@ -3,6 +3,7 @@
 in vec2 outTextCoord;
 in vec3 outNormalVector;   // Input della normale per i calcoli di colore
 in vec3 sPos;           // Input per determinare l'illuminazione (o ottenuta dal vertex shader o di default interpolato)
+in vec3 lightBasedPos;
 
 out vec4 fragColor; // Colore da rappresentare - in questo caso tramite
 
@@ -24,6 +25,8 @@ vec3 ambiental;
 vec3 diffuse;
 vec3 specular;
 vec3 halfway;
+
+float shadow;
 
 uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene texture
 uniform sampler2D bumpTexture;  //TODO implement normal mapping
@@ -50,5 +53,9 @@ void main() {
     specular = pow(max(0, dot(halfway, newNormal)), specularAlpha) * specularCoefficient;
 
     vec4 txIn = texture(texture1, outTextCoord);
-    fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + diffuse + specular), txIn.a);
+
+    // Calcolo distanza tra (1) superficie/vista e (2) superficie/luce (se 1 > 2, è in ombra)
+    fragColor = (1 - shadow) * vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + diffuse + specular), txIn.a);
+
+    //fragColor = vec4(newNormal, 1);
 }

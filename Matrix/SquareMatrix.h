@@ -23,6 +23,7 @@ public:
    SquareMatrix operator*(float scalar);
    void operator*=(float scalar);
    SquareMatrix operator*(const SquareMatrix& matrix);
+   void operator*=(const SquareMatrix& matrix);
 
    void transpose();
    static SquareMatrix transpose(const SquareMatrix& matrix);

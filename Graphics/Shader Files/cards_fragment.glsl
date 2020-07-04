@@ -15,10 +15,11 @@ uniform sampler2D backTexture;
 uniform vec3 eye;
 
 void main() {
-    float k = dot(normalize(eye - sPos), outNormalVector) > 0 ? 1 : 0;
+    //float k = dot(normalize(eye - sPos), outNormalVector) > 0 ? 1 : 0;
     vec4 tex1Color = texture(cardTexture, outTextCoord);
     vec4 tex2Color = texture(backTexture, outBackUV);
 
     // Using premultiplied alpha for color bleeding correction
-    fragColor = (1 - k) * tex1Color.a * vec4(tex1Color.rgb, 1) + k * tex2Color.a * vec4(tex2Color.rgb, 1);
+    //fragColor = (1 - k) * tex1Color.a * vec4(tex1Color.rgb, 1) + k * tex2Color.a * vec4(tex2Color.rgb, 1);
+    fragColor = vec4(abs(normalize(eye)), 1);
 }

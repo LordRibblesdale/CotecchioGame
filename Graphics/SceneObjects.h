@@ -23,7 +23,9 @@ extern GLFWwindow* window;
 extern GLuint phongShaderProgram;
 extern GLuint offlineShaderProgram;
 extern GLuint cardsShader;
+extern GLuint backShader;
 extern GLuint colorShader;
+extern GLuint lightShader;
 
 extern GLuint offlineFrameBuffer;
 extern GLuint offlineTexture;

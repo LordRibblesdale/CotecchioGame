@@ -222,6 +222,10 @@ void compileShaders() {
    //---------------------------STENCIL RENDERING--------------------------------//
 
    compileShader("Graphics/Shader Files/color_vertex.glsl", "Graphics/Shader Files/color_fragment.glsl", colorShader);
+
+   //----------------------------SHADOW RENDERING--------------------------------//
+
+   compileShader("Graphics/Shader Files/light_vertex.glsl", "Graphics/Shader Files/light_fragment.glsl", lightShader);
 }
 
 void loadCards() {
@@ -407,9 +411,35 @@ void prepareCardRendering() {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void setupLightMap(Light* light) {
+   SpotLight* sl;
+   if ((sl = dynamic_cast<SpotLight*>(light))) {
+      // Genero il buffer per il calcolo della profondità (confronto tra profondità)
+      glGenTextures(1, &sl->getDepthMapAsReference());
+      glBindTexture(GL_TEXTURE_2D, sl->getDepthMapAsReference());
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
+      // Da analizzare come classica texture per l'accesso valori
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      // Clamp to edge per estendere il risultato fuori dai limiti della mappa (non copre tutta la scena)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+      // Genero il framebuffer per il render della shadowmap
+      glGenFramebuffers(1, &sl->getFrameBufferAsReference());
+      glBindFramebuffer(GL_FRAMEBUFFER, sl->getFrameBufferAsReference());
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, sl->getDepthMapAsReference(), 0);
+      // Disattivo la scrittura e lettura, verrà usato solo per la profondità
+      glReadBuffer(GL_NONE);
+      glDrawBuffer(GL_NONE);
+   }
+}
+
 void prepareSceneLights() {
    lights.reserve(1);
    lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 15)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
+
+   setupLightMap(lights.at(0).get());
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -506,6 +536,9 @@ void render() {
    GLuint viewMatrixUniform = glGetUniformLocation(phongShaderProgram, "view");
    GLuint modelMatrixUniform = glGetUniformLocation(phongShaderProgram, "model");
 
+   GLuint texUnif = glGetUniformLocation(phongShaderProgram, "texture1");
+   GLuint bumpUnif = glGetUniformLocation(phongShaderProgram, "bumpTexture");
+
    GLuint lightPosUniform = glGetUniformLocation(phongShaderProgram, "lightPos");
    GLuint lightColorUniform = glGetUniformLocation(phongShaderProgram, "lightColor");
    GLuint lightIntensity = glGetUniformLocation(phongShaderProgram, "lightIntensity");
@@ -537,6 +570,9 @@ void render() {
    GLuint colorViewMatrix = glGetUniformLocation(colorShader, "view");
    GLuint colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
 
+   GLuint lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
+   GLuint phongLightSpaceMatrixUniform = glGetUniformLocation(phongShaderProgram, "lightSpaceMatrix");
+
    SquareMatrix projM_V2C(4, {});
    SquareMatrix viewM_W2V(4, {});
    SquareMatrix viewM_V2W(4, {});
@@ -544,11 +580,18 @@ void render() {
 
    SquareMatrix cardModelM(4, {});
 
+   std::vector<SquareMatrix> lightSpaceMs;
+   lightSpaceMs.reserve(lights.size());
+
+   for (auto i = 0; i < lights.size(); ++i) {
+      lightSpaceMs.emplace_back(SquareMatrix(4, {}));
+   }
+
    // Abilito Stencil test per l'outlining
    glEnable(GL_STENCIL_TEST);
 
    // Imposto le modalità di scrittura dello stencil test
-   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+   glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
@@ -557,11 +600,43 @@ void render() {
       prevTime = currTime;
       currTime = glfwGetTime();
 
+      pollInput(window);
+
       lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + Float3(0, 0, 0.05f*sinf(glfwGetTime())));
 
-      glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+      // Rendering shadow map
+      // TODO use main shader
 
-      pollInput(window);
+      glUseProgram(lightShader);
+
+      // Imposto la viewport per il render della shadow map
+      glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
+
+      for (unsigned int i = 0; i < lights.size(); ++i) {
+         SpotLight* s;
+
+         if ((s = dynamic_cast<SpotLight*>(lights.at(i).get()))) {
+            glBindFramebuffer(GL_FRAMEBUFFER, s->getFrameBufferAsReference());
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*s->getCamera()) * s->getCamera()->world2ViewMatrix());
+
+            glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(i).getArray());
+
+            for (auto& object : objects) {
+               modelM_L2W = std::move(object.getWorldCoordinates());
+
+               for (int j = 0; j < object.getMeshes().size(); ++j) {
+                  glBindVertexArray(vertexArrayObjects.at(j));
+                  // Chamata di disegno della primitiva
+                  glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
+               }
+            }
+         }
+      }
+
+      glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+      glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
 
       glClearColor(0.2, 0.2, 0.2, 1.0f);
       // Pulizia buffer colore e depth
@@ -594,6 +669,8 @@ void render() {
 
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, viewM_W2V.getArray());
+      // TODO fix for multiple lights
+      glUniformMatrix4fv(phongLightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
 
       glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
@@ -604,14 +681,15 @@ void render() {
       glUniform1f(lightIntensity, lights.at(0).get()->getIntensity());
 
       // Caricare vertexArrayObject interessato
-      // TODO optimize by setting uniform locally in RAM
-      glUniform1i(glGetUniformLocation(phongShaderProgram, "texture1"), 0);
-      glUniform1i(glGetUniformLocation(phongShaderProgram, "bumpTexture"), 1);
+      glUniform1i(texUnif, 0);
+      glUniform1i(bumpUnif, 1);
 
       glUniform1f(gammaUniform, GAMMA_CORRECTION);
 
       for (auto& object : objects) {
+         //modelM_L2W = std::move(object.getLocal2World());
          modelM_L2W = std::move(object.getWorldCoordinates());
+
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, modelM_L2W.getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
@@ -704,10 +782,9 @@ void render() {
             if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
                if (pIndex == playerIndex) {
                   if (!hasSelectedCard) {
-                     // Increase performance from ([3*n^3 + 4*n^2] to [12*n^2])
-                     // n = 4 -> 256 to 192 operations
+                     /* Increase performance from ([3*n^3 + 4*n^2] to [12*n^2])
+                        n = 4 -> 256 to 192 operations
 
-                     /*
                      Float4 p0(matrices.at(0).multiplyVector(
                              matrices.at(1).multiplyVector(
                                      matrices.at(2).multiplyVector(
@@ -790,9 +867,10 @@ void render() {
       glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
       glEnable(GL_DEPTH_TEST);
 
+      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
+
       glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
-      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
       for (Card& card : players.at(playerIndex).getCards()) {
          if (card.isSelected1()) {

@@ -1,7 +1,7 @@
 #include "Model.h"
 #include "../Matrix/StandardMatrix.h"
 
-Model::Model(std::string location, std::string name) : location(std::move(location)), name(std::move(name)) {}
+Model::Model(std::string location, std::string name) : location(std::move(location)), name(std::move(name)), local2World(std::move(SquareMatrix(4, {}))) {}
 
 void Model::processNode(aiNode *node, const aiScene *scene) {
    meshes.reserve(meshes.size() + node->mNumMeshes);
@@ -39,7 +39,7 @@ const vector<Mesh> &Model::getMeshes() const {
    return meshes;
 }
 
-SquareMatrix Model::getWorldCoordinates() const {
+SquareMatrix Model::getWorldCoordinates() {
    float alpha1 = cosf(xRotation);
    float beta1 = sinf(xRotation);
    float alpha2 = cosf(yRotation);
@@ -50,10 +50,12 @@ SquareMatrix Model::getWorldCoordinates() const {
    float a1b2 = alpha1 * beta2;
    float b1b2 = beta1 * beta2;
 
-   return SquareMatrix(4, {xScale * alpha2 * alpha3, -yScale*(b1b2 * alpha3 + alpha1 * beta3), -zScale*(a1b2 * alpha3 - beta1 * beta3), xTranslation,
+   local2World = std::move(SquareMatrix(4, {xScale * alpha2 * alpha3, -yScale*(b1b2 * alpha3 + alpha1 * beta3), -zScale*(a1b2 * alpha3 - beta1 * beta3), xTranslation,
                            xScale * alpha2 * beta3, -yScale*(b1b2 * beta3 - alpha1 * alpha3), -zScale*(a1b2 * beta3 + beta1 * alpha3), yTranslation,
                            xScale * beta2, yScale * beta1 * alpha2, zScale * alpha1 * alpha2, zTranslation,
-                           0, 0, 0, 1});
+                           0, 0, 0, 1}));
+
+   return local2World;
 }
 
 float Model::getHighestZPoint() {
@@ -188,4 +190,8 @@ bool Model::doesNeedNoCulling() const {
 
 void Model::setNeedsNoCulling(bool needsNoCulling) {
    Model::needsNoCulling = needsNoCulling;
+}
+
+const SquareMatrix &Model::getLocal2World() const {
+   return local2World;
 }

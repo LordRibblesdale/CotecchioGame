@@ -20,6 +20,7 @@
 
 #include "../../Vector/Float3.h"
 #include "../../Utilities/Color.h"
+#include "../../Utilities/Camera.h"
 
 class Light {
 protected:
@@ -27,43 +28,29 @@ protected:
    Color color;
    float intensity;
 
+   std::unique_ptr<Camera> camera;
+
    Light(Float3 o, Color c, float i) : origin(std::move(o)), intensity(i), color(std::move(c)) {}
 
-   static float degree2Radiants(float degree) {
-      float inv = 1.0/180;
+   static float degree2Radiants(float degree);
 
-      return degree * inv * M_PI;
-   }
-
-   static float radiants2Degree(float radiants) {
-      return radiants * 180 * M_1_PI;
-   }
+   static float radiants2Degree(float radiants);
 public:
    virtual float getIrradiance(float distance) = 0;
 
-   const Color& getColor() {
-      return color;
-   }
+   const Color & getColor() const;
 
-   const Float3 &getOrigin() const {
-      return origin;
-   }
+   const Float3 &getOrigin() const;
 
-   void setOrigin(const Float3 &origin) {
-      Light::origin = origin;
-   }
+   void setOrigin(const Float3 &origin);
 
-   void setColor(const Color &color) {
-      Light::color = color;
-   }
+   void setColor(const Color &color);
 
-   float getIntensity() const {
-      return intensity;
-   }
+   float getIntensity() const;
 
-   void setIntensity(float intensity) {
-      Light::intensity = intensity;
-   }
+   void setIntensity(float intensity);
+
+   std::unique_ptr<Camera>& getCamera();
 };
 
 #endif //LIGHT_H
