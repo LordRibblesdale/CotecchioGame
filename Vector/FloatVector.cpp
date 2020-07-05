@@ -17,16 +17,14 @@ FloatVector::FloatVector(unsigned int size, const std::initializer_list<float> &
 }
 
 FloatVector::FloatVector(const FloatVector &floatVector) {
-   vector_ = std::move(std::unique_ptr<float>(new float[floatVector.getSize()] {0}));
    FloatVector::size_ = floatVector.getSize();
+   vector_.reset(new float[floatVector.getSize()] {0});
 
-   for (int i = 0; i < size_; ++i) {
-      vector_.get()[i] = floatVector.getVector().get()[i];
-   }
+   std::copy(floatVector.getVector().get(), floatVector.getVector().get() + size_, vector_.get());
 }
 
 FloatVector::FloatVector(FloatVector &&floatVector) {
-   vector_ = std::move(std::unique_ptr<float>(floatVector.vector_.release()));
+   vector_ = std::move(floatVector.vector_);
    size_ = floatVector.getSize();
 }
 
@@ -36,18 +34,16 @@ FloatVector::~FloatVector() {
 }
 
 FloatVector &FloatVector::operator=(const FloatVector &vector) {
-   vector_ = std::move(std::unique_ptr<float>(new float[vector.getSize()] {0}));
    FloatVector::size_ = vector.getSize();
+   vector_.reset(new float[vector.getSize()] {0});
 
-   for (int i = 0; i < size_; ++i) {
-      vector_.get()[i] = vector.getVector().get()[i];
-   }
+   std::copy(vector.getVector().get(), vector.getVector().get() + size_, vector_.get());
 
    return *this;
 }
 
 FloatVector &FloatVector::operator=(FloatVector &&vector) {
-   vector_ = std::move(std::unique_ptr<float>(vector.vector_.release()));
+   vector_ = std::move(vector.vector_);
    size_ = vector.getSize();
 
    return *this;
@@ -83,20 +79,21 @@ bool FloatVector::operator!=(const FloatVector &vector) const {
 }
 
 FloatVector FloatVector::operator+(const FloatVector &vector) {
-   std::unique_ptr<float> newData(new float[size_] {0});
-
    if (size_ == vector.getSize()) {
+      FloatVector newData(size_, {});
+
       for (int i = 0; i < size_; ++i) {
-         newData.get()[i] = vector_.get()[i] + vector.getVector().get()[i];
+         newData.getVector().get()[i] = vector_.get()[i] + vector.getVector().get()[i];
       }
+
+      return FloatVector(std::move(newData));
+
    } else {
       std::string s = "Exception VECTOR_SUM: dimensions do not correspond. ";
       s.append("(").append(std::to_string(size_)).append(", ").append(std::to_string(vector.getSize())).append(")\n");
 
       throw (ExceptionNotifier(std::to_string(size_).c_str()));
    }
-
-   return FloatVector(size_, newData.release());
 }
 
 void FloatVector::operator+=(const FloatVector &vector) {
@@ -126,30 +123,31 @@ void FloatVector::operator-=(const FloatVector &vector) {
 }
 
 FloatVector FloatVector::operator-(const FloatVector &vector) {
-   std::unique_ptr<float> newData(new float[size_] {0});
-
    if (size_ == vector.getSize()) {
+      FloatVector newData(size_, {});
+
       for (int i = 0; i < size_; ++i) {
-         newData.get()[i] = vector_.get()[i] - vector.getVector().get()[i];
+         newData.getVector().get()[i] = vector_.get()[i] - vector.getVector().get()[i];
       }
+
+      return FloatVector(std::move(newData));
+
    } else {
       std::string s = "Exception VECTOR_SUM: dimensions do not correspond. ";
       s.append("(").append(std::to_string(size_)).append(", ").append(std::to_string(vector.getSize())).append(")\n");
 
       throw (ExceptionNotifier(std::to_string(size_).c_str()));
    }
-
-   return FloatVector(size_, newData.release());
 }
 
 FloatVector FloatVector::operator*(const float& f) const {
-   std::unique_ptr<float> newData(new float[size_] {0});
+   FloatVector newData(size_, {});
 
    for (int i = 0; i < size_; ++i) {
-      newData.get()[i] = vector_.get()[i] * f;
+      newData.getVector().get()[i] = vector_.get()[i] * f;
    }
 
-   return FloatVector(size_, newData.release());
+   return FloatVector(std::move(newData));
 }
 
 void FloatVector::operator*=(float f) const {

@@ -110,7 +110,7 @@ SquareMatrix Transform::scaleMatrix4(float scaleX, float scaleY, float scaleZ) {
 }
 
 SquareMatrix Transform::scaleTransform3(const SquareMatrix &matrix, float scaleX, float scaleY, float scaleZ) {
-   std::unique_ptr<float> newData(new float[matrix.getDimension() * matrix.getDimension()] {0});
+   FloatArray newData(matrix.getDimension(), {});
 
    unsigned int dim = matrix.getDimension();
    short j = 1;
@@ -129,7 +129,7 @@ SquareMatrix Transform::scaleTransform3(const SquareMatrix &matrix, float scaleX
       }
    }
 
-   return SquareMatrix(matrix.getDimension(), newData.release());
+   return SquareMatrix(std::move(newData));
 }
 
 SquareMatrix Transform::translateMatrix4(float x, float y, float z) {

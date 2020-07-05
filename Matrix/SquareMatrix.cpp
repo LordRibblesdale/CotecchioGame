@@ -28,21 +28,21 @@ SquareMatrix::SquareMatrix(Matrix &&matrix) : Matrix(std::move(matrix)) {
 
 SquareMatrix::~SquareMatrix() {}
 
-SquareMatrix &SquareMatrix::operator=(const SquareMatrix &matrix) {
+SquareMatrix& SquareMatrix::operator=(const SquareMatrix &matrix) {
    data_ = std::move(std::make_unique<FloatArray>(*matrix.data_));
 
    return *this;
 }
 
 SquareMatrix& SquareMatrix::operator=(SquareMatrix && matrix) {
-   data_ = std::move(std::make_unique<FloatArray>(*matrix.data_.release()));
+   data_ = std::move(matrix.data_);
 
    return *this;
 }
 
 SquareMatrix SquareMatrix::operator+(const SquareMatrix &matrix) noexcept(false) {
    if (getDimension() == matrix.getDimension()) {
-      return SquareMatrix(std::move((Matrix) *this + matrix));
+      return SquareMatrix(std::move(static_cast<Matrix>(*this) + matrix));
    } else {
       std::string s = "Exception: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getDimension())).append(") ")
@@ -73,7 +73,7 @@ void SquareMatrix::operator+=(const SquareMatrix &matrix) noexcept(false) {
 
 SquareMatrix SquareMatrix::operator-(const SquareMatrix &matrix) noexcept(false) {
    if (getDimension() == matrix.getDimension()) {
-      return SquareMatrix(std::move((Matrix) *this - matrix));
+      return SquareMatrix(std::move(static_cast<Matrix>(*this) - matrix));
    } else {
       std::string s = "Exception: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getDimension())).append(") ")
@@ -103,7 +103,7 @@ void SquareMatrix::operator-=(const SquareMatrix &matrix) noexcept(false) {
 }
 
 SquareMatrix SquareMatrix::operator*(float scalar) {
-   return SquareMatrix(std::move((Matrix) *this * scalar));
+   return SquareMatrix(std::move(static_cast<Matrix>(*this) * scalar));
 }
 
 void SquareMatrix::operator*=(float scalar) {
@@ -114,7 +114,7 @@ void SquareMatrix::operator*=(float scalar) {
 
 SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) noexcept(false) {
    if (getDimension() == matrix.getDimension()) {
-      return SquareMatrix(std::move((Matrix) *this * matrix));
+      return SquareMatrix(std::move(static_cast<Matrix>(*this) * matrix));
    } else {
       std::string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
       s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");
@@ -125,9 +125,9 @@ SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) noexcept(false)
 
 void SquareMatrix::operator*=(const SquareMatrix& matrix) {
    if (getDimension() == matrix.getDimension()) {
-      SquareMatrix tmp(std::move((Matrix) *this * matrix));
+      SquareMatrix tmp(std::move(static_cast<Matrix>(*this) * matrix));
 
-      data_.reset(tmp.data_.release());
+      data_ = std::move(tmp.data_);
    } else {
       std::string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
       s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");
@@ -217,19 +217,19 @@ void SquareMatrix::invert() {
 SquareMatrix SquareMatrix::calculateInverse(const SquareMatrix &matrix) {
    unsigned int dimension = matrix.getDimension();
    float determinant = matrix.calculateDeterminant();
-   std::unique_ptr<float> newData(new float[dimension*dimension] {0});
+   FloatArray newData(dimension, {});
 
    if (determinant != 0) {
       float scalar = std::abs(1 / determinant);
 
       for (unsigned int i = 0; i < dimension; ++i) {
          for (unsigned int j = 0; j < dimension; ++j) {
-            newData.get()[i*dimension + j] = scalar * ((i+j) % 2 == 0 ? 1 : -1) * calculateCofactor(matrix, j, i);
+            newData.getArray().get()[i*dimension + j] = scalar * ((i+j) % 2 == 0 ? 1 : -1) * calculateCofactor(matrix, j, i);
          }
       }
    }
 
-   return SquareMatrix(dimension, newData.release());
+   return SquareMatrix(std::move(newData));
 }
 
 //TODO create new classes Matrix2, Matrix3 and Matrix4

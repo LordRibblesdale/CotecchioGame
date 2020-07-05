@@ -96,11 +96,11 @@ void compileShader(const string &vLocation, const string &fLocation,
    glDeleteShader(fragmentShader);
 }
 
-void loadShader(std::string &string, const std::string &location) {
+void loadShader(std::string &string, const std::string& location) {
    std::ifstream file(location);
    std::string s((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-   string = const_cast<char *>(s.c_str());
+   string = s.c_str();
 }
 
 GLuint createTextureUniform() {

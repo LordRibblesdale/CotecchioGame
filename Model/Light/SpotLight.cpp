@@ -19,7 +19,7 @@ SpotLight::SpotLight(SpotLight&& light) : Light(light.getOrigin(), light.getColo
    midAngle = light.getMidAngle();
    maxAngle = light.getMaxAngle();
 
-   camera = std::move(std::unique_ptr<Camera>(light.getCamera().release()));
+   camera = std::move(light.camera);
 }
 
 float SpotLight::getIrradiance(float angle) {

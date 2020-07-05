@@ -190,9 +190,3 @@ float Camera::getYawAngle() const {
 void Camera::setYawAngle(float yawAngle) {
    Camera::yawAngle = yawAngle;
 }
-
-
-
-
-
-

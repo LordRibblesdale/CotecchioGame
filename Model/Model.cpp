@@ -3,7 +3,6 @@
 
 Model::Model(std::string location, std::string name) : location(std::move(location)), name(std::move(name)), local2World(SquareMatrix(4, {})) {}
 
-
 void Model::processNode(aiNode *node, const aiScene *scene) {
    meshes.reserve(meshes.size() + node->mNumMeshes);
 

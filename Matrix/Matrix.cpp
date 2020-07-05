@@ -8,16 +8,20 @@ Matrix::Matrix(unsigned int rows, unsigned int columns, float* data) {
    data_ = std::move(std::make_unique<FloatArray>(rows, columns, data));
 }
 
+Matrix::Matrix(FloatArray&& data) {
+   data_ = std::move(std::make_unique<FloatArray>(std::move(data)));
+}
+
 Matrix::Matrix(const Matrix &matrix) {
    data_ = std::move(std::make_unique<FloatArray>(*matrix.data_));
 }
 
 Matrix::Matrix(Matrix &&matrix) {
-   data_ = std::move(std::make_unique<FloatArray>(*matrix.data_.release()));
+   data_ = std::move(matrix.data_);
 }
 
 Matrix::~Matrix() {
-   data_.reset(nullptr);
+   data_.reset();
 }
 
 Matrix &Matrix::operator=(const Matrix &matrix) {
@@ -27,19 +31,21 @@ Matrix &Matrix::operator=(const Matrix &matrix) {
 }
 
 Matrix &Matrix::operator=(Matrix && matrix) {
-   data_ = std::move(std::make_unique<FloatArray>(*matrix.data_.release()));
+   data_ = std::move(matrix.data_);
 
    return *this;
 }
 
 //TODO fix repeated functions
 Matrix Matrix::operator+(const Matrix &matrix) noexcept(false) {
-   std::unique_ptr<float> newData(new float[getRows() * getColumns()] {0});
-
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
+      FloatArray newData(getRows(), getColumns(), {});
+
       for (int i = 0; i < getRows() * getColumns(); ++i) {
-         newData.get()[i] = data_->operator[](i) + matrix.getData()->operator[](i);
+         newData.getArray().get()[i] = data_->operator[](i) + matrix.getData()->operator[](i);
       }
+
+      return Matrix(std::move(newData));
    } else {
       std::string s = "Exception: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
@@ -49,8 +55,6 @@ Matrix Matrix::operator+(const Matrix &matrix) noexcept(false) {
 
       throw ExceptionNotifier(s.c_str());
    }
-
-   return Matrix(getRows(), getColumns(), newData.release());
 }
 
 void Matrix::operator+=(const Matrix &matrix) noexcept(false) {
@@ -70,12 +74,14 @@ void Matrix::operator+=(const Matrix &matrix) noexcept(false) {
 }
 
 Matrix Matrix::operator-(const Matrix &matrix) noexcept(false) {
-   std::unique_ptr<float> newData(new float[getRows() * getColumns()] {0});
-
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
+      FloatArray newData(getRows(), getColumns(), {});
+
       for (int i = 0; i < getRows() * getColumns(); ++i) {
-         newData.get()[i] = data_->operator[](i) - matrix.getData()->operator[](i);
+         newData.getArray().get()[i] = data_->operator[](i) - matrix.getData()->operator[](i);
       }
+
+      return Matrix(std::move(newData));
    } else {
       std::string s = "Exception: dimensions do not correspond.";
       s.append("(").append(std::to_string(getRows())).append(", ").append(std::to_string(getColumns())).append(") ")
@@ -85,8 +91,6 @@ Matrix Matrix::operator-(const Matrix &matrix) noexcept(false) {
 
       throw ExceptionNotifier(s.c_str());
    }
-
-   return Matrix(getRows(), getColumns(), newData.release());
 }
 
 void Matrix::operator-=(const Matrix &matrix) noexcept(false) {
@@ -106,13 +110,13 @@ void Matrix::operator-=(const Matrix &matrix) noexcept(false) {
 }
 
 Matrix Matrix::operator*(const float& scalar) {
-   std::unique_ptr<float> newData(new float[getRows() * getColumns()] {0});
+   FloatArray newData(getRows(), getColumns(), {});
 
    for (int i = 0; i < getRows() * getColumns(); ++i) {
-      newData.get()[i] = data_->operator[](i) * scalar;
+      newData.getArray().get()[i] = data_->operator[](i) * scalar;
    }
 
-   return Matrix(getRows(), getColumns(), newData.release());
+   return Matrix(std::move(newData));
 }
 
 void Matrix::operator*=(const float& scalar) {
@@ -122,54 +126,53 @@ void Matrix::operator*=(const float& scalar) {
 }
 
 Matrix Matrix::operator*(const Matrix &matrix) noexcept(false) {
-   std::unique_ptr<float> newData(new float[getRows() * matrix.getColumns()] {0});
-
    if (getColumns() == matrix.getRows()) {
+      FloatArray newData(getRows(), matrix.getColumns(), {});
+
       for (unsigned int r = 0; r < getRows(); ++r) {
          for (unsigned int c = 0; c < matrix.getColumns(); ++c) {
             for (unsigned int i = 0; i < getColumns(); ++i) {
-               newData.get()[r * matrix.getColumns() + c] += data_->operator[](r * getColumns() + i) * matrix.getData()->operator[](i * matrix.getColumns() + c);
+               newData.getArray().get()[r * matrix.getColumns() + c] += data_->operator[](r * getColumns() + i) * matrix.getData()->operator[](i * matrix.getColumns() + c);
             }
          }
       }
+
+      return Matrix(std::move(newData));
    } else {
       std::string s = "Exception MATRIX_PRODUCT: dimensions do not correspond. ";
       s.append("(").append(std::to_string(getColumns())).append(", ").append(std::to_string(matrix.getRows())).append(")\n");
 
       throw ExceptionNotifier(s.c_str());
    }
-
-   return Matrix(getRows(), matrix.getColumns(), newData.release());
 }
 
 Matrix Matrix::transpose(const Matrix &matrix) {
-   std::unique_ptr<float> newData(new float[matrix.getRows() * matrix.getColumns()] {0});
+   FloatArray newData(matrix.getColumns(), matrix.getRows(), {});
 
    for (int i = 0; i < matrix.getColumns(); ++i) {
       for (int j = 0; j < matrix.getRows(); ++j) {
-         //TODO check here
-         newData.get()[i* matrix.getRows() + j] = matrix.getData()->operator[](j * matrix.getColumns() + i);
+         newData.getArray().get()[i* matrix.getRows() + j] = matrix.getData()->operator[](j * matrix.getColumns() + i);
       }
    }
 
-   return Matrix(matrix.getColumns(), matrix.getRows(), newData.release());
+   return Matrix(std::move(newData));
 }
 
 Matrix Matrix::createSubmatrix(const Matrix &matrix, const unsigned int& rowIndex, const unsigned int& columnIndex) {
-   std::unique_ptr<float> newData(new float[(matrix.getRows() - 1) * (matrix.getColumns() - 1)] {0});
+   FloatArray newData(matrix.getRows()-1, matrix.getColumns()-1, {});
 
    unsigned int index = 0;
    for (int i = 0; i < matrix.getRows(); ++i) {
       if (i != rowIndex) {
          for (int j = 0; j < matrix.getColumns(); ++j) {
             if (j != columnIndex) {
-               newData.get()[index++] = matrix.getArray()[i * matrix.getColumns() + j];
+               newData.getArray().get()[index++] = matrix.getArray()[i * matrix.getColumns() + j];
             }
          }
       }
    }
 
-   return Matrix(matrix.getRows() - 1, matrix.getColumns() - 1, newData.release());
+   return Matrix(std::move(newData));
 }
 
 FloatVector Matrix::multiplyVector(const FloatVector& vector) const noexcept(false) {

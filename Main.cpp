@@ -5,6 +5,9 @@
 
 #include "rapidxml.hpp"
 
+// Accesso a variabile protetta permesso alle classi/sottoclassi
+// https://en.cppreference.com/w/cpp/language/access#Protected_member_access
+
 // Argument as XML file importer
 int main(int argc, char** argv) {
    // TODO load from settings (or another file) all models to be loaded

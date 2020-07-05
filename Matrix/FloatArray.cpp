@@ -1,7 +1,7 @@
 #include <iostream>
 #include "FloatArray.h"
 
-FloatArray::FloatArray(unsigned short rows, unsigned short columns, const std::initializer_list<float> &data) : rows_(rows), columns_(columns) {
+FloatArray::FloatArray(unsigned int rows, unsigned int columns, const std::initializer_list<float> &data) : rows_(rows), columns_(columns) {
    array_ = std::move(std::unique_ptr<float>(new float[rows*columns] {0}));
    rows_ = rows;
    columns_ = columns;
@@ -13,40 +13,36 @@ FloatArray::FloatArray(unsigned short rows, unsigned short columns, const std::i
    }
 }
 
-FloatArray::FloatArray(unsigned short dimension, const std::initializer_list<float> &data) : FloatArray(dimension, dimension, data) {}
+FloatArray::FloatArray(unsigned int dimension, const std::initializer_list<float> &data) : FloatArray(dimension, dimension, data) {}
 
-FloatArray::FloatArray(unsigned short rows, unsigned short columns, float*& data) {
+FloatArray::FloatArray(unsigned int rows, unsigned int columns, float*& data) {
    array_ = std::move(std::unique_ptr<float>(data));
    rows_ = rows;
    columns_ = columns;
 }
 
 FloatArray::FloatArray(const FloatArray &floatArray) {
-   array_ = std::move(std::unique_ptr<float>(new float[floatArray.getRows() * floatArray.getColumns()] {0}));
    FloatArray::rows_ = floatArray.getRows();
    FloatArray::columns_ = floatArray.getColumns();
+   array_.reset(new float[rows_ * columns_] {0});
 
-   for (int i = 0; i < rows_ * columns_; ++i) {
-      array_.get()[i] = floatArray.getArray().get()[i];
-   }
+   std::copy(floatArray.getArray().get(), floatArray.getArray().get() + rows_*columns_, array_.get());
 }
 
 FloatArray::FloatArray(FloatArray&& floatArray) {
    // Accesso a variabile protetta permesso alle classi/sottoclassi
    // https://en.cppreference.com/w/cpp/language/access#Protected_member_access
-   array_ = std::move(std::unique_ptr<float>(floatArray.array_.release()));
+   array_ = std::move(floatArray.array_);
    rows_ = floatArray.getRows();
    columns_ = floatArray.getColumns();
 }
 
 FloatArray &FloatArray::operator=(const FloatArray &floatArray) {
-   array_ = std::move(std::unique_ptr<float>(new float[floatArray.getRows() * floatArray.getColumns()] {0}));
    FloatArray::rows_ = floatArray.getRows();
    FloatArray::columns_ = floatArray.getColumns();
+   array_.reset(new float[rows_ * columns_] {0});
 
-   for (int i = 0; i < rows_ * columns_; ++i) {
-      array_.get()[i] = floatArray.getArray().get()[i];
-   }
+   std::copy(floatArray.getArray().get(), floatArray.getArray().get() + rows_*columns_, array_.get());
 
    return *this;
 }
@@ -54,9 +50,9 @@ FloatArray &FloatArray::operator=(const FloatArray &floatArray) {
 FloatArray &FloatArray::operator=(FloatArray &&floatArray) {
    // Accesso a variabile protetta permesso alle classi/sottoclassi
    // https://en.cppreference.com/w/cpp/language/access#Protected_member_access
-   array_ = std::move(std::unique_ptr<float>(floatArray.array_.release()));
    rows_ = floatArray.getRows();
    columns_ = floatArray.getColumns();
+   array_ = std::move(floatArray.array_);
 
    return *this;
 }
