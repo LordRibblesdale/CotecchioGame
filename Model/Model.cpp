@@ -1,5 +1,5 @@
 #include "Model.h"
-#include "../../CotecchioGame - Copy/Matrix/StandardMatrix.h"
+#include "../Matrix/StandardMatrix.h"
 
 Model::Model(std::string location, std::string name) : location(std::move(location)), name(std::move(name)), local2World(SquareMatrix(4, {})) {}
 

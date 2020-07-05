@@ -2,8 +2,8 @@
 #define MODEL_H
 
 #include <assimp/scene.h>
-#include "../../CotecchioGame - Copy/Model/Mesh.h"
-#include "../../CotecchioGame - Copy/Matrix/SquareMatrix.h"
+#include "../Model/Mesh.h"
+#include "../Matrix/SquareMatrix.h"
 
 // TODO check if possible to change model loading pipeline (assigning texture GLuint & Material here)
 
