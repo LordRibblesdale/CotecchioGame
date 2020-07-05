@@ -2,8 +2,8 @@
 #define MODEL_H
 
 #include <assimp/scene.h>
-#include "Mesh.h"
-#include "../Matrix/SquareMatrix.h"
+#include "../../CotecchioGame - Copy/Model/Mesh.h"
+#include "../../CotecchioGame - Copy/Matrix/SquareMatrix.h"
 
 // TODO check if possible to change model loading pipeline (assigning texture GLuint & Material here)
 
@@ -27,17 +27,18 @@ class Model {
    bool hasTextures;
    bool needsNoCulling;
 
-
    SquareMatrix local2World;
 public:
    Model(std::string location, std::string name);
 
-   const vector<Mesh> &getMeshes() const;
+   const vector<Mesh>& getMeshes() const;
 
    void processNode(aiNode* node, const aiScene* scene);
    void processMesh(aiMesh* mesh);
 
-   SquareMatrix getWorldCoordinates();
+   const SquareMatrix& getWorldCoordinates();
+
+   const SquareMatrix& getLocal2WorldMatrix() const;
 
    float getHighestZPoint();
 
@@ -51,8 +52,6 @@ public:
 
    bool doesNeedNoCulling() const;
    void setNeedsNoCulling(bool needsNoCulling);
-
-   const SquareMatrix &getLocal2World() const;
 
    const float& getXTranslation() const;
    void setXTranslation(const float& xTranslation);

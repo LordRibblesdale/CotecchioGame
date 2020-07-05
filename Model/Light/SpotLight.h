@@ -9,10 +9,6 @@ class SpotLight : public Light {
    float midAngle;   // Angolo di caratterizzazione comportamento
 
    Float3 direction;
-
-   unsigned int frameBuffer;
-   unsigned int depthMap;
-
 public:
    SpotLight();
    SpotLight(Float3 origin, Float3 direction, Color color, float intensity, float midAngle_, float maxAngle_);
@@ -20,10 +16,6 @@ public:
    SpotLight(SpotLight&& light);
 
    virtual float getIrradiance(float angle) override;
-
-   unsigned int& getFrameBufferAsReference();
-
-   unsigned int& getDepthMapAsReference();
 
    float getMaxAngle() const;
 

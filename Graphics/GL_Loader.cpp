@@ -412,27 +412,24 @@ void prepareCardRendering() {
 }
 
 void setupLightMap(Light* light) {
-   SpotLight* sl;
-   if ((sl = dynamic_cast<SpotLight*>(light))) {
-      // Genero il buffer per il calcolo della profondità (confronto tra profondità)
-      glGenTextures(1, &sl->getDepthMapAsReference());
-      glBindTexture(GL_TEXTURE_2D, sl->getDepthMapAsReference());
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
-      // Da analizzare come classica texture per l'accesso valori
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      // Clamp to edge per estendere il risultato fuori dai limiti della mappa (non copre tutta la scena)
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   // Genero il buffer per il calcolo della profondità (confronto tra profondità)
+   glGenTextures(1, &light->getDepthMapAsReference());
+   glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
+   // Da analizzare come classica texture per l'accesso valori
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+   // Clamp to edge per estendere il risultato fuori dai limiti della mappa (non copre tutta la scena)
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-      // Genero il framebuffer per il render della shadowmap
-      glGenFramebuffers(1, &sl->getFrameBufferAsReference());
-      glBindFramebuffer(GL_FRAMEBUFFER, sl->getFrameBufferAsReference());
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, sl->getDepthMapAsReference(), 0);
-      // Disattivo la scrittura e lettura, verrà usato solo per la profondità
-      glReadBuffer(GL_NONE);
-      glDrawBuffer(GL_NONE);
-   }
+   // Genero il framebuffer per il render della shadowmap
+   glGenFramebuffers(1, &light->getFrameBufferAsReference());
+   glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
+   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light->getDepthMapAsReference(), 0);
+   // Disattivo la scrittura e lettura, verrà usato solo per la profondità
+   glReadBuffer(GL_NONE);
+   glDrawBuffer(GL_NONE);
 }
 
 void prepareSceneLights() {
@@ -572,11 +569,12 @@ void render() {
 
    GLuint lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
    GLuint phongLightSpaceMatrixUniform = glGetUniformLocation(phongShaderProgram, "lightSpaceMatrix");
+   GLuint depthMapUniform = glGetUniformLocation(phongShaderProgram, "depthMap");
 
    SquareMatrix projM_V2C(4, {});
    SquareMatrix viewM_W2V(4, {});
    SquareMatrix viewM_V2W(4, {});
-   SquareMatrix modelM_L2W(4, {});
+   //SquareMatrix modelM_L2W(4, {});
 
    SquareMatrix cardModelM(4, {});
 
@@ -605,34 +603,37 @@ void render() {
       lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + Float3(0, 0, 0.05f*sinf(glfwGetTime())));
 
       // Rendering shadow map
-      // TODO use main shader
-
       glUseProgram(lightShader);
 
       // Imposto la viewport per il render della shadow map
       glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
 
       for (unsigned int i = 0; i < lights.size(); ++i) {
-         SpotLight* s;
+         glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
+         glClear(GL_DEPTH_BUFFER_BIT);
 
-         if ((s = dynamic_cast<SpotLight*>(lights.at(i).get()))) {
-            glBindFramebuffer(GL_FRAMEBUFFER, s->getFrameBufferAsReference());
-            glClear(GL_DEPTH_BUFFER_BIT);
+         // TODO check if casting necessary
+         if (dynamic_cast<SpotLight*>(lights.at(i).get())) {
+            lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(i)->getCamera()) *
+                                                      lights.at(i)->getCamera()->world2ViewMatrix());
+         } else {
+            // TODO complete
+         }
 
-            lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*s->getCamera()) * s->getCamera()->world2ViewMatrix());
+         glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(i).getArray());
 
-            glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(i).getArray());
+         for (auto& object : objects) {
+            //modelM_L2W = object.getWorldCoordinates();
+            glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
-            for (auto& object : objects) {
-               modelM_L2W = std::move(object.getWorldCoordinates());
-
-               for (int j = 0; j < object.getMeshes().size(); ++j) {
-                  glBindVertexArray(vertexArrayObjects.at(j));
-                  // Chamata di disegno della primitiva
-                  glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
-               }
+            for (int j = 0; j < object.getMeshes().size(); ++j) {
+               glBindVertexArray(vertexArrayObjects.at(j));
+               // Chamata di disegno della primitiva
+               glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
             }
          }
+
+
       }
 
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
@@ -683,14 +684,19 @@ void render() {
       // Caricare vertexArrayObject interessato
       glUniform1i(texUnif, 0);
       glUniform1i(bumpUnif, 1);
+      //glUniform1i(depthMapUniform, 5);
+      // TODO set multiple lights
+      //glActiveTexture(GL_TEXTURE5);
+      //glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
 
       glUniform1f(gammaUniform, GAMMA_CORRECTION);
 
       for (auto& object : objects) {
-         //modelM_L2W = std::move(object.getLocal2World());
-         modelM_L2W = std::move(object.getWorldCoordinates());
+         //modelM_L2W = object.getWorldCoordinates();
 
-         glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, modelM_L2W.getArray());
+         //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, modelM_L2W.getArray());
+         //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getLocal2WorldMatrix().getArray());
+         glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
          for (int j = 0; j < object.getMeshes().size(); ++j) {
             if (object.doesHaveTextures()) {

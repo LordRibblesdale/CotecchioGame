@@ -1,5 +1,13 @@
 #include "Light.h"
 
+unsigned int& Light::getFrameBufferAsReference() {
+   return frameBuffer;
+}
+
+unsigned int& Light::getDepthMapAsReference() {
+   return depthMap;
+}
+
 float Light::degree2Radiants(float degree) {
    float inv = 1.0/180;
 

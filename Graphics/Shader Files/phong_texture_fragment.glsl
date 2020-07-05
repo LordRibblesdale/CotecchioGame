@@ -3,7 +3,7 @@
 in vec2 outTextCoord;
 in vec3 outNormalVector;   // Input della normale per i calcoli di colore
 in vec3 sPos;           // Input per determinare l'illuminazione (o ottenuta dal vertex shader o di default interpolato)
-in vec3 lightBasedPos;
+in vec4 lightBasedPos;
 
 out vec4 fragColor; // Colore da rappresentare - in questo caso tramite
 
@@ -30,6 +30,7 @@ float shadow;
 
 uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene texture
 uniform sampler2D bumpTexture;  //TODO implement normal mapping
+uniform sampler2D depthMap;
 
 void main() {
     float normalDelta = texture(bumpTexture, outTextCoord).x -0.25f;
@@ -55,7 +56,20 @@ void main() {
     vec4 txIn = texture(texture1, outTextCoord);
 
     // Calcolo distanza tra (1) superficie/vista e (2) superficie/luce (se 1 > 2, è in ombra)
-    fragColor = (1 - shadow) * vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + diffuse + specular), txIn.a);
+    // Richiesta della depth map precedentemente scritta nei calcoli precedenti
+    // Necessaria poichè non effettuata al passaggio tra vertex e fragment (non è punto interno allo shader per il calcolo della scena
+    // Light Projective/Clip Space -> NDC space
 
-    //fragColor = vec4(newNormal, 1);
+    vec3 perspDivide = lightBasedPos.xyz / lightBasedPos.w;
+    // Normalizzazione da [-1, 1] a [0, 1] per il confronto con la profondità
+    perspDivide *= 0.5f;    //[-1, 1] -> [-0.5, 0.5]
+    perspDivide += 0.5f;    //[-0.5, 0.5] -> [0, 1]
+
+    // Controllo distanze tra camera-punto e luce-punto
+    // -> Stiamo confrontando se quel punto effettivamente sia visibile, controllando la distanza tra questo fragment e il calcolo sulla depth map
+    shadow = texture(depthMap, perspDivide.xy).r > perspDivide.z ? 1 : 0;
+
+    //fragColor = vec4((1 - shadow) * pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + diffuse + specular), txIn.a);
+
+    fragColor = texture(depthMap, perspDivide.xy);
 }

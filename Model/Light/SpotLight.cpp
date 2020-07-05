@@ -40,14 +40,6 @@ float SpotLight::getIrradiance(float angle) {
    return intensity * falloff;
 }
 
-unsigned int& SpotLight::getFrameBufferAsReference() {
-   return frameBuffer;
-}
-
-unsigned int& SpotLight::getDepthMapAsReference() {
-   return depthMap;
-}
-
 float SpotLight::getMaxAngle() const {
    return maxAngle;
 }

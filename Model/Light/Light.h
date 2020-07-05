@@ -28,6 +28,9 @@ protected:
    Color color;
    float intensity;
 
+   unsigned int frameBuffer;
+   unsigned int depthMap;
+
    std::unique_ptr<Camera> camera;
 
    Light(Float3 o, Color c, float i) : origin(std::move(o)), intensity(i), color(std::move(c)) {}
@@ -35,8 +38,13 @@ protected:
    static float degree2Radiants(float degree);
 
    static float radiants2Degree(float radiants);
+
 public:
    virtual float getIrradiance(float distance) = 0;
+
+   unsigned int& getFrameBufferAsReference();
+
+   unsigned int& getDepthMapAsReference();
 
    const Color & getColor() const;
 
