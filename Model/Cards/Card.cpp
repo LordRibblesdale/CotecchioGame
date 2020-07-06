@@ -51,11 +51,11 @@ unsigned int vIndices[6] {
 SquareMatrix Card::getWorldCoordinates(unsigned int cardIndex) {
    // TODO optimize memory & operations
    unsigned int handCards = players.at(playerID).getCards().size();
-   Float3 t(std::move(players.at(playerID).getPosition() - 2.5f*(players.at(playerID).getPosition() - lookAt).getNormalized()));
-   Float3 tmp(-t.getY()*0.2f/* - 0.1f*cardIndex / static_cast<float>(handCards)*/, t.getX()*0.2f, 0);
+   Float3 t(std::move(players.at(playerID).getPosition() - 4.0f*(players.at(playerID).getPosition() - lookAt).getNormalized()));
+   Float3 tmp(-t.getY()*0.2f, t.getX()*0.2f, 0);
    SquareMatrix translate(std::move(Transform::translateMatrix4(
-           t.getX() - tmp.getX() * (1 - 2.25f*cardIndex / static_cast<float>(handCards)),
-           t.getY() - tmp.getY() * (1 - 2.25f*cardIndex / static_cast<float>(handCards)),
+           t.getX() - tmp.getX() * (1 - 3.25f*cardIndex / static_cast<float>(handCards)),
+           t.getY() - tmp.getY() * (1 - 3.25f*cardIndex / static_cast<float>(handCards)),
            t.getZ() - 0.5f)));
    SquareMatrix qRotate(std::move(Rotation::rotationByQuaternion(Float4(tmp.getX(), tmp.getY(), 0, 1), degree2Radiants(-10))));
    SquareMatrix rotate(std::move(Rotation::rotationZAxisMatrix4(M_PI_2 - ((M_PI/static_cast<float>(sessionPlayers))*(sessionPlayers-2)*playerID))));

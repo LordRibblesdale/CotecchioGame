@@ -3,6 +3,8 @@
 #include <memory>
 
 void increaseIndex() {
+   previousPlayerIndex = playerIndex;
+
    if (++playerIndex == sessionPlayers) {
       playerIndex = 0;
    }
@@ -21,7 +23,7 @@ void createPlayerPositions(unsigned short int nPlayers) {
 
    //TODO use maxX for effective radius
    for (int i = 0; i < nPlayers; ++i) {
-      players.emplace_back(Player(40/nPlayers, Float3(8.25f* cosf(i * angle), 7.5f*sinf(i * angle), maxZ+2)));
+      players.emplace_back(Player(40/nPlayers, Float3(8.25f* cosf(i * angle), 9.25f*sinf(i * angle), maxZ+2)));
    }
 }
 

@@ -81,6 +81,7 @@ extern double cameraPlayerPositionTime;
 extern float blurValue;
 
 extern unsigned int playerIndex;
+extern unsigned int previousPlayerIndex;
 extern unsigned short int sessionPlayers;
 
 //--------------------------------------------------------------//

@@ -331,7 +331,7 @@ void loadObjects() {
       loadTexture(object.getLocation(), object.getName(), object.doesHaveTextures());
    }
 
-   createPlayerPositions(4);
+   createPlayerPositions(3);
    loadCards();
    loadCardTextures();
 
@@ -559,6 +559,7 @@ void render() {
    GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
    GLuint cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
    GLuint cardEyePosition = glGetUniformLocation(cardsShader, "eye");
+   GLuint playerIndexUniform = glGetUniformLocation(cardsShader, "playerIndex");
 
    GLuint cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
    GLuint backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
@@ -768,6 +769,8 @@ void render() {
 
       glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
+      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
+      glUniform1i(playerIndexUniform, playerIndex);
 
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
       glStencilMask(0x00);
@@ -872,8 +875,6 @@ void render() {
       glStencilMask(0x00);    // solo in lettura del buffer, non attiva la scrittura
       glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
       glEnable(GL_DEPTH_TEST);
-
-      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
       glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());

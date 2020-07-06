@@ -27,6 +27,7 @@ public:
 
    Camera(Float3 eye, Float3 lookAt, Float3 up);
 
+   Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float zoom, float far, float angle, float aspectRatio);
    Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float angle, float aspectRatio);
 
    Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left, float right, float angle);

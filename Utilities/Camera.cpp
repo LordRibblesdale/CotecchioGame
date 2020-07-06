@@ -32,6 +32,20 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
    yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
+Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float zoom, float far, float angle, float aspectRatio)
+        : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
+   Camera::near = near + zoom;
+   Camera::far = far;
+   Camera::viewAngle = degree2Radiants(angle);
+   Camera::aspectRatio = aspectRatio;
+
+   Camera::right = near * tanf(Camera::viewAngle * 0.5f);
+   //
+   Camera::top = aspectRatio * right;
+
+   yawAngle = acosf((lookAt - eye).getNormalized().getX());
+}
+
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left,
                float right, float angle) : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
    Camera::near = near;
