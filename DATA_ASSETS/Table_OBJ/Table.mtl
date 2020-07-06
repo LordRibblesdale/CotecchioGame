@@ -1,0 +1,377 @@
+newmtl lambert2SG1
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd file1-nurbsToPoly81.1.png
+Ni 1.00
+newmtl phong1SG1
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-nurbsToPoly2.2.png
+bump  -bm 1 bump3d1-nurbsToPoly2.2.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG3
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-nurbsToPoly1.png
+bump  -bm 1 bump3d1-nurbsToPoly1.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG14
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly6.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly6.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG15
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly61.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly61.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG16
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly50.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly50.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG17
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly80.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly80.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG18
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly14.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly14.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG21
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly25.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly25.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG22
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly18.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly18.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG23
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly38.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly38.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG24
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly39.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly39.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG25
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly24.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly24.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG26
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly32.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly32.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG27
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly37.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly37.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG28
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly33.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly33.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG29
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly31.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly31.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG30
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly68.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly68.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG31
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly74.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly74.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG32
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly43.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly43.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG33
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly69.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly69.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG34
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly67.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly67.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG40
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly55.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly55.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG41
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly11.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly11.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG42
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly56.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly56.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG43
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly57.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly57.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG49
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly51.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly51.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG50
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly49.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly49.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG51
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly75.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly75.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG52
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly73.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly73.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG57
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly44.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly44.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG58
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly45.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly45.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG59
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly10.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly10.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG60
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly26.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly26.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG61
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly27.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly27.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG62
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly62.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly62.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG63
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-group3_nurbsToPoly63.png
+bump  -bm 1 bump3d1-group3_nurbsToPoly63.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19
+newmtl phong1SG71
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd wood1-nurbsToPoly3.png
+bump  -bm 1 bump3d1-nurbsToPoly3.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 13.19

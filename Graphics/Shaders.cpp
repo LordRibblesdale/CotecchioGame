@@ -311,60 +311,45 @@ void loadTexture(const std::string &location, const std::string &name, bool load
 
 void loadCardTextures() {
    int width, height, channels;
-   std::unique_ptr<unsigned char> data(stbi_load((DATA_ASSETS_LOCATION + "Cards.png").c_str(), &width, &height, &channels, 0));
+   unsigned char* data(stbi_load((DATA_ASSETS_LOCATION + "Cards.png").c_str(), &width, &height, &channels, 0));
 
    if (data) {
       createTextureUniform(cardTexture);
 
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, cardTexture);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.release());
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
       glGenerateMipmap(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, 0);
    }
 
-   data.reset(stbi_load((DATA_ASSETS_LOCATION + "Back.png").c_str(), &width, &height, &channels, 0));
+   stbi_image_free(data);
+
+   data = stbi_load((DATA_ASSETS_LOCATION + "Back.png").c_str(), &width, &height, &channels, 0);
 
    if (data) {
       createTextureUniform(backCardTexture);
 
       glActiveTexture(GL_TEXTURE4);
       glBindTexture(GL_TEXTURE_2D, backCardTexture);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.release());
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
       glGenerateMipmap(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, 0);
    }
+
+   stbi_image_free(data);
 }
 
 void loadIcon(const std::string& location) {
    GLFWimage icon[1];
    int width, height, channels;
-   std::unique_ptr<unsigned char> data(stbi_load(location.c_str(), &width, &height, &channels, 0));
+   unsigned char* data(stbi_load(location.c_str(), &width, &height, &channels, 0));
    icon[0].width = width;
    icon[0].height = height;
-   icon[0].pixels = data.release();
+   icon[0].pixels = data;
 
    if (icon->pixels) {
       glfwSetWindowIcon(window, 1, icon);
-   } else {
-      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
-   }
-}
-
-void loadIcon(const string &location, const string& location2) {
-   GLFWimage icon[2];
-   int width, height, channels;
-   std::unique_ptr<unsigned char> data(stbi_load(location.c_str(), &width, &height, &channels, 0));
-   icon[0].width = width;
-   icon[0].height = height;
-   icon[0].pixels = data.release();
-   data.reset(stbi_load(location2.c_str(), &width, &height, &channels, 0));
-   icon[1].width = width;
-   icon[1].height = height;
-   icon[1].pixels = data.release();
-
-   if (icon->pixels) {
-      glfwSetWindowIcon(window, 2, icon);
    } else {
       std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
    }

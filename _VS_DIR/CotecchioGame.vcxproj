@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{A9F46F94-B666-40D1-B80A-E5F3A2307766}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="cmake-build-debug\cmakefiles\3.15.3\compileridcxx\CMakeCXXCompilerId.cpp" />
+    <ClCompile Include="cmake-build-debug\cmakefiles\3.15.3\compileridc\CMakeCCompilerId.c" />
+    <ClCompile Include="cmake-build-debug\cmakefiles\3.16.5\compileridcxx\CMakeCXXCompilerId.cpp" />
+    <ClCompile Include="cmake-build-debug\cmakefiles\3.16.5\compileridc\CMakeCCompilerId.c" />
+    <ClCompile Include="cmakefiles\3.16.5\compileridcxx\CMakeCXXCompilerId.cpp" />
+    <ClCompile Include="cmakefiles\3.16.5\compileridc\CMakeCCompilerId.c" />
+    <ClCompile Include="graphics\glad\src\glad.c" />
+    <ClCompile Include="io\stb-master\deprecated\stb_image.c" />
+    <ClCompile Include="io\stb-master\stb_vorbis.c" />
+    <ClCompile Include="io\stb-master\tests\caveview\cave_main.c" />
+    <ClCompile Include="io\stb-master\tests\caveview\cave_mesher.c" />
+    <ClCompile Include="io\stb-master\tests\caveview\cave_parse.c" />
+    <ClCompile Include="io\stb-master\tests\caveview\cave_render.c" />
+    <ClCompile Include="io\stb-master\tests\caveview\main.c" />
+    <ClCompile Include="io\stb-master\tests\caveview\win32\SDL_windows_main.c" />
+    <ClCompile Include="io\stb-master\tests\c_lexer_test.c" />
+    <ClCompile Include="io\stb-master\tests\grid_reachability.c" />
+    <ClCompile Include="io\stb-master\tests\herringbone_generator.c" />
+    <ClCompile Include="io\stb-master\tests\herringbone_map.c" />
+    <ClCompile Include="io\stb-master\tests\image_test.c" />
+    <ClCompile Include="io\stb-master\tests\image_write_test.c" />
+    <ClCompile Include="io\stb-master\tests\oversample\main.c" />
+    <ClCompile Include="io\stb-master\tests\pg_test\pg_test.c" />
+    <ClCompile Include="io\stb-master\tests\resample_test.cpp" />
+    <ClCompile Include="io\stb-master\tests\resample_test_c.c" />
+    <ClCompile Include="io\stb-master\tests\sdf\sdf_test.c" />
+    <ClCompile Include="io\stb-master\tests\stb.c" />
+    <ClCompile Include="io\stb-master\tests\stblib_test.c" />
+    <ClCompile Include="io\stb-master\tests\stblib_test_companion.c" />
+    <ClCompile Include="io\stb-master\tests\stb_cpp.cpp" />
+    <ClCompile Include="io\stb-master\tests\stb_png_read_fuzzer.cpp" />
+    <ClCompile Include="io\stb-master\tests\stb_static.c" />
+    <ClCompile Include="io\stb-master\tests\stretchy_buffer_test.c" />
+    <ClCompile Include="io\stb-master\tests\stretch_test.c" />
+    <ClCompile Include="io\stb-master\tests\test_cpp_compilation.cpp" />
+    <ClCompile Include="io\stb-master\tests\test_c_compilation.c" />
+    <ClCompile Include="io\stb-master\tests\test_c_lexer.c" />
+    <ClCompile Include="io\stb-master\tests\test_ds.c" />
+    <ClCompile Include="io\stb-master\tests\test_ds_cpp.cpp" />
+    <ClCompile Include="io\stb-master\tests\test_dxt.c" />
+    <ClCompile Include="io\stb-master\tests\test_easyfont.c" />
+    <ClCompile Include="io\stb-master\tests\test_image.c" />
+    <ClCompile Include="io\stb-master\tests\test_image_write.c" />
+    <ClCompile Include="io\stb-master\tests\test_perlin.c" />
+    <ClCompile Include="io\stb-master\tests\test_siphash.c" />
+    <ClCompile Include="io\stb-master\tests\test_sprintf.c" />
+    <ClCompile Include="io\stb-master\tests\test_truetype.c" />
+    <ClCompile Include="io\stb-master\tests\test_vorbis.c" />
+    <ClCompile Include="io\stb-master\tests\test_voxel.c" />
+    <ClCompile Include="io\stb-master\tests\textedit_sample.c" />
+    <ClCompile Include="io\stb-master\tests\tilemap_editor_integration_example.c" />
+    <ClCompile Include="io\stb-master\tests\vorbseek\vorbseek.c" />
+    <ClCompile Include="io\stb-master\tools\build_matrix.c" />
+    <ClCompile Include="io\stb-master\tools\easy_font_maker.c" />
+    <ClCompile Include="io\stb-master\tools\make_readme.c" />
+    <ClCompile Include="io\stb-master\tools\trailing_whitespace.c" />
+    <ClCompile Include="io\stb-master\tools\unicode.c" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainChess.cpp" />
+    <ClCompile Include="matrix\FloatArray.cpp" />
+    <ClCompile Include="matrix\Matrix.cpp" />
+    <ClCompile Include="matrix\SquareMatrix.cpp" />
+    <ClCompile Include="matrix\StandardMatrix.cpp" />
+    <ClCompile Include="model\Box.cpp" />
+    <ClCompile Include="model\light\Light.cpp" />
+    <ClCompile Include="model\light\OmniLight.cpp" />
+    <ClCompile Include="model\light\SpotLight.cpp" />
+    <ClCompile Include="model\Material.cpp" />
+    <ClCompile Include="model\Model.cpp" />
+    <ClCompile Include="model\Mesh.cpp" />
+    <ClCompile Include="model\Triangle.cpp" />
+    <ClCompile Include="utilities\Camera.cpp" />
+    <ClCompile Include="utilities\Color.cpp" />
+    <ClCompile Include="utilities\Ray.cpp" />
+    <ClCompile Include="vector\Float2.cpp" />
+    <ClCompile Include="vector\Float3.cpp" />
+    <ClCompile Include="vector\Float4.cpp" />
+    <ClCompile Include="vector\FloatVector.cpp" />
+    <ClCompile Include="_notproject_exercises\MainTest.cpp" />
+    <ClCompile Include="_notproject_exercises\MainTextureE2.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="exception\ExceptionNotifier.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\aabb.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\ai_assert.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\anim.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\BaseImporter.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Bitmap.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\BlobIOSystem.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\ByteSwapper.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\camera.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\cexport.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\cfileio.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\cimport.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\color4.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\compiler\poppack1.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\compiler\pstdint.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\compiler\pushpack1.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\config.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\DefaultIOStream.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\Defines.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\defs.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Exceptional.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Exporter.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\fast_atof.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\GenericProperty.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Hash.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Importer.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\importerdesc.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\IOStream.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\IOSystem.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\irrXMLWrapper.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\light.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\LineSplitter.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\LogAux.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Logger.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\LogStream.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\Macros.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\material.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\MathFunctions.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\matrix3x3.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\matrix4x4.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\mesh.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\metadata.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\NullLogger.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\ParsingUtils.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\pbrmaterial.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\port\androidjni\AndroidJNIIOSystem.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\postprocess.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Profiler.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="graphics\assimp\include\assimp\qnan.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\quaternion.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\RemoveComments.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\scene.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\SceneCombiner.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\SGSpatialSort.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\SmoothingGroups.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\SpatialSort.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\StandardShapes.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\StreamReader.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\StreamWriter.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\StringComparison.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\StringUtils.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Subdivision.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\texture.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\TinyFormatter.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\types.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\vector2.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\vector3.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\version.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\Vertex.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\XMLTools.h" />
+    <ClInclude Include="graphics\assimp\include\assimp\ZipArchiveIOSystem.h" />
+    <ClInclude Include="graphics\glad\include\glad\glad.h" />
+    <ClInclude Include="graphics\glad\include\khr\khrplatform.h" />
+    <ClInclude Include="graphics\glfw-3.3.2.bin.win64\include\glfw\glfw3.h" />
+    <ClInclude Include="graphics\glfw-3.3.2.bin.win64\include\glfw\glfw3native.h" />
+    <ClInclude Include="graphics\GL_Loader.h" />
+    <ClInclude Include="graphics\GL_Loader_Ex1Chess.h" />
+    <ClInclude Include="graphics\Shaders.h" />
+    <ClInclude Include="io\rapidxml-1.13\rapidxml.hpp" />
+    <ClInclude Include="io\rapidxml-1.13\rapidxml_iterators.hpp" />
+    <ClInclude Include="io\rapidxml-1.13\rapidxml_print.hpp" />
+    <ClInclude Include="io\rapidxml-1.13\rapidxml_utils.hpp" />
+    <ClInclude Include="io\stb-master\deprecated\rrsprintf.h" />
+    <ClInclude Include="io\stb-master\stb.h" />
+    <ClInclude Include="io\stb-master\stb_connected_components.h" />
+    <ClInclude Include="io\stb-master\stb_c_lexer.h" />
+    <ClInclude Include="io\stb-master\stb_divide.h" />
+    <ClInclude Include="io\stb-master\stb_ds.h" />
+    <ClInclude Include="io\stb-master\stb_dxt.h" />
+    <ClInclude Include="io\stb-master\stb_easy_font.h" />
+    <ClInclude Include="io\stb-master\stb_herringbone_wang_tile.h" />
+    <ClInclude Include="io\stb-master\stb_image.h" />
+    <ClInclude Include="io\stb-master\stb_image_resize.h" />
+    <ClInclude Include="io\stb-master\stb_image_write.h" />
+    <ClInclude Include="io\stb-master\stb_include.h" />
+    <ClInclude Include="io\stb-master\stb_leakcheck.h" />
+    <ClInclude Include="io\stb-master\stb_perlin.h" />
+    <ClInclude Include="io\stb-master\stb_rect_pack.h" />
+    <ClInclude Include="io\stb-master\stb_sprintf.h" />
+    <ClInclude Include="io\stb-master\stb_textedit.h" />
+    <ClInclude Include="io\stb-master\stb_tilemap_editor.h" />
+    <ClInclude Include="io\stb-master\stb_truetype.h" />
+    <ClInclude Include="io\stb-master\stb_voxel_render.h" />
+    <ClInclude Include="io\stb-master\stretchy_buffer.h" />
+    <ClInclude Include="io\stb-master\tests\caveview\caveview.h" />
+    <ClInclude Include="io\stb-master\tests\caveview\cave_parse.h" />
+    <ClInclude Include="io\stb-master\tests\caveview\glext.h" />
+    <ClInclude Include="io\stb-master\tests\caveview\glext_list.h" />
+    <ClInclude Include="io\stb-master\tests\caveview\stb_gl.h" />
+    <ClInclude Include="io\stb-master\tests\caveview\stb_glprog.h" />
+    <ClInclude Include="io\stb-master\tests\oversample\stb_wingraph.h" />
+    <ClInclude Include="io\stb-master\tests\prerelease\stb_lib.h" />
+    <ClInclude Include="matrix\FloatArray.h" />
+    <ClInclude Include="matrix\Matrix.h" />
+    <ClInclude Include="matrix\SquareMatrix.h" />
+    <ClInclude Include="matrix\StandardMatrix.h" />
+    <ClInclude Include="model\Box.h" />
+    <ClInclude Include="model\light\Light.h" />
+    <ClInclude Include="model\light\OmniLight.h" />
+    <ClInclude Include="model\light\SpotLight.h" />
+    <ClInclude Include="model\Material.h" />
+    <ClInclude Include="model\Model.h" />
+    <ClInclude Include="model\Mesh.h" />
+    <ClInclude Include="model\Triangle.h" />
+    <ClInclude Include="utilities\Camera.h" />
+    <ClInclude Include="utilities\Color.h" />
+    <ClInclude Include="utilities\Ray.h" />
+    <ClInclude Include="vector\Float2.h" />
+    <ClInclude Include="vector\Float3.h" />
+    <ClInclude Include="vector\Float4.h" />
+    <ClInclude Include="vector\FloatVector.h" />
+    <ClInclude Include="_notproject_exercises\graphics\GL_Loader_Ex2Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cmake-build-debug\cmakefiles\3.15.3\CMakeDetermineCompilerABI_C.bin" />
+    <None Include="cmake-build-debug\cmakefiles\3.15.3\CMakeDetermineCompilerABI_CXX.bin" />
+    <None Include="cmake-build-debug\cmakefiles\3.16.5\CMakeDetermineCompilerABI_C.bin" />
+    <None Include="cmake-build-debug\cmakefiles\3.16.5\CMakeDetermineCompilerABI_CXX.bin" />
+    <None Include="cmake-build-debug\cmakefiles\cotecchiogame.dir\C.includecache" />
+    <None Include="cmake-build-debug\cmakefiles\cotecchiogame.dir\CXX.includecache" />
+    <None Include="cmakefiles\3.16.5\CMakeDetermineCompilerABI_C.bin" />
+    <None Include="cmakefiles\3.16.5\CMakeDetermineCompilerABI_CXX.bin" />
+    <None Include="cmakefiles\cotecchiogame.dir\C.includecache" />
+    <None Include="cmakefiles\cotecchiogame.dir\CXX.includecache" />
+    <None Include="graphics\assimp\include\assimp\color4.inl" />
+    <None Include="graphics\assimp\include\assimp\material.inl" />
+    <None Include="graphics\assimp\include\assimp\matrix3x3.inl" />
+    <None Include="graphics\assimp\include\assimp\matrix4x4.inl" />
+    <None Include="graphics\assimp\include\assimp\quaternion.inl" />
+    <None Include="graphics\assimp\include\assimp\SmoothingGroups.inl" />
+    <None Include="graphics\assimp\include\assimp\vector2.inl" />
+    <None Include="graphics\assimp\include\assimp\vector3.inl" />
+    <None Include="io\rapidxml-1.13\manual.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="cmakefiles\cotecchiogame.dir\manifest.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
