@@ -285,6 +285,8 @@ void loadObject(const std::string& location, const std::string& objName, const u
 
       objects.emplace_back(table);
    }
+
+   importer.FreeScene();
 }
 
 void loadObjects() {
@@ -944,7 +946,7 @@ void render() {
 }
 
 void cleanMemory() {
-   // TODO complete adding remaining variables
+   // TODO complete: adding remaining variables
    // Liberazione della memoria
    for (int i = 0; i < vertexArrayObjects.size(); ++i) {
       glDeleteBuffers(1, &vertexBufferObjects.at(i));
