@@ -559,7 +559,8 @@ void render() {
    GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
    GLuint cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
    GLuint cardEyePosition = glGetUniformLocation(cardsShader, "eye");
-   GLuint playerIndexUniform = glGetUniformLocation(cardsShader, "playerIndex");
+   GLuint playerIndexUniform = glGetUniformLocation(cardsShader, "currentPlayer");
+   GLuint viewPlayerUniform = glGetUniformLocation(cardsShader, "viewPlayer");
 
    GLuint cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
    GLuint backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
@@ -633,8 +634,6 @@ void render() {
                glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
             }
          }
-
-
       }
 
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
@@ -769,7 +768,6 @@ void render() {
 
       glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
-      glUniform3f(cardEyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
       glUniform1i(playerIndexUniform, playerIndex);
 
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -779,116 +777,120 @@ void render() {
       double x, y;
       glfwGetCursorPos(window, &x, &y);
 
-      for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
-         for (unsigned int i = 0; i < players.at(pIndex).getCards().size(); ++i) {
-            //std::vector<SquareMatrix> matrices;
-            //matrices.reserve(4);
+      if (!players.empty()) {
+         for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
+            glUniform1i(viewPlayerUniform, pIndex);
 
-            //players.at(pIndex).getCards().at(i).getWorldCoordinates(i, matrices);
+            for (unsigned int i = players.at(pIndex).getCards().size()-1; i > 0; --i) {
+               //std::vector<SquareMatrix> matrices;
+               //matrices.reserve(4);
 
-            cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
+               //players.at(pIndex).getCards().at(i).getWorldCoordinates(i, matrices);
 
-            if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
-               if (pIndex == playerIndex) {
-                  if (!hasSelectedCard) {
-                     /* Increase performance from ([3*n^3 + 4*n^2] to [12*n^2])
-                        n = 4 -> 256 to 192 operations
+               cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
 
-                     Float4 p0(matrices.at(0).multiplyVector(
-                             matrices.at(1).multiplyVector(
-                                     matrices.at(2).multiplyVector(
-                                             matrices.at(3).multiplyVector(
-                                                     Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1))))));
-                     Float4 p1(matrices.at(0).multiplyVector(
-                             matrices.at(1).multiplyVector(
-                                     matrices.at(2).multiplyVector(
-                                             matrices.at(3).multiplyVector(
-                                                     Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1))))));
-                     Float4 p2(matrices.at(0).multiplyVector(
-                             matrices.at(1).multiplyVector(
-                                     matrices.at(2).multiplyVector(
-                                             matrices.at(3).multiplyVector(
-                                             Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1))))));
-                     Float4 p3(matrices.at(0).multiplyVector(
-                             matrices.at(1).multiplyVector(
-                                     matrices.at(2).multiplyVector(
-                                             matrices.at(3).multiplyVector(
-                                             Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1))))));
-                                             */
+               if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
+                  if (pIndex == playerIndex) {
+                     if (!hasSelectedCard) {
+                        /* Increase performance from ([3*n^3 + 4*n^2] to [12*n^2])
+                           n = 4 -> 256 to 192 operations
 
-                     Float4 p0(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
-                     Float4 p1(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
-                     Float4 p2(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
-                     Float4 p3(cardModelM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1)));
+                        Float4 p0(matrices.at(0).multiplyVector(
+                                matrices.at(1).multiplyVector(
+                                        matrices.at(2).multiplyVector(
+                                                matrices.at(3).multiplyVector(
+                                                        Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1))))));
+                        Float4 p1(matrices.at(0).multiplyVector(
+                                matrices.at(1).multiplyVector(
+                                        matrices.at(2).multiplyVector(
+                                                matrices.at(3).multiplyVector(
+                                                        Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1))))));
+                        Float4 p2(matrices.at(0).multiplyVector(
+                                matrices.at(1).multiplyVector(
+                                        matrices.at(2).multiplyVector(
+                                                matrices.at(3).multiplyVector(
+                                                Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1))))));
+                        Float4 p3(matrices.at(0).multiplyVector(
+                                matrices.at(1).multiplyVector(
+                                        matrices.at(2).multiplyVector(
+                                                matrices.at(3).multiplyVector(
+                                                Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1))))));
+                                                */
 
-                     Triangle cardT1(p0, p1, p2);
-                     Triangle cardT2(p2, p1, p3);
+                        Float4 p0(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
+                        Float4 p1(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
+                        Float4 p2(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
+                        Float4 p3(cardModelM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1)));
 
-                     // NDC -> Clip Space
-                     float xProj = (((2*x)/static_cast<float>(X_RESOLUTION)) -1);
-                     float yProj = -(((2*y)/static_cast<float>(Y_RESOLUTION)) -1);  // MINUS per via dell'asse invertito Y SCREEN rispetto a Y CLIP
-                     float zProj = -camera.getNear();
+                        Triangle cardT1(p0, p1, p2);
+                        Triangle cardT2(p2, p1, p3);
 
-                     // NDC Space -> View Space
-                     // ON-AXIS CAMERA
-                     Float4 clipPoint(xProj * camera.getRight(), yProj * camera.getTop(), zProj, 1);
+                        // NDC -> Clip Space
+                        float xProj = (((2*x)/static_cast<float>(X_RESOLUTION)) -1);
+                        float yProj = -(((2*y)/static_cast<float>(Y_RESOLUTION)) -1);  // MINUS per via dell'asse invertito Y SCREEN rispetto a Y CLIP
+                        float zProj = -camera.getNear();
 
-                     // View Space -> World Space
-                     clipPoint = std::move(viewM_V2W.multiplyVector(clipPoint));
+                        // NDC Space -> View Space
+                        // ON-AXIS CAMERA
+                        Float4 clipPoint(xProj * camera.getRight(), yProj * camera.getTop(), zProj, 1);
 
-                     Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
+                        // View Space -> World Space
+                        clipPoint = std::move(viewM_V2W.multiplyVector(clipPoint));
 
-                     // Implement multithreading w/ sync for better performance?
-                     TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
-                     TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
+                        Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
 
-                     if (i1.getHasIntersected() || i2.getHasIntersected()) {
-                        players.at(pIndex).getCards().at(i).setIsSelected(true);
+                        // Implement multithreading w/ sync for better performance?
+                        TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
+                        TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
 
-                        hasSelectedCard = true;
+                        if (i1.getHasIntersected() || i2.getHasIntersected()) {
+                           players.at(pIndex).getCards().at(i).setIsSelected(true);
 
-                        glStencilMask(0xFF);
+                           hasSelectedCard = true;
+
+                           glStencilMask(0xFF);
+                        }
                      }
                   }
                }
+
+               players.at(pIndex).getCards().at(i).updateCoords();
+
+               glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
+
+               glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
+
+               glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             }
-
-            players.at(pIndex).getCards().at(i).updateCoords();
-
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
-
-            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          }
-      }
 
-      // Genero outlining tramite Stencil test
-      glUseProgram(colorShader);
+         // Genero outlining tramite Stencil test
+         glUseProgram(colorShader);
 
-      // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
-      glDisable(GL_DEPTH_TEST);
+         // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
+         glDisable(GL_DEPTH_TEST);
 
-      // Verrà stampato qualcosa su schermo solo se supera il controllo sottostante
-      // Ovvero quando l'oggetto si trova fuori dalla maschera, ovvero il tratto per l'outlining
+         // Verrà stampato qualcosa su schermo solo se supera il controllo sottostante
+         // Ovvero quando l'oggetto si trova fuori dalla maschera, ovvero il tratto per l'outlining
 
-      glStencilMask(0x00);    // solo in lettura del buffer, non attiva la scrittura
-      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-      glEnable(GL_DEPTH_TEST);
+         glStencilMask(0x00);    // solo in lettura del buffer, non attiva la scrittura
+         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+         glEnable(GL_DEPTH_TEST);
 
-      glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
-      glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
+         glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
+         glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
 
-      for (Card& card : players.at(playerIndex).getCards()) {
-         if (card.isSelected1()) {
-            cardModelM = std::move(card.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
+         for (Card& card : players.at(playerIndex).getCards()) {
+            if (card.isSelected1()) {
+               cardModelM = std::move(card.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
 
-            glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cardModelM.getArray());
+               glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+               glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-            card.setIsSelected(false);
-            break;
+               card.setIsSelected(false);
+               break;
+            }
          }
       }
 

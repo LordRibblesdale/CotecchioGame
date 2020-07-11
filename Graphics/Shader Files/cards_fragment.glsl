@@ -12,15 +12,11 @@ out vec4 fragColor;
 uniform sampler2D cardTexture;
 uniform sampler2D backTexture;
 
-uniform vec3 eye;
-uniform int playerIndex;
-uniform int previousPlayerIndex;
-uniform float t;
-
-float EPSILON = -0.9;
+uniform int currentPlayer;
+uniform int viewPlayer;
 
 void main() {
-    float k = dot(normalize(eye - sPos), outNormalVector) * (playerIndex % 2 == 0 ? 1 : -1) > EPSILON ? 1 : 0;
+    float k = viewPlayer == currentPlayer ? 0 : 1;
     vec4 tex1Color = texture(cardTexture, outTextCoord);
     vec4 tex2Color = texture(backTexture, outBackUV);
 

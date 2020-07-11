@@ -54,7 +54,7 @@ SquareMatrix Card::getWorldCoordinates(unsigned int cardIndex) {
    Float3 t(std::move(players.at(playerID).getPosition() - 4.0f*(players.at(playerID).getPosition() - lookAt).getNormalized()));
    Float3 tmp(-t.getY()*0.2f, t.getX()*0.2f, 0);
    SquareMatrix translate(std::move(Transform::translateMatrix4(
-           t.getX() - tmp.getX() * (1 - 3.25f*cardIndex / static_cast<float>(handCards)),
+           t.getX() - tmp.getX() * (1.75f - 3.25f*(cardIndex +1) / static_cast<float>(handCards)),
            t.getY() - tmp.getY() * (1 - 3.25f*cardIndex / static_cast<float>(handCards)),
            t.getZ() - 0.5f)));
    SquareMatrix qRotate(std::move(Rotation::rotationByQuaternion(Float4(tmp.getX(), tmp.getY(), 0, 1), degree2Radiants(-10))));
