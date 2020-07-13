@@ -15,7 +15,8 @@ void createPlayerPositions(unsigned short int nPlayers) {
 
    float angle = (M_PI * 2.0f) / static_cast<float>(nPlayers);
 
-   maxZ = objects.at(0).getHighestZPoint();
+   // TODO use dynamic index
+   maxZ = objects.at(1).getHighestZPoint();
    // TODO fix FurthestPoint
    //maxX = objects.at(0).getFurthestXPoint();
 

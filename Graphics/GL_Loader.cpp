@@ -261,11 +261,10 @@ void loadCards() {
 
 void loadObject(const std::string& location, const std::string& objName, const unsigned int& objType) {
    std::string s(location + objName + ".obj");
-   Assimp::Importer importer;
-   const aiScene* scene(importer.ReadFile(s, aiProcess_Triangulate));
+   const aiScene* scene(importer->ReadFile(s, aiProcess_Triangulate));
 
    if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer.GetErrorString() << std::endl;
+      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer->GetErrorString() << std::endl;
    } else {
       Model table(location, objName);
       table.processNode(scene->mRootNode, scene);
@@ -276,25 +275,23 @@ void loadObject(const std::string& location, const std::string& objName, const u
       } else if (objType == WORLD_TYPE) {
          table.setTexturesEnabled(false);
          table.setNeedsNoCulling(true);
-         table.setXScale(0.5f);
-         table.setYScale(0.5f);
-         table.setZScale(0.5f);
          table.setXTranslation(1);
          table.setXRotation(degree2Radiants(90));
       }
 
-      objects.emplace_back(table);
+      objects.emplace_back(std::move(table));
    }
 
-   importer.FreeScene();
+   importer->FreeScene();
 }
 
 void loadObjects() {
    // TODO initial translation, rotation and scale
-   loadObject(TABLE_ASSETS_LOCATION, "Table", TABLE_TYPE);
+   importer = std::move(std::make_unique<Assimp::Importer>());
 
-   // TODO FIX
    loadObject(DATA_ASSETS_LOCATION, "World", WORLD_TYPE);
+
+   loadObject(TABLE_ASSETS_LOCATION, "Table", TABLE_TYPE);
 
    unsigned long verticesLenght = 0;
    unsigned long texturesLength = 0;
@@ -589,7 +586,11 @@ void render() {
       lightSpaceMs.emplace_back(SquareMatrix(4, {}));
    }
 
-   // Abilito Stencil test per l'outlining
+   unsigned int skipVertexIndex = 0;
+   unsigned int skipTextureIndex = 0;
+   unsigned int skipBumpIndex = 0;
+
+           // Abilito Stencil test per l'outlining
    glEnable(GL_STENCIL_TEST);
 
    // Imposto le modalità di scrittura dello stencil test
@@ -612,6 +613,7 @@ void render() {
       // Imposto la viewport per il render della shadow map
       glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
 
+      /*
       for (unsigned int i = 0; i < lights.size(); ++i) {
          glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
          glClear(GL_DEPTH_BUFFER_BIT);
@@ -637,6 +639,7 @@ void render() {
             }
          }
       }
+       */
 
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
       glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
@@ -693,14 +696,18 @@ void render() {
 
       glUniform1f(gammaUniform, GAMMA_CORRECTION);
 
-      for (auto& object : objects) {
+      skipVertexIndex = 0;
+      skipTextureIndex = 0;
+      skipBumpIndex = 0;
+
+      for (auto & object : objects) {
          //modelM_L2W = object.getWorldCoordinates();
 
          //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, modelM_L2W.getArray());
          //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getLocal2WorldMatrix().getArray());
          glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
-         for (int j = 0; j < object.getMeshes().size(); ++j) {
+         for (auto j = 0; j < object.getMeshes().size(); ++j) {
             if (object.doesHaveTextures()) {
                glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).getAmbientCoeff().getX(),
                        materials.at(materialIndices.at(j)).getAmbientCoeff().getY(),
@@ -723,10 +730,10 @@ void render() {
                // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
                glActiveTexture(GL_TEXTURE0);
                // Il bind sulla variabile texture1 ora si riverisce alla texture unit a cui è stata collegata
-               glBindTexture(GL_TEXTURE_2D, textureUniforms.at(j));
+               glBindTexture(GL_TEXTURE_2D, textureUniforms.at(skipTextureIndex++));
 
                glActiveTexture(GL_TEXTURE1);
-               glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(j));
+               glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(skipBumpIndex++));
             } else {
                glUniform3f(ambientCoefficient, materials.at(materials.size()-1).getAmbientCoeff().getX(),
                            materials.at(materials.size()-1).getAmbientCoeff().getY(),
@@ -737,7 +744,7 @@ void render() {
                glDisable(GL_CULL_FACE);
             }
 
-            glBindVertexArray(vertexArrayObjects.at(j));
+            glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
             // Chamata di disegno della primitiva
             glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
 
@@ -783,7 +790,9 @@ void render() {
          for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
             glUniform1i(viewPlayerUniform, pIndex);
 
-            for (unsigned int i = players.at(pIndex).getCards().size()-1; i > 0; --i) {
+            unsigned int selectedIndex = -1;
+
+            for (size_t i = 0; i < players.at(pIndex).getCards().size(); ++i) {
                //std::vector<SquareMatrix> matrices;
                //matrices.reserve(4);
 
@@ -791,9 +800,9 @@ void render() {
 
                cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
 
-               if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
-                  if (pIndex == playerIndex) {
-                     if (!hasSelectedCard) {
+               if (pIndex == playerIndex) {
+                  if (!hasSelectedCard) {
+                     if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
                         /* Increase performance from ([3*n^3 + 4*n^2] to [12*n^2])
                            n = 4 -> 256 to 192 operations
 
@@ -849,6 +858,7 @@ void render() {
                            players.at(pIndex).getCards().at(i).setIsSelected(true);
 
                            hasSelectedCard = true;
+                           selectedIndex = i;
 
                            glStencilMask(0xFF);
                         }
@@ -856,13 +866,31 @@ void render() {
                   }
                }
 
-               players.at(pIndex).getCards().at(i).updateCoords();
+               if (selectedIndex != i) {
+                  players.at(pIndex).getCards().at(i).updateCoords();
+
+                  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
+
+                  glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
+
+                  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+               }
+            }
+
+            if (hasSelectedCard && (playerIndex == pIndex)) {
+               glDisable(GL_DEPTH_TEST);
+
+               cardModelM = std::move(players.at(pIndex).getCards().at(selectedIndex).getWorldCoordinates(selectedIndex));
+
+               players.at(pIndex).getCards().at(selectedIndex).updateCoords();
 
                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
 
                glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+               glEnable(GL_DEPTH_TEST);
             }
          }
 

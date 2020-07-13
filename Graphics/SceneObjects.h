@@ -4,6 +4,7 @@
 #include <vector>
 #include <stack>
 #include <glfw3.h>
+#include <assimp/Importer.hpp>
 
 #include "../Utilities/Camera.h"
 #include "../Animation/CameraRotation.h"
@@ -17,6 +18,8 @@
 #include "../Model/Cards/Card.h"
 
 extern GLFWwindow* window;
+
+extern std::unique_ptr<Assimp::Importer> importer;
 
 //--------------------------------------------------------------//
 

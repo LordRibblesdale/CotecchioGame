@@ -1,6 +1,7 @@
 #include "SceneObjects.h"
 
 GLFWwindow* window = nullptr;
+std::unique_ptr<Assimp::Importer> importer;
 
 GLuint phongShaderProgram;
 GLuint offlineShaderProgram;

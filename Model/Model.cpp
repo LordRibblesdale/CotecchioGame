@@ -32,7 +32,7 @@ void Model::processMesh(aiMesh *mesh) {
       }
    }
 
-   meshes.push_back(mesh1);
+   meshes.push_back(std::move(mesh1));
 }
 
 const vector<Mesh> &Model::getMeshes() const {
