@@ -20,40 +20,9 @@
 //#include FT_FREETYPE_H
 
 #include <random>
-
-void refreshWindowSize(GLFWwindow *window, int width, int height) {
-   /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
-    * glViewport è la funzione per la trasformazione da NDC a Screen
-    */
-   X_RESOLUTION = width;
-   Y_RESOLUTION = height;
-   glfwGetWindowSize(window, &X_RESOLUTION, &Y_RESOLUTION);
-   aspectRatio = static_cast<float>(Y_RESOLUTION) / static_cast<float>(X_RESOLUTION);
-   camera.setAspectRatio(aspectRatio);
-
-   glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-   glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
-   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
-
-   if (ENABLE_MULTISAMPLING) {
-      glBindFramebuffer(GL_FRAMEBUFFER, secondaryFrameBuffer);
-      glRenderbufferStorageMultisample(GL_RENDERBUFFER, MULTISAMPLING_LEVEL, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
-
-      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaOfflineTexture);
-      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MULTISAMPLING_LEVEL, GL_RGB, X_RESOLUTION, Y_RESOLUTION, GL_TRUE);
-
-      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-   }
-
-   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-   glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-   glViewport(0, 0, width, height);
-}
-
-//---------------------------------------------------------------------------------//
+#include <ctime>
+#include <chrono>
+#include <>
 
 void initializeGLFW() {
    // Inzializzazione di OpenGL per il render
@@ -62,12 +31,6 @@ void initializeGLFW() {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-   /*
-   // Attivazione multisampling
-   // TODO manage this from program settings
-   glfwWindowHint(GLFW_SAMPLES, 4);
-    */
 
 #ifdef __APPLE__
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -90,13 +53,6 @@ bool setupWindowEnvironment() {
    glfwMakeContextCurrent(window);
    // Chiamare determinate callbacks per ogni azione (funzioni da richiamare in un certo evento)
    glfwSetWindowSizeCallback(window, refreshWindowSize);
-
-   /*
-   // Imposto input tramite mouse
-   glfwSetCursorPosCallback(window, cursorPositionCallBack);
-   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    */
-
    glfwSetScrollCallback(window, scrollCallBack);
 
    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -107,6 +63,7 @@ bool setupWindowEnvironment() {
       return false;
    }
 
+   // TODO check real position if 0, 0 is not set
    glfwSetCursorPos(window, 0, 0);
    loadIcon("cotecchio.png");
    //loadIcon("cotecchio.png", "cotecchio_small.png");
@@ -143,6 +100,7 @@ bool setupOfflineRendering() {
 
       // false per fixed sample location (da tenere false?) [con true, parte, immagino sia da implementare la posizione casuale dei campioni]
       // Si sceglie la funzione apposita per il Multisample
+      // TODO check if sample position could be GL_FALSE
       glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MULTISAMPLING_LEVEL, GL_RGB, X_RESOLUTION, Y_RESOLUTION, GL_TRUE);
 
       glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -209,6 +167,7 @@ void compileShaders() {
    * Operazione su valori binari, invia chiamata sulla scheda grafica
    */
 
+   // TODO change name
    compileShader("Graphics/Shader Files/phong_texture_vertex.glsl", "Graphics/Shader Files/phong_texture_fragment.glsl", phongShaderProgram);
 
    //--------------------------OFFLINE RENDERING--------------------------------//
@@ -231,7 +190,8 @@ void compileShaders() {
 void loadCards() {
    unsigned int values[40] {0};
 
-   std::mt19937_64 gen(glfwGetTime());
+    // TODO complete changing seed
+    std::mt19937_64 gen(glfwGetTime());
 
    // TODO fix with correct cards from game rules
    int j = 10;
@@ -239,8 +199,8 @@ void loadCards() {
       value = j++;
    }
 
-   // Si mischiano così le carte in C++?
    std::shuffle(values, values+40, gen);
+   gen.seed(glfwGetTime)
    std::shuffle(values, values+40, gen);
    std::shuffle(values, values+40, gen);
 
@@ -332,6 +292,7 @@ void loadObjects() {
 
    createPlayerPositions(3);
    loadCards();
+   /// Continue here RIPSES
    loadCardTextures();
 
    prepareScreenForOfflineRendering();
@@ -480,8 +441,9 @@ void generateObjects(const Mesh &mesh) {
       attributes[index++] = mesh.getNormals().at(i).getZ();
    }
 
+   // GL_STATIC_DRAW??
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, attributes, GL_DYNAMIC_DRAW);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.getIndices().size(), mesh.getIndices().data(), GL_DYNAMIC_DRAW);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.getIndices().size(), mesh.getIndices().data(), GL_STATIC_DRAW);
 
    /* Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
     * Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL

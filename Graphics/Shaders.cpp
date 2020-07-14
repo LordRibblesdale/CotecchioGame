@@ -19,6 +19,9 @@
 
 int report;
 
+unsigned int WOOD_INDEX = -1;
+unsigned int VELVET_INDEX = -1;
+
 void compileShader(const string &vLocation, const string &fLocation,
                    GLuint &program) {
    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -140,15 +143,10 @@ void createTextureUniform(GLuint& texture) {
    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-/*
-void loadTextureFromFile(std::vector<GLuint>& textureCoords, std::unordered_map<std::string, GLuint>& map, rapidxml::xml_node<>* position, std::string location) {}
-
-void loadBumpTextureFromFile(std::vector<GLuint> &bumpUniforms, std::unordered_map<std::string, GLuint>& bMap, rapidxml::xml_node<>* bumpNode, std::string location) {}
- */
-
 void loadTexture(const std::string &location, const std::string &name, bool loadFiles) {
    std::unordered_map<std::string, GLuint> map;
    std::unordered_map<std::string, GLuint> bMap;
+   std::unordered_map<std::string, unsigned int> materialMap;
 
    // Creazione input buffer
    std::ifstream file(location + name + ".xml");
@@ -171,10 +169,8 @@ void loadTexture(const std::string &location, const std::string &name, bool load
        * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
        * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
        */
+      // TODO is necessary to flip?
       stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
-
-      //std::thread thread1;
-      //std::thread thread2;
 
       int width, height, channels;
       unsigned char* data;
@@ -185,6 +181,7 @@ void loadTexture(const std::string &location, const std::string &name, bool load
       for (rapidxml::xml_node<>* position = rootNode->first_node("Material"); position; position = position->next_sibling()) {
          Material material;
 
+         // TODO check if that material has been added (use unordered map)
          if (std::string("Wood") == position->first_attribute("name")->value()) {
             material.setDiffuseCoeff(Float3(
                     std::stof(position->first_node("Diffuse")->first_attribute("valueR")->value()),
@@ -199,9 +196,12 @@ void loadTexture(const std::string &location, const std::string &name, bool load
             ));
 
             material.setShininess(std::stof(position->first_node("Specular")->first_attribute("specularExp")->value()));
+            WOOD_INDEX = materials.size();
          } else if (std::string("Velvet") == position->first_attribute("name")->value()) {
             material.setDiffuseCoeff(Float3(1, 1, 1));
             material.setRoughness(std::stof(position->first_node("PBR")->first_attribute("roughness")->value()));
+
+            VELTET_INDEX = materials.size();
          } else if (std::string("Generic") == position->first_attribute("name")->value()) {
             material.setDiffuseCoeff(Float3(1, 1, 1));
          }
@@ -344,9 +344,9 @@ void loadIcon(const std::string& location) {
    GLFWimage icon[1];
    int width, height, channels;
    unsigned char* data(stbi_load(location.c_str(), &width, &height, &channels, 0));
-   icon[0].width = width;
-   icon[0].height = height;
-   icon[0].pixels = data;
+   icon->width = width;
+   icon->height = height;
+   icon->pixels = data;
 
    if (icon->pixels) {
       glfwSetWindowIcon(window, 1, icon);

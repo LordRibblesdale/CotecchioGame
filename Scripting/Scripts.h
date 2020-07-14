@@ -13,4 +13,6 @@ void cursorPositionCallBack(GLFWwindow* window, double xPos, double yPos);
 
 void scrollCallBack(GLFWwindow* window, double xOffset, double yOffset);
 
+void refreshWindowSize(GLFWwindow *window, int width, int height);
+
 #endif //COTECCHIOGAME_SCRIPTS_H

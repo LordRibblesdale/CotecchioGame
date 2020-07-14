@@ -34,10 +34,6 @@
  * Generare vbo e vao tramite funzioni predefinite semplifica chiamate a runtime
  */
 
-void refreshWindowSize(GLFWwindow *window, int width, int height);
-
-//------------------------------------------------------------------------------//
-
 void initializeGLFW();
 
 bool setupWindowEnvironment();

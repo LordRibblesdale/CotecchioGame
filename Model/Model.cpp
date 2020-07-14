@@ -3,8 +3,20 @@
 
 Model::Model(std::string location, std::string name) : location(std::move(location)), name(std::move(name)), local2World(SquareMatrix(4, {})) {}
 
+unsigned long calculateMeshesSize(aiNode* node) {
+   unsigned long size = node->mNumMeshes;
+
+   for (int i = 0; i < node->mNumChildren; ++i) {
+      size += calculateMeshesSize(node->mChildren[i]);
+   }
+
+   return size;
+}
+
 void Model::processNode(aiNode *node, const aiScene *scene) {
-   meshes.reserve(meshes.size() + node->mNumMeshes);
+   unsigned long meshLenght = calculateMeshesSize(node);
+
+   meshes.reserve(meshLenght);
 
    for (int i = 0; i < node->mNumMeshes; ++i) {
       // Accesso alle mesh di interesse a partire dagli indici posseduti dal nodo
