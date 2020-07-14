@@ -234,36 +234,3 @@ void scrollCallBack(GLFWwindow *window, double xOffset, double yOffset) {
       }
    }
 }
-
-void refreshWindowSize(GLFWwindow *window, int width, int height) {
-   /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
-    * glViewport è la funzione per la trasformazione da NDC a Screen
-    */
-   X_RESOLUTION = width;
-   Y_RESOLUTION = height;
-   glfwGetWindowSize(window, &X_RESOLUTION, &Y_RESOLUTION);
-   aspectRatio = static_cast<float>(Y_RESOLUTION) / static_cast<float>(X_RESOLUTION);
-   camera.setAspectRatio(aspectRatio);
-
-   if (ENABLE_MULTISAMPLING) {
-      glBindFramebuffer(GL_FRAMEBUFFER, secondaryFrameBuffer);
-      glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
-      glRenderbufferStorageMultisample(GL_RENDERBUFFER, MULTISAMPLING_LEVEL, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
-
-      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaOfflineTexture);
-      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MULTISAMPLING_LEVEL, GL_RGB, X_RESOLUTION, Y_RESOLUTION, GL_TRUE);
-   } else {
-      glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-      glBindTexture(GL_TEXTURE_2D, offlineTexture);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-      glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
-      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
-   }
-
-   glBindTexture(GL_TEXTURE_2D, 0);
-   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-   glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-   glViewport(0, 0, width, height);
-}

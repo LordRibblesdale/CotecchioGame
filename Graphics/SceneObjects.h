@@ -14,8 +14,8 @@
 #include <assimp/Importer.hpp>
 
 #include "../Utilities/Camera.h"
-#include "../Animation/CameraRotation.h"
-#include "../Animation/CameraTranslation.h"
+#include "../Scripting/CameraRotation.h"
+#include "../Scripting/CameraTranslation.h"
 #include "../Model/Model.h"
 
 #include "../Model/Light/SpotLight.h"

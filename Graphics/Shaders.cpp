@@ -201,7 +201,7 @@ void loadTexture(const std::string &location, const std::string &name, bool load
             material.setDiffuseCoeff(Float3(1, 1, 1));
             material.setRoughness(std::stof(position->first_node("PBR")->first_attribute("roughness")->value()));
 
-            VELTET_INDEX = materials.size();
+            VELVET_INDEX = materials.size();
          } else if (std::string("Generic") == position->first_attribute("name")->value()) {
             material.setDiffuseCoeff(Float3(1, 1, 1));
          }

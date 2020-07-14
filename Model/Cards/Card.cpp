@@ -52,11 +52,11 @@ SquareMatrix Card::getWorldCoordinates(unsigned int cardIndex) {
    // TODO optimize memory & operations
    unsigned int handCards = players.at(playerID).getCards().size();
    Float3 t(std::move(players.at(playerID).getPosition() - 4.0f*(players.at(playerID).getPosition() - lookAt).getNormalized()));
-   Float3 tmp(-t.getY()*0.2f, t.getX()*0.2f, 0);
+   Float3 tmp(-t.getY()*0.2f + 0.001f, t.getX()*0.2f + 0.001f,  0);
    SquareMatrix translate(std::move(Transform::translateMatrix4(
-           t.getX() - tmp.getX() * (1.75f - 3.25f*(cardIndex +1) / static_cast<float>(handCards)),
-           t.getY() - tmp.getY() * (1 - 3.25f*cardIndex / static_cast<float>(handCards)),
-           t.getZ() - 0.5f)));
+           t.getX() - tmp.getX() * (1.75f - 3.25f*(cardIndex +1) / static_cast<float>(handCards)) -0.10f,
+           t.getY() - tmp.getY() * (1.0f - 3.25f*(cardIndex) / static_cast<float>(handCards)) -0.10f,
+           t.getZ() - 0.4f)));
    SquareMatrix qRotate(std::move(Rotation::rotationByQuaternion(Float4(tmp.getX(), tmp.getY(), 0, 1), degree2Radiants(-10))));
    SquareMatrix rotate(std::move(Rotation::rotationZAxisMatrix4(M_PI_2 - ((M_PI/static_cast<float>(sessionPlayers))*(sessionPlayers-2)*playerID))));
    SquareMatrix scale(std::move(Transform::scaleMatrix4(0.4, 0.4, 0.4)));
@@ -67,6 +67,7 @@ SquareMatrix Card::getWorldCoordinates(unsigned int cardIndex) {
 }
 
 void Card::getWorldCoordinates(unsigned int cardIndex, std::vector<SquareMatrix>& matrices) {
+   /*
    unsigned int handCards = players.at(playerID).getCards().size();
    Float3 t(std::move(players.at(playerID).getPosition() - 2.5f*(players.at(playerID).getPosition() - lookAt).getNormalized()));
    Float3 tmp(-t.getY()*0.2f - 0.1f*cardIndex / static_cast<float>(handCards), t.getX()*0.2f, 0);
@@ -77,6 +78,7 @@ void Card::getWorldCoordinates(unsigned int cardIndex, std::vector<SquareMatrix>
    matrices.emplace_back(std::move(Rotation::rotationByQuaternion(Float4(tmp.getX(), tmp.getY(), 0, 1), degree2Radiants(-10))));
    matrices.emplace_back(std::move(Rotation::rotationZAxisMatrix4(M_PI_2 - ((M_PI/static_cast<float>(sessionPlayers))*(sessionPlayers-2)*playerID))));
    matrices.emplace_back(std::move(Transform::scaleMatrix4(0.4, 0.4, 0.4)));
+    */
 }
 
 void Card::updateCoords() const {
