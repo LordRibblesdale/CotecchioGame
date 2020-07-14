@@ -5,13 +5,13 @@
 
 #ifdef _WIN32
 #include "glfw3.h"
-#include "../Model/Mesh.h"
-
 #endif
 
 #ifdef linux
 #include <GLFW/glfw3.h>
 #endif
+
+#include "../Model/Mesh.h"
 
 /* Processo di rendering:
  * - Inizializzazione libreria

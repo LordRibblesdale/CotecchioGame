@@ -339,7 +339,11 @@ enum
 #if (_MSC_VER >= 1500)
 #include <stdlib.h>
 #else
+#if (linux)
+#include <stdlib.h>
+#else
 #include <c++/stdlib.h>
+#endif
 #endif
 
 typedef unsigned char stbi_uc;

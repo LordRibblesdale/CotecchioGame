@@ -3,7 +3,14 @@
 
 #include <vector>
 #include <stack>
-#include <glfw3.h>
+
+#ifdef _WIN32
+#include "glfw3.h"
+#endif
+
+#ifdef linux
+#include <GLFW/glfw3.h>
+#endif
 #include <assimp/Importer.hpp>
 
 #include "../Utilities/Camera.h"
