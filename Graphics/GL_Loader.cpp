@@ -400,6 +400,7 @@ void setupLightMap(Light* light) {
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
    glGenTextures(1, &light->getDepthMapAsReference());
    glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
+   glActiveTexture(GL_TEXTURE10);
    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
    // Da analizzare come classica texture per l'accesso valori
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -415,6 +416,10 @@ void setupLightMap(Light* light) {
    // Disattivo la scrittura e lettura, verrà usato solo per la profondità
    glReadBuffer(GL_NONE);
    glDrawBuffer(GL_NONE);
+
+   std::cout << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
+
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void prepareSceneLights() {
@@ -640,6 +645,7 @@ void render() {
    GLuint colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
 
    GLuint lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
+   GLuint modelLightShaderUniform = glGetUniformLocation(lightShader, "model");
    GLuint lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
    GLuint depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
@@ -686,6 +692,7 @@ void render() {
       // Imposto la viewport per il render della shadow map
       glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
 
+      /*
       for (unsigned int i = 0; i < lights.size(); ++i) {
          glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
          glClear(GL_DEPTH_BUFFER_BIT);
@@ -701,13 +708,34 @@ void render() {
 
          for (auto& object : objects) {
             //modelM_L2W = object.getWorldCoordinates();
-            glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
+            glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
             for (int j = 0; j < object.getMeshes().size(); ++j) {
                glBindVertexArray(vertexArrayObjects.at(j));
                // Chamata di disegno della primitiva
                glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
             }
+         }
+      }
+       */
+
+      skipVertexIndex = 0;
+
+      glBindFramebuffer(GL_FRAMEBUFFER, lights.at(0)->getFrameBufferAsReference());
+      glClear(GL_DEPTH_BUFFER_BIT);
+      lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(0)->getCamera()) *
+                                     lights.at(0)->getCamera()->world2ViewMatrix());
+
+      glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
+
+      for (auto& object : objects) {
+         //modelM_L2W = object.getWorldCoordinates();
+         glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
+
+         for (const auto& mesh : object.getMeshes()) {
+            glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
+            // Chamata di disegno della primitiva
+            glDrawElements(GL_TRIANGLES, mesh.getIndices().size(), GL_UNSIGNED_INT, 0);
          }
       }
 
@@ -753,16 +781,17 @@ void render() {
       // TODO set multiple lights
       glUniform3f(lightPosUniform, lights.at(0).get()->getOrigin().getX(), lights.at(0).get()->getOrigin().getY(), lights.at(0).get()->getOrigin().getZ());
       glUniform3f(lightColorUniform, lights.at(0).get()->getColor().getRed(), lights.at(0).get()->getColor().getGreen(), lights.at(0).get()->getColor().getBlue());
-      //TODO manage falloff
+      //TODO manage falloff (on CPU or GPU?)
       glUniform1f(lightIntensity, lights.at(0).get()->getIntensity());
 
       // Caricare vertexArrayObject interessato
       glUniform1i(texUnif, 0);
       glUniform1i(bumpUnif, 1);
-      //glUniform1i(depthMapUniform, 5);
       // TODO set multiple lights
-      //glActiveTexture(GL_TEXTURE5);
-      //glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
+      glUniform1i(depthMapUniform, 10);
+
+      glActiveTexture(GL_TEXTURE10);
+      glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
 
       glUniform1f(gammaUniform, GAMMA_CORRECTION);
 

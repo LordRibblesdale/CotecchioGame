@@ -1,3 +1,4 @@
+#include <iostream>
 #include "SpotLight.h"
 
 SpotLight::SpotLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 10) {

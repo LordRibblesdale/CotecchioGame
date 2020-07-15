@@ -60,16 +60,21 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
 }
 
 SquareMatrix Camera::world2ViewMatrix() {
-   /* TODO implement minimum variation
-    * Il problema della matrice non invertibile è risolvibile "spostando" la camera quando si vee che i prodotti vettoriali
-    * che si usano per costruirla sono 0. Se considero una camera che guarda lungo z (negativi per esempio) allora xV=UPXzV = 0
-    * (entrambi i vettori sono lungo Z globale)A questo punto si intercetta il prodotto vettoriale zero (o <eps) e si sposta
-    * leggermente la camera (può essere utile anche considerando la camera che si muove). Praticamente si elimina la possibilità
-    * che la camera vada in posizioni complicate
-    */
+    /* Il problema della matrice non invertibile è risolvibile "spostando" la camera quando si vede che i prodotti vettoriali
+     * che si usano per costruirla sono 0. Se considero una camera che guarda lungo z (negativi per esempio) allora xV=UPXzV = 0
+     * (entrambi i vettori sono lungo Z globale)A questo punto si intercetta il prodotto vettoriale zero (o <eps) e si sposta
+     * leggermente la camera (può essere utile anche considerando la camera che si muove). Praticamente si elimina la possibilità
+     * che la camera vada in posizioni complicate
+     */
+
    Float3 zView(std::move(eye - lookAt));
    zView.normalize();
    Float3 xView(std::move(up.crossProduct(zView)));
+
+   if (xView.l2Norm() == 0) {
+      xView = std::move(Float3(0.00015f, 1.00021f, 0.0f).crossProduct(zView));
+   }
+
    xView.normalize();
    Float3 yView(std::move(zView.crossProduct(xView)));
    yView.normalize();
@@ -86,6 +91,11 @@ SquareMatrix Camera::view2WorldMatrix() {
    Float3 zView(std::move(eye - lookAt));
    zView.normalize();
    Float3 xView(std::move(up.crossProduct(zView)));
+
+   if (xView.l2Norm() == 0) {
+      xView = std::move(Float3(0.00015f, 1.00021f, 0.0f).crossProduct(zView));
+   }
+
    xView.normalize();
    Float3 yView(std::move(zView.crossProduct(xView)));
    yView.normalize();
