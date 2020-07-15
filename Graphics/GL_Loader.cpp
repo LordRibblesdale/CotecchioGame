@@ -322,7 +322,6 @@ void loadObjects() {
 
    createPlayerPositions(8);
    loadCards();
-   /// Continue here RIPSES
    loadCardTextures();
 
    prepareScreenForOfflineRendering();
@@ -403,6 +402,7 @@ void prepareCardRendering() {
 
 void setupLightMap(Light* light) {
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
+   // TODO check shader to be set
    glGenTextures(1, &light->getDepthMapAsReference());
    glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
@@ -671,7 +671,7 @@ void render() {
 
    unsigned int flipCardRenderingIndex = ceil(players.size()/2.0f);
 
-           // Abilito Stencil test per l'outlining
+   // Abilito Stencil test per l'outlining
    glEnable(GL_STENCIL_TEST);
 
    // Imposto le modalità di scrittura dello stencil test
@@ -726,7 +726,7 @@ void render() {
       glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
 
       glClearColor(0.2, 0.2, 0.2, 1.0f);
-      // Pulizia buffer colore e depth
+      // Pulizia buffer colore, depth e stencil
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
@@ -840,7 +840,6 @@ void render() {
       glDisable(GL_CULL_FACE);
 
       // Blend di trasparenza
-      // TODO implement order-dependent transparency
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -945,6 +944,7 @@ void render() {
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
       glUseProgram(offlineShaderProgram);
 
+      // TODO ???
       if (ENABLE_MULTISAMPLING) {
          glUniform1i(samplesUniform, MULTISAMPLING_LEVEL);
       }
