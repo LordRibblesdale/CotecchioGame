@@ -1,12 +1,9 @@
--> TODO check positions when window size are changed
--> TODO Implement XML reading-writing system
+-> TODO check positions when window sizes are changed (?)
+-> Implement XML reading-writing system
 
 -> Add matrix conversion in upper dimension (example: projective-4)
--> Check all exceptions and noexcept(false) declarations
 -> Correct all names based on code styles
 -> Add all remaining friend operators
-
--> Check "move" operations (if needed or not)
 
 
 -> Check all pointers and deletes (use of unique_ptr?) - DONE
@@ -15,3 +12,5 @@
 -> vector reserve - DONE
 -> Normalise all vectors (especially if involved into orthogonal matrices) [ex: world->view] - DONE
 -> Import texture with premultiplied alpha - DONE
+-> Check all exceptions and noexcept(false) declarations - DONE
+-> Check "move" operations (if needed or not) - DONE

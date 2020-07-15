@@ -36,7 +36,6 @@ Matrix &Matrix::operator=(Matrix && matrix) {
    return *this;
 }
 
-//TODO fix repeated functions
 Matrix Matrix::operator+(const Matrix &matrix) noexcept(false) {
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
       FloatArray newData(getRows(), getColumns(), {});

@@ -232,7 +232,6 @@ SquareMatrix SquareMatrix::calculateInverse(const SquareMatrix &matrix) {
    return SquareMatrix(std::move(newData));
 }
 
-//TODO create new classes Matrix2, Matrix3 and Matrix4
 void SquareMatrix::scaleMatrix(float scaleX, float scaleY, float scaleZ) {
    //TODO automise here
    data_->getArray().get()[0] *= scaleX;

@@ -3,7 +3,7 @@
 GLFWwindow* window = nullptr;
 std::unique_ptr<Assimp::Importer> importer;
 
-GLuint phongShaderProgram;
+GLuint shaderProgram;
 GLuint offlineShaderProgram;
 GLuint cardsShader;
 GLuint backShader;

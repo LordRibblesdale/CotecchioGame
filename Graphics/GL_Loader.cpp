@@ -93,8 +93,6 @@ bool setupWindowEnvironment() {
       return false;
    }
 
-   // TODO check real position if 0, 0 is not set
-   glfwSetCursorPos(window, 0, 0);
    loadIcon("cotecchio.png");
    //loadIcon("cotecchio.png", "cotecchio_small.png");
 
@@ -130,7 +128,6 @@ bool setupOfflineRendering() {
 
       // false per fixed sample location (da tenere false?) [con true, parte, immagino sia da implementare la posizione casuale dei campioni]
       // Si sceglie la funzione apposita per il Multisample
-      // TODO check if sample position could be GL_FALSE
       glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MULTISAMPLING_LEVEL, GL_RGB, X_RESOLUTION, Y_RESOLUTION, GL_TRUE);
 
       glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -197,8 +194,7 @@ void compileShaders() {
    * Operazione su valori binari, invia chiamata sulla scheda grafica
    */
 
-   // TODO change name
-   compileShader("Graphics/Shader Files/phong_texture_vertex.glsl", "Graphics/Shader Files/phong_texture_fragment.glsl", phongShaderProgram);
+   compileShader("Graphics/Shader Files/texture_vertex.glsl", "Graphics/Shader Files/texture_fragment.glsl", shaderProgram);
 
    //--------------------------OFFLINE RENDERING--------------------------------//
 
@@ -320,7 +316,7 @@ void loadObjects() {
       loadTexture(object.getLocation(), object.getName(), object.doesHaveTextures());
    }
 
-   createPlayerPositions(8);
+   createPlayerPositions(3);
    loadCards();
    loadCardTextures();
 
@@ -402,7 +398,6 @@ void prepareCardRendering() {
 
 void setupLightMap(Light* light) {
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
-   // TODO check shader to be set
    glGenTextures(1, &light->getDepthMapAsReference());
    glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
@@ -607,31 +602,28 @@ void renderCardsInLoop(SquareMatrix& cardModelM, const GLuint& cardModelMatrix, 
 
 void render() {
    // Collezione indici per inviare dati allo shader
-   GLuint projectionMatrixUniform = glGetUniformLocation(phongShaderProgram, "projection");
-   GLuint viewMatrixUniform = glGetUniformLocation(phongShaderProgram, "view");
-   GLuint modelMatrixUniform = glGetUniformLocation(phongShaderProgram, "model");
+   GLuint projectionMatrixUniform = glGetUniformLocation(shaderProgram, "projection");
+   GLuint viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
+   GLuint modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
-   GLuint texUnif = glGetUniformLocation(phongShaderProgram, "texture1");
-   GLuint bumpUnif = glGetUniformLocation(phongShaderProgram, "bumpTexture");
+   GLuint texUnif = glGetUniformLocation(shaderProgram, "texture1");
+   GLuint bumpUnif = glGetUniformLocation(shaderProgram, "bumpTexture");
 
-   GLuint lightPosUniform = glGetUniformLocation(phongShaderProgram, "lightPos");
-   GLuint lightColorUniform = glGetUniformLocation(phongShaderProgram, "lightColor");
-   GLuint lightIntensity = glGetUniformLocation(phongShaderProgram, "lightIntensity");
+   GLuint lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
+   GLuint lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
+   GLuint lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
 
-   GLuint ambientCoefficient = glGetUniformLocation(phongShaderProgram, "ambientCoefficient");
-   GLuint diffusiveCoefficient = glGetUniformLocation(phongShaderProgram, "diffusiveCoefficient");
-   GLuint specularCoefficient = glGetUniformLocation(phongShaderProgram, "specularCoefficient");
-   GLuint specularAlpha = glGetUniformLocation(phongShaderProgram, "specularAlpha");
-   GLuint eyePosition = glGetUniformLocation(phongShaderProgram, "eye");
+   GLuint ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
+   GLuint diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
+   GLuint specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
+   GLuint specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
+   GLuint eyePosition = glGetUniformLocation(shaderProgram, "eye");
 
-   GLuint gammaUniform = glGetUniformLocation(phongShaderProgram, "gammaCorrection");
+   GLuint gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
+
+   GLuint fixedColorUniform = glGetUniformLocation(shaderProgram, "color");
 
    GLuint blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
-
-   GLuint samplesUniform = 0;
-   if (ENABLE_MULTISAMPLING) {
-      samplesUniform = glGetUniformLocation(offlineShaderProgram, "samples");
-   }
 
    GLuint cardModelMatrix = glGetUniformLocation(cardsShader, "model");
    GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
@@ -648,8 +640,8 @@ void render() {
    GLuint colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
 
    GLuint lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
-   GLuint phongLightSpaceMatrixUniform = glGetUniformLocation(phongShaderProgram, "lightSpaceMatrix");
-   GLuint depthMapUniform = glGetUniformLocation(phongShaderProgram, "depthMap");
+   GLuint lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
+   GLuint depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
    SquareMatrix projM_V2C(4, {});
    SquareMatrix viewM_W2V(4, {});
@@ -694,12 +686,10 @@ void render() {
       // Imposto la viewport per il render della shadow map
       glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
 
-      /*
       for (unsigned int i = 0; i < lights.size(); ++i) {
          glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
          glClear(GL_DEPTH_BUFFER_BIT);
 
-         // TODO check if casting necessary
          if (dynamic_cast<SpotLight*>(lights.at(i).get())) {
             lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(i)->getCamera()) *
                                                       lights.at(i)->getCamera()->world2ViewMatrix());
@@ -720,7 +710,6 @@ void render() {
             }
          }
       }
-       */
 
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
       glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
@@ -730,7 +719,7 @@ void render() {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
 
       // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
-      glUseProgram(phongShaderProgram);
+      glUseProgram(shaderProgram);
 
       // Abilito back culling face (non si elaborano facce non visibili in base alla normale
       glEnable(GL_CULL_FACE);
@@ -757,7 +746,7 @@ void render() {
       glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, projM_V2C.getArray());
       glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, viewM_W2V.getArray());
       // TODO fix for multiple lights
-      glUniformMatrix4fv(phongLightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
+      glUniformMatrix4fv(lsmMainShaderUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
 
       glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
 
@@ -819,6 +808,8 @@ void render() {
                glUniform3f(ambientCoefficient, materials.at(materials.size()-1).getAmbientCoeff().getX(),
                            materials.at(materials.size()-1).getAmbientCoeff().getY(),
                            materials.at(materials.size()-1).getAmbientCoeff().getZ());
+
+               //glUniform3f(fixedColorUniform, 0.2f, 0.2f, 0.2f);
             }
 
             if (object.doesNeedNoCulling()) {
@@ -944,11 +935,6 @@ void render() {
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
       glUseProgram(offlineShaderProgram);
 
-      // TODO ???
-      if (ENABLE_MULTISAMPLING) {
-         glUniform1i(samplesUniform, MULTISAMPLING_LEVEL);
-      }
-
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -992,6 +978,6 @@ void cleanMemory() {
    glDeleteBuffers(1, &sVBO);
    glDeleteVertexArrays(1, &sVAO);
 
-   glDeleteProgram(phongShaderProgram);
+   glDeleteProgram(shaderProgram);
    glDeleteFramebuffers(1, &offlineFrameBuffer);
 }

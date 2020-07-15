@@ -42,8 +42,6 @@ Float2::Float2(FloatVector &&point) : FloatVector(std::move(point)) {
 
 Float2::~Float2() {}
 
-//TODO missing "+=" e "-=" operators
-
 Float2& Float2::operator=(const Float2 &point) {
    setX(point.getX());
    setY(point.getY());

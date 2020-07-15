@@ -30,7 +30,7 @@ extern std::unique_ptr<Assimp::Importer> importer;
 
 //--------------------------------------------------------------//
 
-extern GLuint phongShaderProgram;
+extern GLuint shaderProgram;
 extern GLuint offlineShaderProgram;
 extern GLuint cardsShader;
 extern GLuint backShader;

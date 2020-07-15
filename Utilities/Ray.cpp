@@ -41,7 +41,6 @@ bool Ray::isIntersecting(const Box &box) const {
 TriangleIntersection Ray::getTriangleIntersection(const Triangle &triangle) const {
    TriangleIntersection intersection(false, nullptr, nullptr);
 
-   //TODO optimise memory?
    Float3 e2(std::move(triangle.getPoints()[2] - triangle.getPoints()[0]));
    Float3 e1(std::move(triangle.getPoints()[1] - triangle.getPoints()[0]));
    Float3 q(direction_.crossProduct(e2));

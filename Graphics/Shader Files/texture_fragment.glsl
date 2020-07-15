@@ -32,6 +32,8 @@ uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene
 uniform sampler2D bumpTexture;  //TODO implement normal mapping
 uniform sampler2D depthMap;
 
+uniform vec3 color;
+
 void main() {
     float normalDelta = texture(bumpTexture, outTextCoord).x -0.25f;
     vec3 newNormal = (1 + 2.5*normalDelta) * outNormalVector;
@@ -69,7 +71,7 @@ void main() {
     // -> Stiamo confrontando se quel punto effettivamente sia visibile, controllando la distanza tra questo fragment e il calcolo sulla depth map
     shadow = texture(depthMap, perspDivide.xy).r > perspDivide.z ? 1 : 0;
 
-    fragColor = vec4((1 - shadow) * pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + diffuse + specular), txIn.a);
+    //fragColor = vec4((1 - shadow) * pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + diffuse + specular) + color, txIn.a);
 
-    //fragColor = texture(depthMap, perspDivide.xy);
+    fragColor = texture(depthMap, perspDivide.xy);
 }

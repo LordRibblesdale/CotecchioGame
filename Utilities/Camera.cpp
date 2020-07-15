@@ -66,7 +66,6 @@ SquareMatrix Camera::world2ViewMatrix() {
     * (entrambi i vettori sono lungo Z globale)A questo punto si intercetta il prodotto vettoriale zero (o <eps) e si sposta
     * leggermente la camera (può essere utile anche considerando la camera che si muove). Praticamente si elimina la possibilità
     * che la camera vada in posizioni complicate
-    * TODO end implementation
     */
    Float3 zView(std::move(eye - lookAt));
    zView.normalize();

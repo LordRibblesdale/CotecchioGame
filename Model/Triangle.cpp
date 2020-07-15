@@ -3,7 +3,6 @@
 #include <memory>
 
 Triangle::Triangle(const Float3 &p0, const Float3 &p1, const Float3 &p2) {
-   //TODO check move (if necessary or duplicate needed)
    //TODO optimise point to vector edit
    points = std::move(std::make_unique<Float3[]>(3));
    points[0] = p0;
@@ -12,7 +11,6 @@ Triangle::Triangle(const Float3 &p0, const Float3 &p1, const Float3 &p2) {
 }
 
 Triangle::Triangle(const Float4 &p0, const Float4 &p1, const Float4 &p2) {
-   //TODO check move (if necessary or duplicate needed)
    //TODO optimise point to vector edit
    points = std::move(std::make_unique<Float3[]>(3));
    points[0] = std::move(p0.getFloat3());
@@ -20,7 +18,6 @@ Triangle::Triangle(const Float4 &p0, const Float4 &p1, const Float4 &p2) {
    points[2] = std::move(p2.getFloat3());
 }
 
-// TODO Check memory usage
 Triangle::Triangle(const Triangle &triangle) {
    points = std::move(std::make_unique<Float3[]>(3));
 
