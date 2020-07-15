@@ -23,7 +23,7 @@ void main() {
     // gl_Position attribuisce la posizione al vertice
     vec4 tmp = model * vec4(position, 1.0f);
     sPos = vec3(tmp);
-    //lightBasedPos = lightSpaceMatrix * tmp;
+    lightBasedPos = lightSpaceMatrix * tmp;
     gl_Position = projection * view * tmp;   // Posizione in Clip Space/NDC
 
     outNormalVector = normalize(mat3(transpose(inverse(model))) * normalVector);

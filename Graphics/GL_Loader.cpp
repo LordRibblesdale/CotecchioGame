@@ -396,11 +396,10 @@ void prepareCardRendering() {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void setupLightMap(Light* light) {
+bool setupLightMap(Light* light) {
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
    glGenTextures(1, &light->getDepthMapAsReference());
    glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
-   glActiveTexture(GL_TEXTURE10);
    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
    // Da analizzare come classica texture per l'accesso valori
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -417,16 +416,18 @@ void setupLightMap(Light* light) {
    glReadBuffer(GL_NONE);
    glDrawBuffer(GL_NONE);
 
-   std::cout << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+   return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
 void prepareSceneLights() {
    lights.reserve(1);
-   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 15)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
+   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 10)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
 
-   setupLightMap(lights.at(0).get());
+   if (!setupLightMap(lights.at(0).get())) {
+      std::cout << "Error SHADOW_MAP_LIGHT "<< 0 <<": Fragment not created." << std::endl;
+   }
 }
 
 void generateObjects(const Mesh &mesh) {
@@ -633,7 +634,6 @@ void render() {
    GLuint cardModelMatrix = glGetUniformLocation(cardsShader, "model");
    GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
    GLuint cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
-   GLuint cardEyePosition = glGetUniformLocation(cardsShader, "eye");
    GLuint playerIndexUniform = glGetUniformLocation(cardsShader, "currentPlayer");
    GLuint viewPlayerUniform = glGetUniformLocation(cardsShader, "viewPlayer");
 
