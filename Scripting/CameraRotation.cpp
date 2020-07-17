@@ -2,7 +2,7 @@
 #include "../Matrix/StandardMatrix.h"
 #include <cmath>
 
-CameraRotation::CameraRotation(const Float3& initialPosition, const Float3& finalPosition, float radius) : quaternion(SquareMatrix(1, {})) {
+CameraRotation::CameraRotation(const Float3& initialPosition, const Float3& finalPosition, float radius) : rotation(SquareMatrix(1, {})) {
    if (radius < 0) radius = -radius;
 
    center = std::move(Float3(0.5f * initialPosition + 0.5f * finalPosition));
@@ -21,10 +21,10 @@ CameraRotation::CameraRotation(const Float3& initialPosition, const Float3& fina
 }
 
 Float3 CameraRotation::rotateCamera(const Float3 &position, double duration) {
-   quaternion = std::move(Rotation::rotationZAxisMatrix(angle* static_cast<float>(duration)));
+   rotation = std::move(Rotation::rotationZAxisMatrix(angle * static_cast<float>(duration)));
 
    Float3 tmp(position - center);
-   tmp = std::move(quaternion.multiplyVector(tmp));
+   tmp = std::move(rotation.multiplyVector(tmp));
    return tmp + center;
 
    /*

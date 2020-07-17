@@ -20,15 +20,15 @@ public:
 
    Matrix& operator=(const Matrix& matrix);
    Matrix& operator=(Matrix&& matrix);
-   Matrix operator+(const Matrix& matrix);
+   Matrix operator+(const Matrix& matrix) const;
    void operator+=(const Matrix& matrix);
-   Matrix operator-(const Matrix& matrix);
+   Matrix operator-(const Matrix& matrix) const;
    void operator-=(const Matrix& matrix);
    //TODO complete operator functions
    //Matrix& operator+(Matrix&& matrix);
-   Matrix operator*(const float& scalar);
+   Matrix operator*(const float& scalar) const;
    void operator*=(const float& scalar);
-   Matrix operator*(const Matrix& matrix);
+   Matrix operator*(const Matrix& matrix) const;
 
    static Matrix transpose(const Matrix& matrix);
 
@@ -51,8 +51,6 @@ public:
    inline unsigned int getColumns() const {
       return data_->getColumns();
    }
-
-   void deleteMatrix();
 
    std::string toString() const;
 };

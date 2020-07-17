@@ -57,7 +57,7 @@ float maxY = 0;
 float maxZ = 0;
 
 double prevXPos, prevYPos;
-double prevTime, currTime, sumTime, sumTimeTranslCamera;
+double prevTime, currTime, sumTimeTranslCamera;
 
 bool TRANSFORM_CAMERA = false;
 std::unique_ptr<CameraRotation> cameraRotation;
@@ -72,11 +72,18 @@ double cameraPlayerPositionTime;
 float blurValue;
 
 unsigned int playerIndex = 0;
-unsigned int previousPlayerIndex = 0;
 unsigned short int sessionPlayers = 0;
 
 std::vector<Model> objects;
 std::stack<unsigned int> cardsValue;
+std::vector<Card> cardsOnTable;
+std::unique_ptr<CardMoving> cardMovingAnimation;
+size_t selectedCardIndex;
+size_t MAX_SIZE_T_VALUE;
+double cardAnimationTime;
+double sumTimeCardAnimationTime;
+bool CARD_ANIMATION = false;
+bool BUSY_AT_CARD_ANIMATION = false;
 
 std::vector<Material> materials;
 std::vector<unsigned int> materialIndices;

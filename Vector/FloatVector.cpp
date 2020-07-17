@@ -78,7 +78,7 @@ bool FloatVector::operator!=(const FloatVector &vector) const {
    return true;
 }
 
-FloatVector FloatVector::operator+(const FloatVector &vector) {
+FloatVector FloatVector::operator+(const FloatVector &vector) const {
    if (size_ == vector.getSize()) {
       FloatVector newData(size_, {});
 
@@ -122,7 +122,7 @@ void FloatVector::operator-=(const FloatVector &vector) {
    }
 }
 
-FloatVector FloatVector::operator-(const FloatVector &vector) {
+FloatVector FloatVector::operator-(const FloatVector &vector) const {
    if (size_ == vector.getSize()) {
       FloatVector newData(size_, {});
 

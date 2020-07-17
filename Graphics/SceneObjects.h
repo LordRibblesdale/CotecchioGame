@@ -21,8 +21,9 @@
 #include "../Model/Light/SpotLight.h"
 #include "../Matrix/StandardMatrix.h"
 
-#include "../Player/Player.h"
 #include "../Model/Cards/Card.h"
+#include "../Player/Player.h"
+#include "../Scripting/CardMoving.h"
 
 extern GLFWwindow* window;
 
@@ -76,7 +77,7 @@ extern float maxY;
 extern float maxZ;
 
 extern double prevXPos, prevYPos;
-extern double prevTime, currTime, sumTimeCamera, sumTimeTranslCamera;
+extern double prevTime, currTime, sumTimeTranslCamera;
 
 extern bool TRANSFORM_CAMERA;
 extern std::unique_ptr<CameraRotation> cameraRotation;
@@ -91,13 +92,20 @@ extern double cameraPlayerPositionTime;
 extern float blurValue;
 
 extern unsigned int playerIndex;
-extern unsigned int previousPlayerIndex;
 extern unsigned short int sessionPlayers;
 
 //--------------------------------------------------------------//
 
 extern std::vector<Model> objects;
 extern std::stack<unsigned int> cardsValue;
+extern std::vector<Card> cardsOnTable;
+extern std::unique_ptr<CardMoving> cardMovingAnimation;
+extern size_t selectedCardIndex;
+extern size_t MAX_SIZE_T_VALUE;
+extern double cardAnimationTime;
+extern double sumTimeCardAnimationTime;
+extern bool CARD_ANIMATION;
+extern bool BUSY_AT_CARD_ANIMATION;
 
 extern std::vector<Material> materials;
 extern std::vector<unsigned int> materialIndices;

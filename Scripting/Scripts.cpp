@@ -3,8 +3,6 @@
 #include <memory>
 
 void increaseIndex() {
-   previousPlayerIndex = playerIndex;
-
    if (++playerIndex == sessionPlayers) {
       playerIndex = 0;
    }
@@ -35,6 +33,42 @@ void pollInput(GLFWwindow *window) {
    // Funzione per l'input, esempio via tastiera
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       glfwSetWindowShouldClose(window, true);
+   }
+
+   if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
+      //std::cout << CARD_ANIMATION << " " << selectedCardIndex << " " << cardsOnTable.size() << std::endl;
+      if (sumTimeCardAnimationTime == 0) {
+         cardAnimationTime = 1;
+
+         CARD_ANIMATION = true;
+      }
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+      if (sumTimeTranslCamera == 0) {
+         cameraPlayerPositionTime = 2;
+         MENU_TRANSLATION_CAMERA = true;
+      }
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+      if (sumTimeTranslCamera == 0) {
+         cameraPlayerPositionTime = 1;
+
+         PLAYER_TRANSLATION_CAMERA = true;
+      }
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
+      DEVELOPER_MODE = !DEVELOPER_MODE;
+
+      if (DEVELOPER_MODE) {
+         glfwSetCursorPosCallback(window, cursorPositionCallBack);
+         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      } else {
+         glfwSetCursorPosCallback(window, nullptr);
+         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+      }
    }
 
    if (DEVELOPER_MODE) {
@@ -75,10 +109,36 @@ void pollInput(GLFWwindow *window) {
       }
    }
 
-   if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-      cameraPlayerPositionTime = 1;
+   if (CARD_ANIMATION) {
+      if (!BUSY_AT_CARD_ANIMATION && selectedCardIndex != MAX_SIZE_T_VALUE) {
+         BUSY_AT_CARD_ANIMATION = true;
 
-      PLAYER_TRANSLATION_CAMERA = true;
+         if (sumTimeCardAnimationTime == 0) {
+            //std::cout << playerIndex << " " << selectedCardIndex << std::endl;
+            cardsOnTable.emplace_back(players.at(playerIndex).getCards().at(selectedCardIndex));
+            players.at(playerIndex).getCards().erase(players.at(playerIndex).getCards().begin() + selectedCardIndex);
+         }
+
+         double diff = currTime - prevTime;
+
+         if (!cardMovingAnimation) {
+            cardMovingAnimation = std::move(std::make_unique<CardMoving>(&cardsOnTable.at(cardsOnTable.size()-1), cardAnimationTime));
+         }
+
+         if (sumTimeCardAnimationTime + diff <= cardAnimationTime) {
+            sumTimeCardAnimationTime += diff;
+
+            cardMovingAnimation->moveCard(cardMovingAnimation->getCard()->tmp, diff);
+         } else {
+            cardMovingAnimation.reset();
+            sumTimeCardAnimationTime = 0;
+
+            BUSY_AT_CARD_ANIMATION = false;
+            CARD_ANIMATION = false;
+         }
+
+         BUSY_AT_CARD_ANIMATION = false;
+      }
    }
 
    if (PLAYER_TRANSLATION_CAMERA && IS_GAME_STARTED) {
@@ -113,11 +173,6 @@ void pollInput(GLFWwindow *window) {
       }
    }
 
-   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
-      cameraPlayerPositionTime = 2;
-      MENU_TRANSLATION_CAMERA = true;
-   }
-
    if (MENU_TRANSLATION_CAMERA && !IS_GAME_STARTED) {
       // TODO fix IS_ANIMATION_BUSY usage (permette una microfrazione di secondo di poter attivare un'altra animazione da un altro tasto)
       if (!IS_ANIMATION_BUSY) {
@@ -149,18 +204,6 @@ void pollInput(GLFWwindow *window) {
          }
 
          IS_ANIMATION_BUSY = false;
-      }
-   }
-
-   if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
-      DEVELOPER_MODE = !DEVELOPER_MODE;
-
-      if (DEVELOPER_MODE) {
-         glfwSetCursorPosCallback(window, cursorPositionCallBack);
-         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-      } else {
-         glfwSetCursorPosCallback(window, nullptr);
-         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
       }
    }
 

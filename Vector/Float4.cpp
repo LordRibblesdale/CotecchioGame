@@ -62,7 +62,7 @@ Float4 &Float4::operator=(Float4 &&point) {
    return *this;
 }
 
-Float4 Float4::operator+(const Float4 &point) {
+Float4 Float4::operator+(const Float4 &point) const {
    return Float4(getX() + point.getX(), getY() + point.getY(), getZ() + point.getZ(), getW() + point.getW());
 }
 
@@ -75,7 +75,7 @@ Float4& Float4::operator+=(const Float4 &point) {
    return *this;
 }
 
-Float4 Float4::operator-(const Float4 &point) {
+Float4 Float4::operator-(const Float4 &point) const {
    return Float4(getX() - point.getX(), getY() - point.getY(), getZ() - point.getZ(), getW() + point.getW());
 }
 
@@ -88,7 +88,7 @@ Float4& Float4::operator-=(const Float4 &point) {
    return *this;
 }
 
-Float4 Float4::operator*(const float &scalar) {
+Float4 Float4::operator*(const float &scalar) const {
    return Float4(scalar * getX(), scalar * getY(), scalar * getZ(), scalar * getW());
 }
 

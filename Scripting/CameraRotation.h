@@ -6,7 +6,7 @@
 
 class CameraRotation {
    //TODO implement camera rotation on different axis using finalPosition and initialPosition inclination
-   SquareMatrix quaternion;
+   SquareMatrix rotation;
    Float3 center;
    float angle;
 

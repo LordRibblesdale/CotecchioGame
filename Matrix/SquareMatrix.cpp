@@ -40,7 +40,7 @@ SquareMatrix& SquareMatrix::operator=(SquareMatrix && matrix) {
    return *this;
 }
 
-SquareMatrix SquareMatrix::operator+(const SquareMatrix &matrix) noexcept(false) {
+SquareMatrix SquareMatrix::operator+(const SquareMatrix &matrix) const {
    if (getDimension() == matrix.getDimension()) {
       return SquareMatrix(std::move(static_cast<Matrix>(*this) + matrix));
    } else {
@@ -53,7 +53,7 @@ SquareMatrix SquareMatrix::operator+(const SquareMatrix &matrix) noexcept(false)
    }
 }
 
-void SquareMatrix::operator+=(const SquareMatrix &matrix) noexcept(false) {
+void SquareMatrix::operator+=(const SquareMatrix &matrix) {
    unsigned int dim = getDimension();
 
    if (dim == matrix.getDimension()) {
@@ -71,7 +71,7 @@ void SquareMatrix::operator+=(const SquareMatrix &matrix) noexcept(false) {
    }
 }
 
-SquareMatrix SquareMatrix::operator-(const SquareMatrix &matrix) noexcept(false) {
+SquareMatrix SquareMatrix::operator-(const SquareMatrix &matrix) const {
    if (getDimension() == matrix.getDimension()) {
       return SquareMatrix(std::move(static_cast<Matrix>(*this) - matrix));
    } else {
@@ -84,7 +84,7 @@ SquareMatrix SquareMatrix::operator-(const SquareMatrix &matrix) noexcept(false)
    }
 }
 
-void SquareMatrix::operator-=(const SquareMatrix &matrix) noexcept(false) {
+void SquareMatrix::operator-=(const SquareMatrix &matrix) {
    unsigned int dim = getDimension();
 
    if (dim == matrix.getDimension()) {
@@ -102,7 +102,7 @@ void SquareMatrix::operator-=(const SquareMatrix &matrix) noexcept(false) {
    }
 }
 
-SquareMatrix SquareMatrix::operator*(float scalar) {
+SquareMatrix SquareMatrix::operator*(float scalar) const {
    return SquareMatrix(std::move(static_cast<Matrix>(*this) * scalar));
 }
 
@@ -112,7 +112,7 @@ void SquareMatrix::operator*=(float scalar) {
    }
 }
 
-SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) noexcept(false) {
+SquareMatrix SquareMatrix::operator*(const SquareMatrix& matrix) const {
    if (getDimension() == matrix.getDimension()) {
       return SquareMatrix(std::move(static_cast<Matrix>(*this) * matrix));
    } else {

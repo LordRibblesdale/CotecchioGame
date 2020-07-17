@@ -36,7 +36,7 @@ Matrix &Matrix::operator=(Matrix && matrix) {
    return *this;
 }
 
-Matrix Matrix::operator+(const Matrix &matrix) noexcept(false) {
+Matrix Matrix::operator+(const Matrix &matrix) const {
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
       FloatArray newData(getRows(), getColumns(), {});
 
@@ -56,7 +56,7 @@ Matrix Matrix::operator+(const Matrix &matrix) noexcept(false) {
    }
 }
 
-void Matrix::operator+=(const Matrix &matrix) noexcept(false) {
+void Matrix::operator+=(const Matrix &matrix) {
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
       for (int i = 0; i < getRows() * getColumns(); ++i) {
          data_->operator[](i) += matrix.getData()->operator[](i);
@@ -72,7 +72,7 @@ void Matrix::operator+=(const Matrix &matrix) noexcept(false) {
    }
 }
 
-Matrix Matrix::operator-(const Matrix &matrix) noexcept(false) {
+Matrix Matrix::operator-(const Matrix &matrix) const {
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
       FloatArray newData(getRows(), getColumns(), {});
 
@@ -92,7 +92,7 @@ Matrix Matrix::operator-(const Matrix &matrix) noexcept(false) {
    }
 }
 
-void Matrix::operator-=(const Matrix &matrix) noexcept(false) {
+void Matrix::operator-=(const Matrix &matrix) {
    if (getRows() == matrix.getRows() && getColumns() == matrix.getColumns()) {
       for (int i = 0; i < getRows() * getColumns(); ++i) {
          data_->operator[](i) -= matrix.getData()->operator[](i);
@@ -108,7 +108,7 @@ void Matrix::operator-=(const Matrix &matrix) noexcept(false) {
    }
 }
 
-Matrix Matrix::operator*(const float& scalar) {
+Matrix Matrix::operator*(const float& scalar) const {
    FloatArray newData(getRows(), getColumns(), {});
 
    for (int i = 0; i < getRows() * getColumns(); ++i) {
@@ -124,7 +124,7 @@ void Matrix::operator*=(const float& scalar) {
    }
 }
 
-Matrix Matrix::operator*(const Matrix &matrix) noexcept(false) {
+Matrix Matrix::operator*(const Matrix &matrix) const {
    if (getColumns() == matrix.getRows()) {
       FloatArray newData(getRows(), matrix.getColumns(), {});
 
@@ -174,7 +174,7 @@ Matrix Matrix::createSubmatrix(const Matrix &matrix, const unsigned int& rowInde
    return Matrix(std::move(newData));
 }
 
-FloatVector Matrix::multiplyVector(const FloatVector& vector) const noexcept(false) {
+FloatVector Matrix::multiplyVector(const FloatVector& vector) const {
    if (getColumns() == vector.getSize()) {
       FloatVector newData(getRows(), {});
 

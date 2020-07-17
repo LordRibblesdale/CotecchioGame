@@ -18,12 +18,12 @@ public:
    Float4& operator=(const Float4& point);
    Float4& operator=(Float4&& point);
 
-   Float4 operator+(const Float4& point);
-   Float4 operator-(const Float4& point);
+   Float4 operator+(const Float4& point) const;
+   Float4 operator-(const Float4& point) const;
    Float4& operator+=(const Float4& point);
    Float4& operator-=(const Float4& point);
 
-   Float4 operator*(const float& scalar);
+   Float4 operator*(const float& scalar) const;
    Float4& operator*=(const float& scalar);
 
    float dotProduct(const Float4& point) const;

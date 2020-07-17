@@ -13,7 +13,7 @@ class Player {
 public:
    Player(unsigned short int nCards, Float3 position);
 
-   std::vector<Card> &getCards();
+   std::vector<Card>& getCards();
    const Float3 &getPosition() const;
 };
 

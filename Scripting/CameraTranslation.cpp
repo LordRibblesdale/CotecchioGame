@@ -6,6 +6,5 @@ CameraTranslation::CameraTranslation(const Float3& initialPosition, const Float3
 Float3 CameraTranslation::translateCamera(double time, double duration) {
    double t = time / duration;
 
-
    return (1-t)* initialPosition + t*finalPosition;
 }

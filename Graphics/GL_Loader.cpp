@@ -243,6 +243,9 @@ void loadCards() {
 
       ++playerID;
    }
+
+   // NOTA: dovrà riservare players come size, una carta per giocatore, per via del funzionamento del gioco
+   cardsOnTable.reserve(40);
 }
 
 void loadObject(const std::string& location, const std::string& objName, const unsigned int& objType) {
@@ -365,12 +368,12 @@ void prepareCardRendering() {
    glBindVertexArray(cardVAO);
 
    glBindBuffer(GL_ARRAY_BUFFER, cardVBO2);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, cardUVArray, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, backUVArray, GL_DYNAMIC_DRAW);
    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
    glEnableVertexAttribArray(1);
 
    glBindBuffer(GL_ARRAY_BUFFER, cardVBO3);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, cardUVArray, GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, backUVArray, GL_STATIC_DRAW);
    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
    glEnableVertexAttribArray(3);
 
@@ -423,7 +426,7 @@ bool setupLightMap(Light* light) {
 
 void prepareSceneLights() {
    lights.reserve(1);
-   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 10)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
+   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 15)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
 
    if (!setupLightMap(lights.at(0).get())) {
       std::cout << "Error SHADOW_MAP_LIGHT "<< 0 <<": Fragment not created." << std::endl;
@@ -520,7 +523,7 @@ void renderText() {
 }
 
 void renderCardsInLoop(SquareMatrix& cardModelM, const GLuint& cardModelMatrix, SquareMatrix& viewM_V2W, unsigned int& pIndex,
-        size_t& i, bool& hasSelectedCard, unsigned int& selectedIndex, int x, int y) {
+        size_t& i, bool& hasSelectedCard, double x, double y) {
    //std::vector<SquareMatrix> matrices;
    //matrices.reserve(4);
 
@@ -586,7 +589,7 @@ void renderCardsInLoop(SquareMatrix& cardModelM, const GLuint& cardModelMatrix, 
                players.at(pIndex).getCards().at(i).setIsSelected(true);
 
                hasSelectedCard = true;
-               selectedIndex = i;
+               selectedCardIndex = i;
 
                glStencilMask(0xFF);
             }
@@ -594,16 +597,11 @@ void renderCardsInLoop(SquareMatrix& cardModelM, const GLuint& cardModelMatrix, 
       }
    }
 
-   if (selectedIndex != i) {
-      players.at(pIndex).getCards().at(i).updateCoords();
+   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, players.at(pIndex).getCards().at(i).cardUVArray);
 
-      glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
+   glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
-      glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
-
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-   }
-
+   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void render() {
@@ -645,7 +643,7 @@ void render() {
    GLuint colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
 
    GLuint lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
-   GLuint modelLightShaderUniform = glGetUniformLocation(lightShader, "model");
+   GLuint modelLightShaderUniform = glGetUniformLocation(lightShader, "modelMatrix");
    GLuint lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
    GLuint depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
@@ -669,6 +667,8 @@ void render() {
 
    unsigned int flipCardRenderingIndex = ceil(players.size()/2.0f);
 
+   MAX_SIZE_T_VALUE = std::numeric_limits<size_t>::max();
+
    // Abilito Stencil test per l'outlining
    glEnable(GL_STENCIL_TEST);
 
@@ -684,6 +684,8 @@ void render() {
 
       pollInput(window);
 
+      selectedCardIndex = MAX_SIZE_T_VALUE;
+
       lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + Float3(0, 0, 0.05f*sinf(glfwGetTime())));
 
       // Rendering shadow map
@@ -691,6 +693,12 @@ void render() {
 
       // Imposto la viewport per il render della shadow map
       glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
+
+      glEnable(GL_CULL_FACE);
+      // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
+      glCullFace(GL_BACK);
+      //glFrontFace(GL_CW); // o CCW
+
 
       /*
       for (unsigned int i = 0; i < lights.size(); ++i) {
@@ -718,6 +726,8 @@ void render() {
          }
       }
        */
+
+      // TODO fix shadow mapping
 
       skipVertexIndex = 0;
 
@@ -890,26 +900,22 @@ void render() {
          for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
             glUniform1i(viewPlayerUniform, pIndex);
 
-            unsigned int selectedIndex = -1;
-
             if (pIndex < flipCardRenderingIndex) {
                for (size_t i = 0; i < players.at(pIndex).getCards().size(); ++i) {
-                  renderCardsInLoop(cardModelM, cardModelMatrix, viewM_V2W, pIndex, i, hasSelectedCard, selectedIndex, x, y);
+                  renderCardsInLoop(cardModelM, cardModelMatrix, viewM_V2W, pIndex, i, hasSelectedCard, x, y);
                }
             } else {
                for (size_t i = players.at(pIndex).getCards().size()-1; i >= 0 && i != std::numeric_limits<size_t>::max(); --i) {
-                  renderCardsInLoop(cardModelM, cardModelMatrix, viewM_V2W, pIndex, i, hasSelectedCard, selectedIndex, x, y);
+                  renderCardsInLoop(cardModelM, cardModelMatrix, viewM_V2W, pIndex, i, hasSelectedCard, x, y);
                }
             }
 
             if (hasSelectedCard && (playerIndex == pIndex)) {
                glDisable(GL_DEPTH_TEST);
 
-               cardModelM = std::move(players.at(pIndex).getCards().at(selectedIndex).getWorldCoordinates(selectedIndex));
+               cardModelM = std::move(players.at(playerIndex).getCards().at(selectedCardIndex).getWorldCoordinates(selectedCardIndex));
 
-               players.at(pIndex).getCards().at(selectedIndex).updateCoords();
-
-               glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, cardUVArray);
+               glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, players.at(pIndex).getCards().at(selectedCardIndex).cardUVArray);
 
                glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
@@ -917,6 +923,16 @@ void render() {
 
                glEnable(GL_DEPTH_TEST);
             }
+         }
+
+         for (const Card& card : cardsOnTable) {
+            cardModelM = *card.hand2Table * card.local2World;
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, card.cardUVArray);
+
+            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          }
 
          // Genero outlining tramite Stencil test
@@ -935,17 +951,11 @@ void render() {
          glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
          glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
 
-         for (Card& card : players.at(playerIndex).getCards()) {
-            if (card.isSelected1()) {
-               cardModelM = std::move(card.getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
-
-               glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cardModelM.getArray());
-
-               glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-               card.setIsSelected(false);
-               break;
-            }
+         if (selectedCardIndex != MAX_SIZE_T_VALUE) {
+            cardModelM = std::move(players.at(playerIndex).getCards().at(selectedCardIndex).getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
+            glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cardModelM.getArray());
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            players.at(playerIndex).getCards().at(selectedCardIndex).setIsSelected(false);
          }
       }
 

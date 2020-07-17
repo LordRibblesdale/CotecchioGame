@@ -18,14 +18,12 @@ public:
 
    const float* operator*();
 
-   Float3 operator+(const Float3& point);
-   friend Float3 operator+(const Float3& point, const Float3& point2);
-   Float3 operator-(const Float3& point);
-   friend Float3 operator-(const Float3& point, const Float3& point2);
+   Float3 operator+(const Float3& point) const;
+   Float3 operator-(const Float3& point) const;
    Float3& operator+=(const Float3& point);
    Float3& operator-=(const Float3& point);
 
-   Float3 operator*(const float& scalar);
+   Float3 operator*(const float& scalar) const;
    friend Float3 operator*(const float& scalar, const Float3& point2);
    Float3& operator*=(const float& scalar);
 

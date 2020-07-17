@@ -4,9 +4,11 @@
 #include <iostream>
 #include <vector>
 #include "../../Matrix/SquareMatrix.h"
+#include "../../Vector/Float4.h"
+#include "../../Matrix/StandardMatrix.h"
 
 extern float cardVertices[24];
-extern float cardUVArray[8];
+extern float backUVArray[8];
 extern unsigned int vIndices[6];
 
 struct Card {
@@ -15,26 +17,44 @@ struct Card {
    unsigned int value;
    float u = 0,  v = 0;
 
+   float cardUVArray[8];
+
    SquareMatrix local2World;
+   std::unique_ptr<SquareMatrix> hand2Table;
+
+   Float3 t;
+   Float3 tmp;
+   SquareMatrix translate;
+   SquareMatrix qRotate;
+   SquareMatrix rotate;
+   SquareMatrix scale;
+
+   SquareMatrix partialLocal2World;
+
+   float angle = degree2Radiants(-10);
 
    bool isSelected;
+   bool isCardSetup = false;
+
+   size_t handCards;
 
    // value è del tipo NM (10, 11, 20, 39, ....)
-   Card(unsigned int vaule, unsigned short int playerID) : local2World(std::move(SquareMatrix(4, {}))) {
-      Card::value = vaule;
-      Card::playerID = playerID;
+   Card(unsigned int vaule, unsigned short int playerID);
+   // TODO check if std::moving member from vector to move ctor destroys elements in vector (removes automatically)
+   Card(const Card& card);
+   ~Card();
 
-      u = (value%10)*0.1f;
-      v = ((value/10)-1)*0.25f;
-   }
+   Card& operator=(const Card& card);
 
    SquareMatrix getWorldCoordinates(unsigned int cardIndex);
    void getWorldCoordinates(unsigned int cardIndex, std::vector<SquareMatrix>& matrices);
 
-   void updateCoords() const;
+    void setupCard();
 
    // Scritta appositamente per crearla come copia
-   SquareMatrix getLocal2World() const;
+   const SquareMatrix& getLocal2World() const;
+
+   Float4 getWorldCardCenter();
 
    bool isSelected1() const;
 

@@ -71,7 +71,7 @@ void main() {
     // -> Stiamo confrontando se quel punto effettivamente sia visibile, controllando la distanza tra questo fragment e il calcolo sulla depth map
     shadow = perspDivide.z > texture(depthMap, perspDivide.xy).r ? 1 : 0;
 
-    fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular))/* + color*/, txIn.a);
+    fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)), txIn.a);
 
     //fragColor = vec4(vec3(perspDivide.r), 1);
 }

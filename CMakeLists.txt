@@ -26,14 +26,14 @@ add_executable(${PROJECT_NAME}
         ${UtilitiesFolder}
         ${GraphicsFolder}
         ${ModelFolder}
-        ${PlayerFolder}
         ${AnimationFolder}
+        ${PlayerFolder}
         ${GladLibraries}
         ${GLFWLibraries}
         ${XMLFolder}
         #${ThreadPool}
         #${ThreadPoolLib}
-        ${MainFile})
+        ${MainFile} Scripting/CardMoving.cpp Scripting/CardMoving.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")

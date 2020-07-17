@@ -16,13 +16,13 @@ public:
 
    SquareMatrix& operator=(const SquareMatrix& matrix);
    SquareMatrix& operator=(SquareMatrix&& matrix);
-   SquareMatrix operator+(const SquareMatrix& matrix);
+   SquareMatrix operator+(const SquareMatrix& matrix) const;
    void operator+=(const SquareMatrix& matrix);
-   SquareMatrix operator-(const SquareMatrix& matrix);
+   SquareMatrix operator-(const SquareMatrix& matrix) const;
    void operator-=(const SquareMatrix& matrix);
-   SquareMatrix operator*(float scalar);
+   SquareMatrix operator*(float scalar) const;
    void operator*=(float scalar);
-   SquareMatrix operator*(const SquareMatrix& matrix);
+   SquareMatrix operator*(const SquareMatrix& matrix) const;
    void operator*=(const SquareMatrix& matrix);
 
    void transpose();
