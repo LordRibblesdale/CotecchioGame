@@ -394,10 +394,8 @@ void renderCardsOnTable() {
    glActiveTexture(GL_TEXTURE3);
    glBindTexture(GL_TEXTURE_2D, cardTexture);
 
-   /*
    glEnable(GL_BLEND);
    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    */
 
    glUniformMatrix4fv(deckProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
    glUniformMatrix4fv(deckViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());

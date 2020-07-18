@@ -9,7 +9,7 @@ SpotLight::SpotLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 
 }
 
 SpotLight::SpotLight(const Float3& origin, const Float3& direction, const Color& color1, float intensity, float midAngle_, float maxAngle_) : Light(origin, color1, intensity) {
-   camera = std::move(std::make_unique<Camera>(origin, direction, Float3(0, 0, 1), 0.1f, 1000, 45, 1));
+   camera = std::move(std::make_unique<Camera>(origin, direction, Float3(0, 0, 1), 0.1f, 1000, maxAngle_, 1));
 
    midAngle = midAngle_;
    maxAngle = maxAngle_;

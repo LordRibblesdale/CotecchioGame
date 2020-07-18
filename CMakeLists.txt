@@ -50,7 +50,7 @@ endif()
 
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES})
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
+    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
         target_link_libraries(${PROJECT_NAME} "/usr/lib/aarch64-linux-gnu/libdl.so")
     else ()
         target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libdl.so")
