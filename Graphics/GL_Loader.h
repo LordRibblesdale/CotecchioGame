@@ -12,6 +12,12 @@
 #endif
 
 #include "../Model/Mesh.h"
+#include "Shaders.h"
+#include "SceneObjects.h"
+#include "Settings.h"
+#include "../Scripting/Scripts.h"
+#include "../Model/Triangle.h"
+#include "../Utilities/Ray.h"
 
 /* Processo di rendering:
  * - Inizializzazione libreria
@@ -52,7 +58,13 @@ void prepareCardRendering();
 
 void prepareSceneLights();
 
+void setupRenderVariables();
 void render();
+void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, double x, double y);
+void renderShadowMap();
+void renderSceneObjects();
+void renderCards();
+void renderCardsOnTable();
 
 void cleanMemory();
 

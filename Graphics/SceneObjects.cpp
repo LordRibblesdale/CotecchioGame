@@ -6,7 +6,7 @@ std::unique_ptr<Assimp::Importer> importer;
 GLuint shaderProgram;
 GLuint offlineShaderProgram;
 GLuint cardsShader;
-GLuint backShader;
+GLuint deckShader;
 GLuint colorShader;
 GLuint lightShader;
 

@@ -241,8 +241,6 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
          // TODO implement methods with reference access (reduce copies)
          tmp = move(Rotation::axisZRotateVertex3(tmp, -angle));
 
-         camera.setYawAngle(acosf(tmp.getNormalized().getX()));
-
          tmp += camera.getEye();
          camera.setLookAt(tmp);
 

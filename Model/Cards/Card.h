@@ -38,6 +38,9 @@ struct Card {
 
    size_t handCards;
 
+   bool isFirstMatrixSaved = false;
+   SquareMatrix firstLocal;
+
    // value è del tipo NM (10, 11, 20, 39, ....)
    Card(unsigned int vaule, unsigned short int playerID);
    // TODO check if std::moving member from vector to move ctor destroys elements in vector (removes automatically)

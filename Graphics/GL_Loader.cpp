@@ -1,25 +1,8 @@
 #include "GL_Loader.h"
-
-#include "Shaders.h"
-#include "SceneObjects.h"
-#include "../Scripting/Scripts.h"
-#include "Settings.h"
-#include "../Model/Triangle.h"
-#include "../Utilities/Ray.h"
-
-#if (_MSC_VER >= 1500)
-#include "Graphics/assimp/include/assimp/Importer.hpp"
-#include "Graphics/assimp/include/assimp/scene.h"
-#include "Graphics/assimp/include/assimp/postprocess.h"
-#else
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#endif
+#include "GL_RenderVariables.h"
 
 //#include <ft2build.h>
 //#include FT_FREETYPE_H
-
-#include <random>
 
 void refreshWindowSize(GLFWwindow *window, int width, int height) {
    /* La Callback prevere azioni sull'immagine, per poi riproiettarla tramite glViewport
@@ -98,7 +81,6 @@ bool setupWindowEnvironment() {
 
    return true;
 }
-
 
 bool setupOfflineRendering() {
    bool status = true;
@@ -203,6 +185,7 @@ void compileShaders() {
    //---------------------------CARD RENDERING--------------------------------//
 
    compileShader("Graphics/Shader Files/cards_vertex.glsl", "Graphics/Shader Files/cards_fragment.glsl", cardsShader);
+   compileShader("Graphics/Shader Files/deck_vertex.glsl", "Graphics/Shader Files/deck_fragment.glsl", deckShader);
 
    //---------------------------STENCIL RENDERING--------------------------------//
 
@@ -211,123 +194,6 @@ void compileShaders() {
    //----------------------------SHADOW RENDERING--------------------------------//
 
    compileShader("Graphics/Shader Files/light_vertex.glsl", "Graphics/Shader Files/light_fragment.glsl", lightShader);
-}
-
-void loadCards() {
-   unsigned int values[40] {0};
-
-    std::mt19937_64 gen(glfwGetTime());
-
-   // TODO fix with correct cards from game rules
-   int j = 10;
-   for (unsigned int & value : values) {
-      value = j++;
-   }
-
-   std::shuffle(values, values+40, gen);
-   gen.seed(glfwGetTime());
-   std::shuffle(values, values+40, gen);
-   gen.seed(glfwGetTime());
-   std::shuffle(values, values+40, gen);
-
-   for (auto& value : values) {
-      cardsValue.push(value);
-   }
-
-   int playerID = 0;
-   for (auto& player : players) {
-      for (unsigned int i = 0; i < 40/sessionPlayers; ++i) {
-         player.getCards().emplace_back(Card(cardsValue.top(), playerID));
-         cardsValue.pop();
-      }
-
-      ++playerID;
-   }
-
-   // NOTA: dovrà riservare players come size, una carta per giocatore, per via del funzionamento del gioco
-   cardsOnTable.reserve(40);
-}
-
-void loadObject(const std::string& location, const std::string& objName, const unsigned int& objType) {
-   std::string s(location + objName + ".obj");
-   const aiScene* scene(importer->ReadFile(s, aiProcess_Triangulate));
-
-   if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-      std::cout << "Error ASSIMP_SCENE_LOADING: scene not loaded." << std::endl << importer->GetErrorString() << std::endl;
-   } else {
-      Model table(location, objName);
-      table.processNode(scene->mRootNode, scene);
-
-      if (objType == TABLE_TYPE) {
-         table.setTexturesEnabled(true);
-         table.setXRotation(degree2Radiants(90));
-      } else if (objType == WORLD_TYPE) {
-         table.setTexturesEnabled(false);
-         table.setNeedsNoCulling(true);
-         table.setXTranslation(1);
-         table.setXRotation(degree2Radiants(90));
-      }
-
-      objects.emplace_back(std::move(table));
-   }
-
-   importer->FreeScene();
-}
-
-void loadObjects() {
-   // TODO initial translation, rotation and scale
-   importer = std::move(std::make_unique<Assimp::Importer>());
-
-   loadObject(DATA_ASSETS_LOCATION, "World", WORLD_TYPE);
-
-   loadObject(TABLE_ASSETS_LOCATION, "Table", TABLE_TYPE);
-
-   unsigned long verticesLenght = 0;
-   unsigned long texturesLength = 0;
-
-   for (const Model& model : objects) {
-      for (const Mesh& mesh : model.getMeshes()) {
-         verticesLenght += mesh.getVertices().size();
-      }
-
-      if (model.doesHaveTextures()) {
-         texturesLength += model.getMeshes().size();
-      }
-   }
-
-   vertexArrayObjects.reserve(verticesLenght);
-   vertexBufferObjects.reserve(verticesLenght);
-   textureUniforms.reserve(texturesLength);
-
-   for (const auto& object : objects) {
-      for (const auto& mesh : object.getMeshes()) {
-         generateObjects(mesh);
-      }
-
-      /* Richiesta della posizione della texture
-       * Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
-         GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-       * Assegnazione e modifica uniform a prescindere
-       * Uso glUseProgram per assegnare texture
-         glUseProgram(shaderProgram);
-       * Assegnazione valore della texture a uno specifico canale di OpenGL
-       * Canali limitati, massimo un certo numero di texture contemporaneamente
-         glUniform1i(textureUniform, 0);
-         glUseProgram(0);
-       */
-
-      loadTexture(object.getLocation(), object.getName(), object.doesHaveTextures());
-   }
-
-   createPlayerPositions(3);
-   loadCards();
-   loadCardTextures();
-
-   prepareScreenForOfflineRendering();
-
-   prepareCardRendering();
-
-   prepareSceneLights();
 }
 
 void prepareScreenForOfflineRendering() {
@@ -426,246 +292,27 @@ bool setupLightMap(Light* light) {
 
 void prepareSceneLights() {
    lights.reserve(1);
-   lights.emplace_back(new SpotLight(std::move(Float3(0, 0, 15)), Float3(0, 0, 0), Color(1, 1, 1), 10, degree2Radiants(40), degree2Radiants(60)));
+   lights.emplace_back(std::move(std::make_unique<SpotLight>(
+           std::move(Float3(0, 0, 15)),
+           Float3(0, 0, 0),
+           Color(1, 1, 1),
+           10,
+           degree2Radiants(40),
+           degree2Radiants(60))));
 
    if (!setupLightMap(lights.at(0).get())) {
       std::cout << "Error SHADOW_MAP_LIGHT "<< 0 <<": Fragment not created." << std::endl;
    }
 }
 
-void generateObjects(const Mesh &mesh) {
-   /* E' possibile attribuire durante il ciclo il colore, tramite l'uniform vec4
-   * Gathering variabile uniform del pixel shader che risiede nel programma, ma non si accede tramite puntatore
-   *    -> Accesso tramite (poichè puntatore non generato nello shader)
-   */
-   GLuint vao;
-   GLuint vbo;
-   GLuint ebo;
-
-   // Genera il Vertex Array Object
-   glGenVertexArrays(1, &vao);
-   // Genera il Vertex Buffer Object
-   glGenBuffers(1, &vbo);
-   glGenBuffers(1, &ebo);
-   /* Chiamata per collegare un tipo di buffer noto agli attributi di vertice, l'indice dell'area di memoria creata va intesa come arraybuffer
-    * Bind all'inizio delle operazioni riferite al VAO
-    * Binding: ogni chiamata di tipo ARRAY_BUFFER sarà assegnata all'ultimo bind assegnato
-    */
-   glBindVertexArray(vao);
-
-   /* Copia dati nell'array, inizializzando la memoria nel punto bindato del buffer (prima solo indice, VBO)
-    * GL_STATIC_DRAW imposta punti che non verranno modificati ma solo disegnati ogni volta
-    */
-   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-   unsigned int size = 3*mesh.getVertices().size() + 2*mesh.getTextureUnwrap().size() + 3*mesh.getNormals().size();
-   GLfloat attributes[size];
-
-   int index = 0;
-   for (int i = 0; i < mesh.getVertices().size(); ++i) {
-      attributes[index++] = mesh.getVertices().at(i).getX();
-      attributes[index++] = mesh.getVertices().at(i).getY();
-      attributes[index++] = mesh.getVertices().at(i).getZ();
-
-      attributes[index++] = mesh.getTextureUnwrap().at(i).getX();
-      attributes[index++] = mesh.getTextureUnwrap().at(i).getY();
-
-      attributes[index++] = mesh.getNormals().at(i).getX();
-      attributes[index++] = mesh.getNormals().at(i).getY();
-      attributes[index++] = mesh.getNormals().at(i).getZ();
-   }
-
-   // GL_STATIC_DRAW??
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, attributes, GL_DYNAMIC_DRAW);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.getIndices().size(), mesh.getIndices().data(), GL_STATIC_DRAW);
-
-   /* Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore
-    * Assegnare attributi a partire da determinati dati, cerca dati nella LOCATION  definita nella GLSL
-    * Stride, in termini di byte: size in byte di un gruppo di dati da analizzare
-    * 0        1        2
-    * x y z    x y z    x y z
-    * Nelle varie posizioni saranno salvate le informazioni
-    * Offset di memoria, ovvero punto zona di memoria per leggere i dati, poichè a priori non nota (potrebbero esserci dati in piu da non dover leggere
-    * x y z u v  x y ... offset 2
-    * DEFINITA nella scrittura dello shader
-    * Stride definisce l'intero vettore, l'offset è da dove iniziare a leggere
-    *
-    * Il valore 3 dice quanti vertici
-    * Lettura del buffer, con un offset di lettura dei 3 valori GL_FLOAT di 3 posizioni;
-    * Abilita gli attributi passatigli
-    *
-    */
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) 0);
-   glEnableVertexAttribArray(0);
-
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
-   glEnableVertexAttribArray(1);
-
-   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
-   glEnableVertexAttribArray(2);
-
-   // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-   // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
-   glBindVertexArray(0);
-
-   // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-   vertexArrayObjects.emplace_back(vao);
-   vertexBufferObjects.emplace_back(vbo);
-   elementBufferObjects.emplace_back(ebo);
-}
-
-void renderText() {
-
-}
-
-void renderCardsInLoop(SquareMatrix& cardModelM, const GLuint& cardModelMatrix, SquareMatrix& viewM_V2W, unsigned int& pIndex,
-        size_t& i, bool& hasSelectedCard, double x, double y) {
-   //std::vector<SquareMatrix> matrices;
-   //matrices.reserve(4);
-
-   //players.at(pIndex).getCards().at(i).getWorldCoordinates(i, matrices);
-
-   cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
-
-   if (pIndex == playerIndex) {
-      if (!hasSelectedCard) {
-         if ((x >= 0 && x <= X_RESOLUTION) && (y >= 0 && y <= Y_RESOLUTION)) {
-            /* Increase performance from ([3*n^3 + 4*n^2] to [12*n^2])
-               n = 4 -> 256 to 192 operations
-
-            Float4 p0(matrices.at(0).multiplyVector(
-                    matrices.at(1).multiplyVector(
-                            matrices.at(2).multiplyVector(
-                                    matrices.at(3).multiplyVector(
-                                            Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1))))));
-            Float4 p1(matrices.at(0).multiplyVector(
-                    matrices.at(1).multiplyVector(
-                            matrices.at(2).multiplyVector(
-                                    matrices.at(3).multiplyVector(
-                                            Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1))))));
-            Float4 p2(matrices.at(0).multiplyVector(
-                    matrices.at(1).multiplyVector(
-                            matrices.at(2).multiplyVector(
-                                    matrices.at(3).multiplyVector(
-                                    Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1))))));
-            Float4 p3(matrices.at(0).multiplyVector(
-                    matrices.at(1).multiplyVector(
-                            matrices.at(2).multiplyVector(
-                                    matrices.at(3).multiplyVector(
-                                    Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1))))));
-                                    */
-
-            Float4 p0(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
-            Float4 p1(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
-            Float4 p2(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
-            Float4 p3(cardModelM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1)));
-
-            Triangle cardT1(p0, p1, p2);
-            Triangle cardT2(p2, p1, p3);
-
-            // NDC -> Clip Space
-            float xProj = (((2.0f*x)/static_cast<float>(X_RESOLUTION)) -1);
-            float yProj = -(((2.0f*y)/static_cast<float>(Y_RESOLUTION)) -1);  // MINUS per via dell'asse invertito Y SCREEN rispetto a Y CLIP
-            float zProj = -camera.getNear();
-
-            // NDC Space -> View Space
-            // ON-AXIS CAMERA
-            Float4 clipPoint(xProj * camera.getRight(), yProj * camera.getTop(), zProj, 1);
-
-            // View Space -> World Space
-            clipPoint = std::move(viewM_V2W.multiplyVector(clipPoint));
-
-            Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
-
-            // Implement multithreading w/ sync for better performance?
-            TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
-            TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
-
-            if (i1.getHasIntersected() || i2.getHasIntersected()) {
-               players.at(pIndex).getCards().at(i).setIsSelected(true);
-
-               hasSelectedCard = true;
-               selectedCardIndex = i;
-
-               glStencilMask(0xFF);
-            }
-         }
-      }
-   }
-
-   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, players.at(pIndex).getCards().at(i).cardUVArray);
-
-   glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
-
-   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
 void render() {
-   // Collezione indici per inviare dati allo shader
-   GLuint projectionMatrixUniform = glGetUniformLocation(shaderProgram, "projection");
-   GLuint viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
-   GLuint modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
-
-   GLuint texUnif = glGetUniformLocation(shaderProgram, "texture1");
-   GLuint bumpUnif = glGetUniformLocation(shaderProgram, "bumpTexture");
-
-   GLuint lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
-   GLuint lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
-   GLuint lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
-
-   GLuint ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
-   GLuint diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
-   GLuint specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
-   GLuint specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
-   GLuint eyePosition = glGetUniformLocation(shaderProgram, "eye");
-
-   GLuint gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
-
-   GLuint fixedColorUniform = glGetUniformLocation(shaderProgram, "color");
-
-   GLuint blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
-
-   GLuint cardModelMatrix = glGetUniformLocation(cardsShader, "model");
-   GLuint cardViewMatrix = glGetUniformLocation(cardsShader, "view");
-   GLuint cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
-   GLuint playerIndexUniform = glGetUniformLocation(cardsShader, "currentPlayer");
-   GLuint viewPlayerUniform = glGetUniformLocation(cardsShader, "viewPlayer");
-
-   GLuint cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
-   GLuint backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
-
-   GLuint colorModelMatrix = glGetUniformLocation(colorShader, "model");
-   GLuint colorViewMatrix = glGetUniformLocation(colorShader, "view");
-   GLuint colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
-
-   GLuint lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
-   GLuint modelLightShaderUniform = glGetUniformLocation(lightShader, "modelMatrix");
-   GLuint lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
-   GLuint depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
-
-   SquareMatrix projM_V2C(4, {});
-   SquareMatrix viewM_W2V(4, {});
-   SquareMatrix viewM_V2W(4, {});
-   //SquareMatrix modelM_L2W(4, {});
-
-   SquareMatrix cardModelM(4, {});
-
-   std::vector<SquareMatrix> lightSpaceMs;
-   lightSpaceMs.reserve(lights.size());
+   setupRenderVariables();
 
    for (auto i = 0; i < lights.size(); ++i) {
       lightSpaceMs.emplace_back(SquareMatrix(4, {}));
    }
 
-   unsigned int skipVertexIndex = 0;
-   unsigned int skipTextureIndex = 0;
-   unsigned int skipBumpIndex = 0;
-
-   unsigned int flipCardRenderingIndex = ceil(players.size()/2.0f);
+   flipCardRenderingIndex = ceil(players.size()/2.0f);
 
    MAX_SIZE_T_VALUE = std::numeric_limits<size_t>::max();
 
@@ -674,6 +321,9 @@ void render() {
 
    // Imposto le modalità di scrittura dello stencil test
    glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+
+   // Abilito back culling face (non si elaborano facce non visibili in base alla normale
+   glEnable(GL_CULL_FACE);
 
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
@@ -686,281 +336,16 @@ void render() {
 
       selectedCardIndex = MAX_SIZE_T_VALUE;
 
-      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + Float3(0, 0, 0.05f*sinf(glfwGetTime())));
-
-      // Rendering shadow map
-      glUseProgram(lightShader);
-
-      // Imposto la viewport per il render della shadow map
-      glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
-
-      glEnable(GL_CULL_FACE);
-      // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
-      glCullFace(GL_BACK);
-      //glFrontFace(GL_CW); // o CCW
-
-
-      /*
-      for (unsigned int i = 0; i < lights.size(); ++i) {
-         glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
-         glClear(GL_DEPTH_BUFFER_BIT);
-
-         if (dynamic_cast<SpotLight*>(lights.at(i).get())) {
-            lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(i)->getCamera()) *
-                                                      lights.at(i)->getCamera()->world2ViewMatrix());
-         } else {
-            // TODO complete
-         }
-
-         glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(i).getArray());
-
-         for (auto& object : objects) {
-            //modelM_L2W = object.getWorldCoordinates();
-            glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
-
-            for (int j = 0; j < object.getMeshes().size(); ++j) {
-               glBindVertexArray(vertexArrayObjects.at(j));
-               // Chamata di disegno della primitiva
-               glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
-            }
-         }
-      }
-       */
-
-      // TODO fix shadow mapping
-
-      skipVertexIndex = 0;
-
-      glBindFramebuffer(GL_FRAMEBUFFER, lights.at(0)->getFrameBufferAsReference());
-      glClear(GL_DEPTH_BUFFER_BIT);
-      lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(0)->getCamera()) *
-                                     lights.at(0)->getCamera()->world2ViewMatrix());
-
-      glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
-
-      for (auto& object : objects) {
-         //modelM_L2W = object.getWorldCoordinates();
-         glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
-
-         for (const auto& mesh : object.getMeshes()) {
-            glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
-            // Chamata di disegno della primitiva
-            glDrawElements(GL_TRIANGLES, mesh.getIndices().size(), GL_UNSIGNED_INT, 0);
-         }
-      }
-
-      glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-      glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
-
-      glClearColor(0.2, 0.2, 0.2, 1.0f);
-      // Pulizia buffer colore, depth e stencil
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
-
-      // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
-      glUseProgram(shaderProgram);
-
-      // Abilito back culling face (non si elaborano facce non visibili in base alla normale
-      glEnable(GL_CULL_FACE);
-      // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
-      glCullFace(GL_BACK);
-      //glFrontFace(GL_CW); // o CCW
-
-      // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_LESS);
-
-      // Per ora viene disattivata la scrittura sul buffer
-      glStencilMask(0x00);
-
-      /* Scrivere nella location della variabile i valori del colore da assegnare al pixel;
-       * Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
-       * Quindi attenzione al posizionamento delle chiamate di modifica stato
-       */
-
-      projM_V2C = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera));
-      viewM_V2W = std::move(camera.view2WorldMatrix());
-      viewM_W2V = std::move(SquareMatrix::calculateInverse(viewM_V2W));
-
-      glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, projM_V2C.getArray());
-      glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, viewM_W2V.getArray());
-      // TODO fix for multiple lights
-      glUniformMatrix4fv(lsmMainShaderUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
-
-      glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
-
-      // TODO set multiple lights
-      glUniform3f(lightPosUniform, lights.at(0).get()->getOrigin().getX(), lights.at(0).get()->getOrigin().getY(), lights.at(0).get()->getOrigin().getZ());
-      glUniform3f(lightColorUniform, lights.at(0).get()->getColor().getRed(), lights.at(0).get()->getColor().getGreen(), lights.at(0).get()->getColor().getBlue());
-      //TODO manage falloff (on CPU or GPU?)
-      glUniform1f(lightIntensity, lights.at(0).get()->getIntensity());
-
-      // Caricare vertexArrayObject interessato
-      glUniform1i(texUnif, 0);
-      glUniform1i(bumpUnif, 1);
-      // TODO set multiple lights
-      glUniform1i(depthMapUniform, 10);
-
-      glActiveTexture(GL_TEXTURE10);
-      glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
-
-      glUniform1f(gammaUniform, GAMMA_CORRECTION);
-
-      skipVertexIndex = 0;
-      skipTextureIndex = 0;
-      skipBumpIndex = 0;
-
-      for (auto & object : objects) {
-         //modelM_L2W = object.getWorldCoordinates();
-
-         //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, modelM_L2W.getArray());
-         //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getLocal2WorldMatrix().getArray());
-         glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
-
-         for (auto j = 0; j < object.getMeshes().size(); ++j) {
-            if (object.doesHaveTextures()) {
-               glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).getAmbientCoeff().getX(),
-                       materials.at(materialIndices.at(j)).getAmbientCoeff().getY(),
-                       materials.at(materialIndices.at(j)).getAmbientCoeff().getZ());
-               glUniform3f(diffusiveCoefficient, materials.at(materialIndices.at(j)).getDiffuseCoeff().getX(),
-                       materials.at(materialIndices.at(j)).getDiffuseCoeff().getY(),
-                       materials.at(materialIndices.at(j)).getDiffuseCoeff().getZ());
-               glUniform3f(specularCoefficient, materials.at(materialIndices.at(j)).getSpecularCoeff().getX(),
-                       materials.at(materialIndices.at(j)).getSpecularCoeff().getY(),
-                       materials.at(materialIndices.at(j)).getSpecularCoeff().getZ());
-               glUniform1f(specularAlpha, materials.at(materialIndices.at(j)).getShininess());
-
-               /*
-               if (materialIndices.at(j) == 1) {
-
-               }
-               */
-
-               // Imposto lo uniform interessato con la texture unit in cui è presente la texture
-               // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
-               glActiveTexture(GL_TEXTURE0);
-               // Il bind sulla variabile texture1 ora si riverisce alla texture unit a cui è stata collegata
-               glBindTexture(GL_TEXTURE_2D, textureUniforms.at(skipTextureIndex++));
-
-               glActiveTexture(GL_TEXTURE1);
-               glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(skipBumpIndex++));
-            } else {
-               glUniform3f(ambientCoefficient, materials.at(materials.size()-1).getAmbientCoeff().getX(),
-                           materials.at(materials.size()-1).getAmbientCoeff().getY(),
-                           materials.at(materials.size()-1).getAmbientCoeff().getZ());
-
-               //glUniform3f(fixedColorUniform, 0.2f, 0.2f, 0.2f);
-            }
-
-            if (object.doesNeedNoCulling()) {
-               glDisable(GL_CULL_FACE);
-            }
-
-            glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
-            // Chamata di disegno della primitiva
-            glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
-
-            if (object.doesNeedNoCulling()) {
-               glEnable(GL_CULL_FACE);
-            }
-         }
-      }
-
-      glUseProgram(cardsShader);
-
-      glDisable(GL_CULL_FACE);
-
-      // Blend di trasparenza
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-      glBindVertexArray(cardVAO);
-      glBindBuffer(GL_ARRAY_BUFFER, cardVBO2);
-
-      glUniform1i(cardTexUnif, 3);
-      glUniform1i(backTexUnif, 4);
-
-      glActiveTexture(GL_TEXTURE3);
-      glBindTexture(GL_TEXTURE_2D, cardTexture);
-
-      glActiveTexture(GL_TEXTURE4);
-      glBindTexture(GL_TEXTURE_2D, backCardTexture);
-
-      glUniformMatrix4fv(cardProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
-      glUniformMatrix4fv(cardViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
-      glUniform1i(playerIndexUniform, playerIndex);
-
-      glStencilFunc(GL_ALWAYS, 1, 0xFF);
-      glStencilMask(0x00);
-
-      bool hasSelectedCard = false;
-      double x, y;
-      glfwGetCursorPos(window, &x, &y);
-
-      if (!players.empty()) {
-         for (unsigned int pIndex = 0; pIndex < players.size(); ++pIndex) {
-            glUniform1i(viewPlayerUniform, pIndex);
-
-            if (pIndex < flipCardRenderingIndex) {
-               for (size_t i = 0; i < players.at(pIndex).getCards().size(); ++i) {
-                  renderCardsInLoop(cardModelM, cardModelMatrix, viewM_V2W, pIndex, i, hasSelectedCard, x, y);
-               }
-            } else {
-               for (size_t i = players.at(pIndex).getCards().size()-1; i >= 0 && i != std::numeric_limits<size_t>::max(); --i) {
-                  renderCardsInLoop(cardModelM, cardModelMatrix, viewM_V2W, pIndex, i, hasSelectedCard, x, y);
-               }
-            }
-
-            if (hasSelectedCard && (playerIndex == pIndex)) {
-               glDisable(GL_DEPTH_TEST);
-
-               cardModelM = std::move(players.at(playerIndex).getCards().at(selectedCardIndex).getWorldCoordinates(selectedCardIndex));
-
-               glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, players.at(pIndex).getCards().at(selectedCardIndex).cardUVArray);
-
-               glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
-
-               glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-               glEnable(GL_DEPTH_TEST);
-            }
-         }
-
-         for (const Card& card : cardsOnTable) {
-            cardModelM = *card.hand2Table * card.local2World;
-
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, card.cardUVArray);
-
-            glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-         }
-
-         // Genero outlining tramite Stencil test
-         glUseProgram(colorShader);
-
-         // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
-         glDisable(GL_DEPTH_TEST);
-
-         // Verrà stampato qualcosa su schermo solo se supera il controllo sottostante
-         // Ovvero quando l'oggetto si trova fuori dalla maschera, ovvero il tratto per l'outlining
-
-         glStencilMask(0x00);    // solo in lettura del buffer, non attiva la scrittura
-         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-         glEnable(GL_DEPTH_TEST);
-
-         glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, projM_V2C.getArray());
-         glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
-
-         if (selectedCardIndex != MAX_SIZE_T_VALUE) {
-            cardModelM = std::move(players.at(playerIndex).getCards().at(selectedCardIndex).getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
-            glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cardModelM.getArray());
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            players.at(playerIndex).getCards().at(selectedCardIndex).setIsSelected(false);
-         }
-      }
-
-      // Da riattivare per permettere le modifiche al buffer (pulizia)
-      glStencilMask(0xFF);
+      Float3 tmp(0, 0, 0.05f*sinf(glfwGetTime()));
+      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + tmp);
+
+      SpotLight* sl(dynamic_cast<SpotLight*>(lights.at(0).get()));
+      sl->setDirection(sl->getDirection() + tmp);
+
+      renderShadowMap();
+      renderSceneObjects();
+      renderCards();
+      renderCardsOnTable();
 
       // Downsampling del color buffer MSAA per riportarlo a risoluzione non upscalata
       if (ENABLE_MULTISAMPLING) {

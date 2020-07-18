@@ -6,8 +6,6 @@ Camera::Camera(Float3 eye, Float3 lookAt) : eye(std::move(eye)), lookAt(std::mov
    far = 100;
    viewAngle = degree2Radiants(45);
    right = near * tanf(viewAngle * 0.5f);
-
-   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up) : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
@@ -15,8 +13,6 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up) : eye(std::move(eye)), look
    far = 100;
    viewAngle = degree2Radiants(45);
    right = near * tanf(viewAngle * 0.5f);
-
-   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float angle, float aspectRatio)
@@ -28,8 +24,6 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
 
    Camera::right = near * tanf(Camera::viewAngle * 0.5f);
    Camera::top = aspectRatio * right;
-
-   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float zoom, float far, float angle, float aspectRatio)
@@ -40,10 +34,8 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float zoom, flo
    Camera::aspectRatio = aspectRatio;
 
    Camera::right = near * tanf(Camera::viewAngle * 0.5f);
-   //
-   Camera::top = aspectRatio * right;
 
-   yawAngle = acosf((lookAt - eye).getNormalized().getX());
+   Camera::top = aspectRatio * right;
 }
 
 Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left,
@@ -55,8 +47,6 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
    Camera::left = left;
    Camera::right = right;
    Camera::viewAngle = degree2Radiants(angle);
-
-   yawAngle = acosf((lookAt - eye).getNormalized().getX());
 }
 
 SquareMatrix Camera::world2ViewMatrix() {
@@ -174,7 +164,7 @@ void Camera::setAspectRatio(float aspectRatio) {
    top = aspectRatio * right;
 }
 
-const Float3 &Camera::getEye() const {
+const Float3& Camera::getEye() const {
    return eye;
 }
 
@@ -182,7 +172,7 @@ void Camera::setEye(const Float3 &eye) {
    Camera::eye = eye;
 }
 
-const Float3 &Camera::getLookAt() const {
+const Float3& Camera::getLookAt() const {
    return lookAt;
 }
 
@@ -190,7 +180,7 @@ void Camera::setLookAt(const Float3 &lookAt) {
    Camera::lookAt = lookAt;
 }
 
-const Float3 &Camera::getUp() const {
+const Float3& Camera::getUp() const {
    return up;
 }
 
@@ -204,12 +194,4 @@ float Camera::getSensibility() const {
 
 void Camera::setSensibility(float sensibility) {
    Camera::sensibility = sensibility;
-}
-
-float Camera::getYawAngle() const {
-   return yawAngle;
-}
-
-void Camera::setYawAngle(float yawAngle) {
-   Camera::yawAngle = yawAngle;
 }

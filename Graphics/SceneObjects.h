@@ -34,7 +34,7 @@ extern std::unique_ptr<Assimp::Importer> importer;
 extern GLuint shaderProgram;
 extern GLuint offlineShaderProgram;
 extern GLuint cardsShader;
-extern GLuint backShader;
+extern GLuint deckShader;
 extern GLuint colorShader;
 extern GLuint lightShader;
 

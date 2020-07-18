@@ -34,6 +34,8 @@ uniform sampler2D depthMap;
 
 uniform vec3 color;
 
+float bias = 0.005f;
+
 void main() {
     float normalDelta = texture(bumpTexture, outTextCoord).x -0.25f;
     vec3 newNormal = (1 + 2.5*normalDelta) * outNormalVector;
@@ -69,9 +71,9 @@ void main() {
 
     // Controllo distanze tra camera-punto e luce-punto
     // -> Stiamo confrontando se quel punto effettivamente sia visibile, controllando la distanza tra questo fragment e il calcolo sulla depth map
-    shadow = perspDivide.z > texture(depthMap, perspDivide.xy).r ? 1 : 0;
+    shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0;
 
-    fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)), txIn.a);
+    fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)) * lightColor, txIn.a);
 
     //fragColor = vec4(vec3(perspDivide.r), 1);
 }

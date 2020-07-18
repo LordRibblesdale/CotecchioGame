@@ -31,7 +31,8 @@ unsigned int vIndices[6] {
 Card::Card(unsigned int vaule, unsigned short playerID)
         : local2World(std::move(SquareMatrix(4, {}))), translate(std::move(SquareMatrix(4, {}))),
           qRotate(std::move(SquareMatrix(4, {}))), rotate(std::move(SquareMatrix(4, {}))),
-          scale(std::move(SquareMatrix(4, {}))), partialLocal2World(std::move(SquareMatrix(4, {}))) {
+          scale(std::move(SquareMatrix(4, {}))), partialLocal2World(std::move(SquareMatrix(4, {}))),
+          firstLocal(std::move(SquareMatrix(4, {}))) {
    Card::value = vaule;
    Card::playerID = playerID;
 
@@ -54,12 +55,9 @@ Card::Card(unsigned int vaule, unsigned short playerID)
 }
 
 Card::Card(const Card &card) : local2World(card.local2World), translate(card.translate), qRotate(card.qRotate),
-                                 rotate(card.rotate), scale(card.scale), partialLocal2World(card.partialLocal2World) {
-   Card::value = card.value;
-   Card::playerID = card.playerID;
-   Card::u = card.u;
-   Card::v = card.v;
-
+                                 rotate(card.rotate), scale(card.scale), partialLocal2World(card.partialLocal2World),
+                                 firstLocal(card.firstLocal), value(card.value), playerID(card.playerID),
+                                 u(card.u), v(card.v)  {
    Card::scale = card.scale;
 
    // Is it the quickest/best optimised/clean way?
@@ -135,7 +133,13 @@ SquareMatrix Card::getWorldCoordinates(unsigned int cardIndex) {
            t.getY() - tmp.getY() * (1.0f - 3.25f*(cardIndex) / static_cast<float>(handCards)) -0.10f,
            t.getZ() - 0.4f)));
 
-   local2World = std::move((translate * partialLocal2World));
+   local2World = std::move(translate * partialLocal2World);
+
+   if (!isFirstMatrixSaved) {
+      firstLocal = local2World;
+
+      isFirstMatrixSaved = true;
+   }
 
    return local2World;
 }

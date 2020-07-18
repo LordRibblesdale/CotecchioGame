@@ -11,7 +11,7 @@ class SpotLight : public Light {
    Float3 direction;
 public:
    SpotLight();
-   SpotLight(Float3 origin, Float3 direction, Color color, float intensity, float midAngle_, float maxAngle_);
+   SpotLight(const Float3& origin, const Float3& direction, const Color& color1, float intensity, float midAngle_, float maxAngle_);
 
    SpotLight(SpotLight&& light);
 
@@ -25,9 +25,9 @@ public:
 
    void setMidAngle(float midAngle);
 
-   const Float3 &getDirection() const;
+   const Float3& getDirection() const;
 
-   void setDirection(const Float3 &direction);
+   void setDirection(const Float3& direction);
 };
 
 #endif //SPOTLIGHT_H

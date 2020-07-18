@@ -14,8 +14,6 @@ class Camera {
    float viewAngle = 0;
    float aspectRatio = 0;
 
-   float yawAngle = 0;
-
    float sensibility = 0.1f;
 
    Float3 eye;
@@ -74,10 +72,6 @@ public:
    const Float3 &getUp() const;
 
    void setUp(const Float3 &up);
-
-   float getYawAngle() const;
-
-   void setYawAngle(float yawAngle);
 
    float getAspectRatio() const;
 

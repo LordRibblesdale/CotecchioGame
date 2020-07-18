@@ -12,8 +12,6 @@ file(GLOB_RECURSE PlayerFolder "Player/*.cpp" "Player/*.h")
 file(GLOB_RECURSE AnimationFolder "Scripting/*.cpp" "Scripting/*.h")
 file(GLOB_RECURSE ExceptionFolder "Exception/*.h")
 file(GLOB_RECURSE XMLFolder "IO/rapidxml-1.13/*.hpp")
-#file(GLOB_RECURSE ThreadPool "IO/ThreadPool/header/*.hpp" "IO/ThreadPool/src/*.cpp")
-#file(GLOB_RECURSE ThreadPoolLib "IO/lib/header/*.hpp" "IO/lib/src/*.cpp")
 file(GLOB_RECURSE MainFile "Main.cpp")
 
 file(GLOB_RECURSE GladLibraries "Graphics/glad/include/*.h" "Graphics/glad/src/*.c")
@@ -31,15 +29,11 @@ add_executable(${PROJECT_NAME}
         ${GladLibraries}
         ${GLFWLibraries}
         ${XMLFolder}
-        #${ThreadPool}
-        #${ThreadPoolLib}
-        ${MainFile} Scripting/CardMoving.cpp Scripting/CardMoving.h)
+        ${MainFile})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/glad")
 target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glad/include/KHR")
 target_include_directories(${PROJECT_NAME} PRIVATE "IO/rapidxml-1.13")
-#target_include_directories(${PROJECT_NAME} PRIVATE "IO/ThreadPool/header")
-#target_include_directories(${PROJECT_NAME} PRIVATE "IO/lib/header")
 
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE "Graphics/glfw-3.3.2.bin.WIN64/include/GLFW")
@@ -56,6 +50,10 @@ endif()
 
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES})
-    target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libdl.so")
+    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
+        target_link_libraries(${PROJECT_NAME} "/usr/lib/aarch64-linux-gnu/libdl.so")
+    else ()
+        target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libdl.so")
+    endif()
 endif()
 
