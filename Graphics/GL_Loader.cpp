@@ -273,9 +273,10 @@ bool setupLightMap(Light* light) {
    // Da analizzare come classica texture per l'accesso valori
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-   // Clamp to edge per estendere il risultato fuori dai limiti della mappa (non copre tutta la scena)
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   // Clamp to border per estendere il risultato fuori dai limiti della mappa sfumando l'effetto della mappa
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+   glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, Color(1, 1, 1, 1).getVector().get());
 
    // Genero il framebuffer per il render della shadowmap
    glGenFramebuffers(1, &light->getFrameBufferAsReference());

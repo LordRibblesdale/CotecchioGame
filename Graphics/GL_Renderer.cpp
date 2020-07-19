@@ -57,6 +57,9 @@ void setupRenderVariables() {
    lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
    depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
+   nearPlaneUniform = glGetUniformLocation(shaderProgram, "nearPlane");
+   farPlaneUniform = glGetUniformLocation(shaderProgram, "farPlane");
+
    offlineFBTextureUniform = glGetUniformLocation(offlineShaderProgram, "offlineRendering");
 
    //SquareMatrix modelM_L2W(4, {});
@@ -80,12 +83,12 @@ void renderShadowMap() {
    skipVertexIndex = 0;
 
    for (unsigned int i = 0; i < lights.size(); ++i) {
-      glBindFramebuffer(GL_FRAMEBUFFER, lights.at(0)->getFrameBufferAsReference());
+      //glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
       glClear(GL_DEPTH_BUFFER_BIT);
-      lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(0)->getCamera()) *
-                                     lights.at(0)->getCamera()->world2ViewMatrix());
+      lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(i)->getCamera()) *
+                                     lights.at(i)->getCamera()->world2ViewMatrix());
 
-      glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
+      glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(i).getArray());
 
       for (auto& object : objects) {
          //modelM_L2W = object.getWorldCoordinates();
@@ -152,6 +155,9 @@ void renderSceneObjects() {
 
    glActiveTexture(GL_TEXTURE10);
    glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
+
+   glUniform1f(nearPlaneUniform, lights.at(0)->getCamera()->getNear());
+   glUniform1f(farPlaneUniform, lights.at(0)->getCamera()->getFar());
 
    glUniform1f(gammaUniform, GAMMA_CORRECTION);
 

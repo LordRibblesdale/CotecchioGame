@@ -48,6 +48,9 @@ GLuint modelLightShaderUniform;
 GLuint lsmMainShaderUniform;
 GLuint depthMapUniform;
 
+GLuint nearPlaneUniform;
+GLuint farPlaneUniform;
+
 GLuint offlineFBTextureUniform;
 
 SquareMatrix projM_V2C(4, {});
