@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-Mesh::Mesh(unsigned int preallocSize, bool hasTextures)  {
+Mesh::Mesh(unsigned int preallocSize, bool hasTextures) {
    vertices.reserve(preallocSize);
    normals.reserve(preallocSize);
    indices.reserve(preallocSize);
@@ -54,4 +54,20 @@ const vector<Color> &Mesh::getVertexColors() const {
 
 const vector<unsigned int> &Mesh::getIndices() const {
    return indices;
+}
+
+const Float3 &Mesh::getTangent() const {
+   return tangent;
+}
+
+void Mesh::setTangent(const Float3 &tangent) {
+   Mesh::tangent = tangent;
+}
+
+const Float3 &Mesh::getBitangent() const {
+   return bitangent;
+}
+
+void Mesh::setBitangent(const Float3 &bitangent) {
+   Mesh::bitangent = bitangent;
 }

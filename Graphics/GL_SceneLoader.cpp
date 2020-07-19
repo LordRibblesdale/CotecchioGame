@@ -97,7 +97,7 @@ void loadObjects() {
 
    for (const auto& object : objects) {
       for (const auto& mesh : object.getMeshes()) {
-         generateObjects(mesh);
+         generateObjects(const_cast<Mesh&>(mesh));
       }
 
       /* Richiesta della posizione della texture
@@ -126,7 +126,7 @@ void loadObjects() {
    prepareSceneLights();
 }
 
-void generateObjects(const Mesh &mesh) {
+void generateObjects(Mesh &mesh) {
    /* E' possibile attribuire durante il ciclo il colore, tramite l'uniform vec4
    * Gathering variabile uniform del pixel shader che risiede nel programma, ma non si accede tramite puntatore
    *    -> Accesso tramite (poichè puntatore non generato nello shader)
@@ -168,8 +168,24 @@ void generateObjects(const Mesh &mesh) {
       attributes[index++] = mesh.getNormals().at(i).getZ();
    }
 
-   // GL_STATIC_DRAW??
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, attributes, GL_DYNAMIC_DRAW);
+   // Impostazione del Tangent Space
+   Float2 deltaUV1(std::move(mesh.getTextureUnwrap().at(2) - mesh.getTextureUnwrap().at(1)));
+   Float2 deltaUV2(std::move(mesh.getTextureUnwrap().at(1) - mesh.getTextureUnwrap().at(0)));
+   Float3 e1(std::move(mesh.getVertices().at(2) - mesh.getVertices().at(1)));
+   Float3 e2(std::move(mesh.getVertices().at(1) - mesh.getVertices().at(0)));
+
+   float invDet = 1.0f / (deltaUV1.getX()*deltaUV2.getY() - deltaUV2.getX()*deltaUV1.getY());
+
+   mesh.setTangent(invDet * Float3(deltaUV2.getY()*e1.getX() - deltaUV1.getY()*e2.getX(),
+                          deltaUV2.getY()*e1.getY() - deltaUV1.getY()*e2.getY(),
+                          deltaUV2.getY()*e1.getZ() - deltaUV1.getY()*e2.getZ()));
+
+   // Anche se calcolabile con prodotto vettoriale su GPU, viene precalcolata per ridurre il carico
+   mesh.setBitangent(invDet * Float3(-deltaUV2.getX()*e1.getX() + deltaUV1.getX()*e2.getX(),
+                                     -deltaUV2.getX()*e1.getY() + deltaUV1.getX()*e2.getY(),
+                                     -deltaUV2.getX()*e1.getZ() + deltaUV1.getX()*e2.getZ()));
+
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, attributes, GL_STATIC_DRAW);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.getIndices().size(), mesh.getIndices().data(), GL_STATIC_DRAW);
 
    /* Imposta il modo di interpretare i dati ottenuti dal buffer, il quale ottiene i dati dal vettore

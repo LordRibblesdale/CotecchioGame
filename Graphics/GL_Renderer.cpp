@@ -12,7 +12,10 @@ void setupRenderVariables() {
    modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
    texUnif = glGetUniformLocation(shaderProgram, "texture1");
-   bumpUnif = glGetUniformLocation(shaderProgram, "bumpTexture");
+   bumpUnif = glGetUniformLocation(shaderProgram, "normalTexture");
+
+   tangentUniform = glGetUniformLocation(shaderProgram, "tangent");
+   bitangentUniform = glGetUniformLocation(shaderProgram, "bitangent");
 
    lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
    lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
@@ -54,12 +57,9 @@ void setupRenderVariables() {
    lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
    depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
-   projM_V2C = std::move(SquareMatrix(4, {}));
-   viewM_W2V = std::move(SquareMatrix(4, {}));
-   viewM_V2W = std::move(SquareMatrix(4, {}));
-   //SquareMatrix modelM_L2W(4, {});
+   offlineFBTextureUniform = glGetUniformLocation(offlineShaderProgram, "offlineRendering");
 
-   cardModelM = std::move(SquareMatrix(4, {}));
+   //SquareMatrix modelM_L2W(4, {});
 
    lightSpaceMs.reserve(lights.size());
 }
@@ -193,6 +193,14 @@ void renderSceneObjects() {
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(skipBumpIndex++));
+
+            glUniform3f(tangentUniform, object.getMeshes().at(j).getTangent().getX(),
+                        object.getMeshes().at(j).getTangent().getY(),
+                        object.getMeshes().at(j).getTangent().getZ());
+
+            glUniform3f(bitangentUniform, object.getMeshes().at(j).getBitangent().getX(),
+                        object.getMeshes().at(j).getBitangent().getY(),
+                        object.getMeshes().at(j).getBitangent().getZ());
          } else {
             glUniform3f(ambientCoefficient, materials.at(materials.size()-1).getAmbientCoeff().getX(),
                         materials.at(materials.size()-1).getAmbientCoeff().getY(),
@@ -401,7 +409,7 @@ void renderCardsOnTable() {
    glUniformMatrix4fv(deckViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
 
    for (const Card& card : cardsOnTable) {
-      cardModelM = /**card.hand2Table * */card.firstLocal;
+      cardModelM = *card.hand2Table * card.local2World;
 
       glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, card.cardUVArray);
 

@@ -35,6 +35,7 @@ void pollInput(GLFWwindow *window) {
       glfwSetWindowShouldClose(window, true);
    }
 
+   //std::cout << (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) << std::endl;
    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
       //std::cout << CARD_ANIMATION << " " << selectedCardIndex << " " << cardsOnTable.size() << std::endl;
       if (sumTimeCardAnimationTime == 0) {
@@ -114,7 +115,6 @@ void pollInput(GLFWwindow *window) {
          BUSY_AT_CARD_ANIMATION = true;
 
          if (sumTimeCardAnimationTime == 0) {
-            //std::cout << playerIndex << " " << selectedCardIndex << std::endl;
             cardsOnTable.emplace_back(players.at(playerIndex).getCards().at(selectedCardIndex));
             players.at(playerIndex).getCards().erase(players.at(playerIndex).getCards().begin() + selectedCardIndex);
          }
@@ -128,7 +128,7 @@ void pollInput(GLFWwindow *window) {
          if (sumTimeCardAnimationTime + diff <= cardAnimationTime) {
             sumTimeCardAnimationTime += diff;
 
-            cardMovingAnimation->moveCard(cardMovingAnimation->getCard()->tmp, diff);
+            cardMovingAnimation->moveCard(cardMovingAnimation->getCard()->tmp, sumTimeCardAnimationTime);
          } else {
             cardMovingAnimation.reset();
             sumTimeCardAnimationTime = 0;
@@ -138,6 +138,9 @@ void pollInput(GLFWwindow *window) {
          }
 
          BUSY_AT_CARD_ANIMATION = false;
+      } else {
+         sumTimeCardAnimationTime = 0;
+         CARD_ANIMATION = false;
       }
    }
 

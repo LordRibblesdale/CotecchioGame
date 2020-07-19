@@ -7,6 +7,9 @@ GLuint modelMatrixUniform;
 GLuint texUnif;
 GLuint bumpUnif;
 
+GLuint tangentUniform;
+GLuint bitangentUniform;
+
 GLuint lightPosUniform;
 GLuint lightColorUniform;
 GLuint lightIntensity;
@@ -44,6 +47,8 @@ GLuint lightSpaceMatrixUniform;
 GLuint modelLightShaderUniform;
 GLuint lsmMainShaderUniform;
 GLuint depthMapUniform;
+
+GLuint offlineFBTextureUniform;
 
 SquareMatrix projM_V2C(4, {});
 SquareMatrix viewM_W2V(4, {});

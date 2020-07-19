@@ -300,8 +300,10 @@ void prepareSceneLights() {
            degree2Radiants(40),
            degree2Radiants(60))));
 
-   if (!setupLightMap(lights.at(0).get())) {
-      std::cout << "Error SHADOW_MAP_LIGHT "<< 0 <<": Fragment not created." << std::endl;
+   for (auto& light : lights) {
+      if (!setupLightMap(light.get())) {
+         std::cout << "Error SHADOW_MAP_LIGHT "<< 0 <<": Fragment not created." << std::endl;
+      }
    }
 }
 
@@ -369,7 +371,7 @@ void render() {
       }
 
       glBindVertexArray(sVAO);
-      glUniform1i(glGetUniformLocation(offlineShaderProgram, "offlineRendering"), 2);
+      glUniform1i(offlineFBTextureUniform, 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
 

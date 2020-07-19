@@ -18,16 +18,16 @@ int main(int argc, char** argv) {
    if (file.is_open()) {
       // Creazione documento
       rapidxml::xml_document<> document;
-      // Creazione nodo iniziale per lettura file
-      rapidxml::xml_node<>* rootNode;
+
       // Lettura testo :         V: iteratore file stream               V: iteratore fino all'EOF
       std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
       // Aggiunta del carattere EOF \0
       buffer.push_back('\0');
       // Ricerca dei nodi (a partire dall'inizio
       document.parse<0>(&buffer[0]);
+      // Creazione nodo iniziale per lettura file
       // Ricerca del primo nodo
-      rootNode = document.first_node("Settings");
+      rapidxml::xml_node<>* rootNode = document.first_node("Settings");
 
       // Iterazioni tra i nodi
       // Creazione dal primo nodo, controllo che esista, imposto il successivo parente

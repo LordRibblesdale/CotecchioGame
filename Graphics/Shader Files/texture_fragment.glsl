@@ -5,6 +5,9 @@ in vec3 outNormalVector;   // Input della normale per i calcoli di colore
 in vec3 sPos;           // Input per determinare l'illuminazione (o ottenuta dal vertex shader o di default interpolato)
 in vec4 lightBasedPos;
 
+in vec3 outTangent;
+in vec3 outBitangent;
+
 out vec4 fragColor; // Colore da rappresentare - in questo caso tramite
 
 // Scrittura di variabili uniform per ottenere informazioni delle luci (pos, color e coeff)
@@ -29,7 +32,15 @@ vec3 halfway;
 float shadow;
 
 uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene texture
-uniform sampler2D bumpTexture;  //TODO implement normal mapping
+uniform sampler2D normalTexture;
+
+vec3 newNormal;
+
+/*
+int MAX_SIZE = 8;
+uniform sampler2D depthMap[8];
+uniform int depthMapSize;
+*/
 uniform sampler2D depthMap;
 
 uniform vec3 color;
@@ -37,8 +48,15 @@ uniform vec3 color;
 float bias = 0.005f;
 
 void main() {
-    float normalDelta = texture(bumpTexture, outTextCoord).x -0.25f;
+    /*
+    float normalDelta = texture(normalTexture, outTextCoord).x -0.25f;
     vec3 newNormal = (1 + 2.5*normalDelta) * outNormalVector;
+    */
+
+    // [0, 1] -> [0, 2] -> [-1, 1]
+    newNormal = (texture(normalTexture, outTextCoord).rgb * 2) -1;
+    newNormal = normalize((mat3(outTangent, outBitangent, outNormalVector)) * newNormal);
+
     vec3 p2l = normalize(lightPos - sPos);
 
     // Moltiplico più tardi il fattore comune lightColor
@@ -71,9 +89,22 @@ void main() {
 
     // Controllo distanze tra camera-punto e luce-punto
     // -> Stiamo confrontando se quel punto effettivamente sia visibile, controllando la distanza tra questo fragment e il calcolo sulla depth map
-    shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0;
+    /*
+    int numLights = 0;
+    for (int i = 0; i < depthMapSize; ++i) {
+        // Branching ridotto per accesso per tutti i fragment shader alla texture (++ di bassa complessità)
+        // https://en.wikipedia.org/wiki/Cycles_per_instruction#Example_2
+        if (perspDivide.z - bias > texture(depthMap[i], perspDivide.xy).r) {
+            ++numLights;
+        }
+    }
+
+    shadow = float(numLights)/float(depthMapSize);
+    */
+
+    //shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0;
 
     fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)) * lightColor, txIn.a);
 
-    //fragColor = vec4(vec3(perspDivide.r), 1);
+    //fragColor = texture(normalTexture, outTextCoord);
 }

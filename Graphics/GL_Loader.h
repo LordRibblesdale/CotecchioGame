@@ -52,7 +52,7 @@ void compileShaders();
 void loadObjects();
 void loadCards();
 
-void generateObjects(const Mesh& mesh);
+void generateObjects(Mesh& mesh);
 void prepareScreenForOfflineRendering();
 void prepareCardRendering();
 

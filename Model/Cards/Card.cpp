@@ -31,12 +31,12 @@ unsigned int vIndices[6] {
 Card::Card(unsigned int vaule, unsigned short playerID)
         : local2World(std::move(SquareMatrix(4, {}))), translate(std::move(SquareMatrix(4, {}))),
           qRotate(std::move(SquareMatrix(4, {}))), rotate(std::move(SquareMatrix(4, {}))),
-          scale(std::move(SquareMatrix(4, {}))), partialLocal2World(std::move(SquareMatrix(4, {}))),
-          firstLocal(std::move(SquareMatrix(4, {}))) {
+          scale(std::move(SquareMatrix(4, {}))), partialLocal2World(std::move(SquareMatrix(4, {}))) {
    Card::value = vaule;
    Card::playerID = playerID;
 
    scale = std::move(Transform::scaleMatrix4(0.4, 0.4, 0.4));
+   hand2Table = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
 
    u = (value%10)*0.1f;
    v = ((value/10)-1)*0.25f;
@@ -56,9 +56,16 @@ Card::Card(unsigned int vaule, unsigned short playerID)
 
 Card::Card(const Card &card) : local2World(card.local2World), translate(card.translate), qRotate(card.qRotate),
                                  rotate(card.rotate), scale(card.scale), partialLocal2World(card.partialLocal2World),
-                                 firstLocal(card.firstLocal), value(card.value), playerID(card.playerID),
-                                 u(card.u), v(card.v)  {
+                                 value(card.value), playerID(card.playerID), u(card.u), v(card.v)  {
    Card::scale = card.scale;
+   Card::t = card.t;
+   Card::tmp = card.tmp;
+
+   if (!card.hand2Table) {
+      hand2Table = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
+   } else {
+      hand2Table = std::move(std::make_unique<SquareMatrix>(*card.hand2Table));
+   }
 
    // Is it the quickest/best optimised/clean way?
    std::copy(card.cardUVArray, card.cardUVArray+8, cardUVArray);
@@ -69,15 +76,27 @@ Card& Card::operator=(const Card &card) {
    Card::playerID = card.playerID;
    Card::u = card.u;
    Card::v = card.v;
+   Card::t = card.t;
+   Card::tmp = card.tmp;
 
    Card::scale = card.scale;
+   Card::local2World = card.local2World;
+   Card::translate = card.translate;
+   Card::qRotate = card.qRotate;
+   Card::rotate = card.rotate;
+   Card::partialLocal2World = card.partialLocal2World;
+
+   if (!card.hand2Table) {
+      hand2Table = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
+   } else {
+      hand2Table = std::move(std::make_unique<SquareMatrix>(*card.hand2Table));
+   }
 
    // Is it the quickest/best optimised/clean way?
    std::copy(card.cardUVArray, card.cardUVArray+8, cardUVArray);
 
    return *this;
 }
-
 
 Card::~Card() {
    playerID = 0;
@@ -88,7 +107,6 @@ Card::~Card() {
    handCards = 0;
 
    hand2Table.reset();
-
 }
 
 /* Mazzo di carte
@@ -134,12 +152,6 @@ SquareMatrix Card::getWorldCoordinates(unsigned int cardIndex) {
            t.getZ() - 0.4f)));
 
    local2World = std::move(translate * partialLocal2World);
-
-   if (!isFirstMatrixSaved) {
-      firstLocal = local2World;
-
-      isFirstMatrixSaved = true;
-   }
 
    return local2World;
 }

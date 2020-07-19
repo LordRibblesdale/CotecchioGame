@@ -10,7 +10,8 @@ class CardMoving {
    float angle;
    double totalDuration;
 
-   Float4 center;
+   Float3 dir;
+   Float3 height;
 
 public:
    CardMoving(Card* card, double totalDuration);

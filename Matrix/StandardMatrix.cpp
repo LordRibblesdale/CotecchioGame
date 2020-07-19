@@ -88,18 +88,17 @@ SquareMatrix Rotation::rotationZAxisMatrix4(const float &angleZ) {
 
 SquareMatrix Rotation::rotationByQuaternion(const Float4& direction, const float &angle) {
    if (direction.l2Norm() != 0 && remainder(angle, 2 * M_PI) != 0) {
-      float sin = sinf(angle * 0.5);
+      float sin = sinf(angle * 0.5f);
       float q1 = direction.getX() * sin;
       float q2 = direction.getY() * sin;
       float q3 = direction.getZ() * sin;
-      float q4 = direction.getW() * cosf(angle * 0.5);
+      float q4 = direction.getW() * cosf(angle * 0.5f);
       float s = 2/(q1*q1 + q2*q2 + q3*q3 + q4*q4);
 
       return SquareMatrix(4, {1-s*(q2*q2 + q3*q3),   s*(q1*q2 - q4*q3),   s*(q1*q3 + q4*q2),   0,
-                                        s*(q1*q2 + q4*q3),   1-s*(q1*q1 + q3*q3), s*(q2*q3 - q4*q1),   0,
-                                        s*(q1*q3 - q4*q2),   s*(q2*q3 + q4*q1),   1-s*(q1*q1 + q2*q2), 0,
-                                        0,                   0,                   0,                   1});
-
+                              s*(q1*q2 + q4*q3),   1-s*(q1*q1 + q3*q3), s*(q2*q3 - q4*q1),   0,
+                              s*(q1*q3 - q4*q2),   s*(q2*q3 + q4*q1),   1-s*(q1*q1 + q2*q2), 0,
+                              0,                   0,                   0,                   1});
    }
 
    return Transform::scaleMatrix4(1, 1, 1);

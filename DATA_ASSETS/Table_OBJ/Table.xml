@@ -8,6 +8,8 @@
 
     <!--lambert2SG1-->
     <Texture name="file1-nurbsToPoly81.1.png" material="Velvet">
+        <Bump name="bump-nurbsToPoly81.1.png">
+        </Bump>
     </Texture>
 
     <!--phong1SG1-->
@@ -433,7 +435,7 @@
     <Material name="Wood">
         <Diffuse valueR="1" valueG="1" valueB="1">
         </Diffuse>
-        <Specular valueR="0.2" valueG="0.2" valueB="0.2" specularExp="7.19">
+        <Specular valueR="0.2" valueG="0.2" valueB="0.2" specularExp="13.19">
         </Specular>
     </Material>
 

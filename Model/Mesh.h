@@ -14,6 +14,9 @@ class Mesh {
    std::vector<Color> vertexColors;
    std::vector<unsigned int> indices;
 
+   Float3 tangent;
+   Float3 bitangent;
+
 public:
    // TODO rule of 5
    Mesh(unsigned int preallocSize, bool hasTextures);
@@ -42,6 +45,14 @@ public:
    bool isPbr() const;
 
    void setPbr(bool pbr);
+
+    const Float3 &getTangent() const;
+
+    void setTangent(const Float3 &tangent);
+
+    const Float3 &getBitangent() const;
+
+    void setBitangent(const Float3 &bitangent);
 };
 
 #endif //OBJECT_H

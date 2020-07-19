@@ -13,6 +13,9 @@ extern GLuint modelMatrixUniform;
 extern GLuint texUnif;
 extern GLuint bumpUnif;
 
+extern GLuint tangentUniform;
+extern GLuint bitangentUniform;
+
 extern GLuint lightPosUniform;
 extern GLuint lightColorUniform;
 extern GLuint lightIntensity;
@@ -52,6 +55,8 @@ extern GLuint lightSpaceMatrixUniform;
 extern GLuint modelLightShaderUniform;
 extern GLuint lsmMainShaderUniform;
 extern GLuint depthMapUniform;
+
+extern GLuint offlineFBTextureUniform;
 
 extern SquareMatrix projM_V2C;
 extern SquareMatrix viewM_W2V;
