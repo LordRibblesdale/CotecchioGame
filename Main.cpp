@@ -45,6 +45,8 @@ int main(int argc, char** argv) {
 
       CAMERA_SENSIBILITY = std::stof(rootNode->first_node("Camera")->first_attribute("sensibility")->value());
 
+      PLAYERS = std::stoi(rootNode->first_node("Players")->first_attribute("num")->value());
+
       file.close();
 
       camera.setAspectRatio(static_cast<float>(Y_RESOLUTION) / static_cast<float>(X_RESOLUTION));

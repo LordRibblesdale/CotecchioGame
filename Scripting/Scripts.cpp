@@ -20,9 +20,9 @@ void createPlayerPositions(unsigned short int nPlayers) {
 
    players.reserve(nPlayers);
 
-   //TODO use maxX for effective radius
+   // Use maxY for effective radius
    for (int i = 0; i < nPlayers; ++i) {
-      players.emplace_back(Player(40/nPlayers, Float3(8.25f* cosf(i * angle), 9.25f*sinf(i * angle), maxZ+2)));
+      players.emplace_back(Player(40/nPlayers, Float3(8.00f* cosf(i * angle), 9.00f*sinf(i * angle), maxZ+3)));
    }
 }
 
@@ -38,10 +38,12 @@ void pollInput(GLFWwindow *window) {
    //std::cout << (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) << std::endl;
    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
       //std::cout << CARD_ANIMATION << " " << selectedCardIndex << " " << cardsOnTable.size() << std::endl;
-      if (sumTimeCardAnimationTime == 0) {
-         cardAnimationTime = 1;
+      if (sumTimeCardAnimationTime == 0 && !CARD_ANIMATION && IS_GAME_STARTED) {
+         if (selectedCardIndex != MAX_SIZE_T_VALUE) {
+            cardAnimationTime = 1;
 
-         CARD_ANIMATION = true;
+            CARD_ANIMATION = true;
+         }
       }
    }
 
@@ -111,7 +113,7 @@ void pollInput(GLFWwindow *window) {
    }
 
    if (CARD_ANIMATION) {
-      if (!BUSY_AT_CARD_ANIMATION && selectedCardIndex != MAX_SIZE_T_VALUE) {
+      if (!BUSY_AT_CARD_ANIMATION/* && selectedCardIndex != MAX_SIZE_T_VALUE*/) {
          BUSY_AT_CARD_ANIMATION = true;
 
          if (sumTimeCardAnimationTime == 0) {
@@ -132,14 +134,17 @@ void pollInput(GLFWwindow *window) {
          } else {
             cardMovingAnimation.reset();
             sumTimeCardAnimationTime = 0;
+            CardMoving::heightBias += 0.0025f;
 
             BUSY_AT_CARD_ANIMATION = false;
             CARD_ANIMATION = false;
+
+            sumTimeTranslCamera = 1;
+            PLAYER_TRANSLATION_CAMERA = true;
          }
 
          BUSY_AT_CARD_ANIMATION = false;
       } else {
-         sumTimeCardAnimationTime = 0;
          CARD_ANIMATION = false;
       }
    }
@@ -211,25 +216,6 @@ void pollInput(GLFWwindow *window) {
    }
 
    //---------------------------------------------------------------------------------------------------//
-
-   if (TRANSFORM_CAMERA) {
-      /*
-      double diff = currTime - prevTime;
-      if (!cameraRotation) {
-         //cameraRotation = std::make_unique<CameraRotation>(camera.getEye(), position1, 0);
-      }
-
-      if (sumTime + diff <= cameraAnimationTime) {
-         camera.setEye(cameraRotation->rotateCamera(camera.getEye(), diff));
-
-         sumTime += diff;
-      } else {
-         //camera.setEye(position1);
-         sumTime = 0;
-         TRANSFORM_CAMERA = false;
-      }
-       */
-   }
 }
 
 void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {

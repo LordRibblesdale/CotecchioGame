@@ -9,5 +9,5 @@ uniform sampler2D cardTexture;
 void main() {
     // Using premultiplied alpha for color bleeding correction
     vec4 tex = texture(cardTexture, outTextCoord);
-    fragColor = vec4(tex.a * tex.rgb, 1);
+    fragColor = tex.a * vec4(tex.rgb, 1);
 }

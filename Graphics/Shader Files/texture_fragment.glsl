@@ -108,7 +108,7 @@ void main() {
     // Only for perspective matrix light
     // [0, 1] -> [0, 2] -> [-1, 1] in NDC
     float currentDepth = (perspDivide.z * 2) -1;
-    /* currentDepth = z_n = z_c * w_c ( con w_c = -z_v)
+    /* currentDepth = z_n = z_c / w_c ( con w_c = -z_v)
      * Sapendo che nella trasformazione Camera -> Clip
                  f + n              2fn
         z_c = - -------- * z_v + --------- * w_v
@@ -120,11 +120,11 @@ void main() {
 
         => z_c*(f - n) + (f + n)* z_v = 2fn * w_v
 
-        => (z_n*(f - n) + (f + n)) * z_v = 2fn * w_v
+        => (-z_n*(f - n) + (f + n)) * z_v = 2fn * w_v
 
                       2fn * w_v
         => z_v = -----------------------
-                  z_n*(f - n) + (f + n)
+                  (f + n) - z_n*(f - n)
      */
 
     shadow = currentDepth <= 1 ? (perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0) : 0;

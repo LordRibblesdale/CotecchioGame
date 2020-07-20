@@ -317,8 +317,6 @@ void render() {
 
    flipCardRenderingIndex = ceil(players.size()/2.0f);
 
-   MAX_SIZE_T_VALUE = std::numeric_limits<size_t>::max();
-
    // Abilito Stencil test per l'outlining
    glEnable(GL_STENCIL_TEST);
 

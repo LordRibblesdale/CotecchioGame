@@ -13,5 +13,7 @@ float GAMMA_CORRECTION = 2.2f;               //Default: 2.2       (Range 1-2.2)?
 
 float CAMERA_SENSIBILITY = 0.5f;             //Default: 0.5f      (Range 0.1f-2f)
 
+unsigned int PLAYERS = 3;
+
 unsigned int TABLE_TYPE = 100;
 unsigned int WORLD_TYPE = 101;

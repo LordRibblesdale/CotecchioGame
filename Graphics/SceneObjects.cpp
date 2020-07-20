@@ -67,7 +67,7 @@ bool MENU_TRANSLATION_CAMERA = false;
 bool PLAYER_TRANSLATION_CAMERA = false;
 std::unique_ptr<CameraTranslation> cameraTranslation;
 std::unique_ptr<CameraTranslation> cameraTranslation2;
-double cameraPlayerPositionTime;
+double cameraPlayerPositionTime = 1;
 
 float blurValue;
 

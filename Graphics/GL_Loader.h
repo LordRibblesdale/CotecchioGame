@@ -81,6 +81,8 @@ static int initialise() {
       return EXIT_FAILURE;
    }
 
+   MAX_SIZE_T_VALUE = std::numeric_limits<size_t>::max();
+
    compileShaders();
    loadObjects();
 

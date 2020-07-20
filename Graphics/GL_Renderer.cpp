@@ -415,7 +415,7 @@ void renderCardsOnTable() {
    glUniformMatrix4fv(deckViewMatrix, 1, GL_TRUE, viewM_W2V.getArray());
 
    for (const Card& card : cardsOnTable) {
-      cardModelM = *card.hand2Table * card.local2World;
+      cardModelM = *card.hand2Table * card.local2World * *card.rotationOnTable;
 
       glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, card.cardUVArray);
 

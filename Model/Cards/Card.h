@@ -21,6 +21,7 @@ struct Card {
 
    SquareMatrix local2World;
    std::unique_ptr<SquareMatrix> hand2Table;
+   std::unique_ptr<SquareMatrix> rotationOnTable;
 
    Float3 t;                  // Vettore distanziatore tra il centro del tavolo e le carte
    Float3 tmp;                // Vettore ortogonale al vettore distanziatore

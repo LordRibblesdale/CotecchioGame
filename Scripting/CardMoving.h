@@ -14,9 +14,11 @@ class CardMoving {
    Float3 height;
 
 public:
-   CardMoving(Card* card, double totalDuration);
+    static float heightBias;
 
-   void moveCard(const Float3& direction, double duration);
+    CardMoving(Card* card, double totalDuration);
+
+   void moveCard(const Float3& direction, double duration) const;
 
     Card* getCard() const;
 };

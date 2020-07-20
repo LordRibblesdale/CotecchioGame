@@ -37,6 +37,7 @@ Card::Card(unsigned int vaule, unsigned short playerID)
 
    scale = std::move(Transform::scaleMatrix4(0.4, 0.4, 0.4));
    hand2Table = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
+   rotationOnTable = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
 
    u = (value%10)*0.1f;
    v = ((value/10)-1)*0.25f;
@@ -67,6 +68,12 @@ Card::Card(const Card &card) : local2World(card.local2World), translate(card.tra
       hand2Table = std::move(std::make_unique<SquareMatrix>(*card.hand2Table));
    }
 
+   if (!card.rotationOnTable) {
+      rotationOnTable = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
+   } else {
+      rotationOnTable = std::move(std::make_unique<SquareMatrix>(*card.rotationOnTable));
+   }
+
    // Is it the quickest/best optimised/clean way?
    std::copy(card.cardUVArray, card.cardUVArray+8, cardUVArray);
 }
@@ -92,6 +99,12 @@ Card& Card::operator=(const Card &card) {
       hand2Table = std::move(std::make_unique<SquareMatrix>(*card.hand2Table));
    }
 
+   if (!card.rotationOnTable) {
+      rotationOnTable = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
+   } else {
+      rotationOnTable = std::move(std::make_unique<SquareMatrix>(*card.rotationOnTable));
+   }
+
    // Is it the quickest/best optimised/clean way?
    std::copy(card.cardUVArray, card.cardUVArray+8, cardUVArray);
 
@@ -107,6 +120,7 @@ Card::~Card() {
    handCards = 0;
 
    hand2Table.reset();
+   rotationOnTable.reset();
 }
 
 /* Mazzo di carte

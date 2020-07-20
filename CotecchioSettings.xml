@@ -7,4 +7,5 @@
     <Framerate unlock = "1"/>
     <Gamma value = "2.2"/>
     <Camera sensibility="0.1"/>
+    <Players num = "6"/>
 </Settings>

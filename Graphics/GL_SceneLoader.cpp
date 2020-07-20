@@ -10,21 +10,39 @@
 #endif
 
 void loadCards() {
-   unsigned int values[40] {0};
+   std::vector<unsigned short> values;
+   // emplace_back duplica dimensioni della capacità originale se necessita riallocazione
+   // Il minimo di carte è 35, un possibile riallocamento restituisce 70 di capacity (30 * 4byte aggiuntivi e O(35))
+   // https://stackoverflow.com/questions/200384/constant-amortized-time
+   // http://www.cplusplus.com/reference/vector/vector/emplace_back/
+   values.reserve(40);
 
-    mt19937_64 gen(glfwGetTime());
+   mt19937_64 gen(glfwGetTime());
 
-   // TODO fix with correct cards from game rules
-   int j = 10;
-   for (unsigned int & value : values) {
-      value = j++;
+   for (auto i = 10; i < 50; ++i) {
+      switch (PLAYERS) {
+         case 3:
+            if (i == 13)
+               continue;
+            break;
+         case 6:
+            if ((i - 3) % 10 == 0)
+               continue;
+            break;
+         case 7:
+            if ((i - 3) % 10 == 0 || i == 13)
+               continue;
+            break;
+      }
+
+      values.emplace_back(i);
    }
 
-   shuffle(values, values+40, gen);
+   std::shuffle(values.begin(), values.end(), gen);
    gen.seed(glfwGetTime());
-   shuffle(values, values+40, gen);
+   std::shuffle(values.begin(), values.end(), gen);
    gen.seed(glfwGetTime());
-   shuffle(values, values+40, gen);
+   std::shuffle(values.begin(), values.end(), gen);
 
    for (auto& value : values) {
       cardsValue.push(value);
@@ -115,7 +133,7 @@ void loadObjects() {
       loadTexture(object.getLocation(), object.getName(), object.doesHaveTextures());
    }
 
-   createPlayerPositions(3);
+   createPlayerPositions(PLAYERS);
    loadCards();
    loadCardTextures();
 
