@@ -29,7 +29,13 @@ void Model::processNode(aiNode *node, const aiScene *scene) {
 }
 
 void Model::processMesh(aiMesh *mesh) {
-   Mesh mesh1(mesh->mNumVertices, true);
+   unsigned int indexSize = 0;
+
+   for (int i = 0; i < mesh->mNumFaces; ++i) {
+      indexSize += mesh->mFaces[i].mNumIndices;
+   }
+
+   Mesh mesh1(mesh->mNumVertices, indexSize, true);
 
    for (int i = 0; i < mesh->mNumVertices; ++i) {
       mesh1.addVertex(Float3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z));

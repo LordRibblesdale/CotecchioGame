@@ -42,8 +42,6 @@ uniform sampler2D depthMap[8];
 uniform int depthMapSize;
 */
 uniform sampler2D depthMap;
-uniform float nearPlane;
-uniform float farPlane;
 
 uniform vec3 color;
 
@@ -107,7 +105,7 @@ void main() {
 
     // Only for perspective matrix light
     // [0, 1] -> [0, 2] -> [-1, 1] in NDC
-    float currentDepth = (perspDivide.z * 2) -1;
+    //float currentDepth = (perspDivide.z * 2) -1;
     /* currentDepth = z_n = z_c / w_c ( con w_c = -z_v)
      * Sapendo che nella trasformazione Camera -> Clip
                  f + n              2fn
@@ -127,7 +125,7 @@ void main() {
                   (f + n) - z_n*(f - n)
      */
 
-    shadow = currentDepth <= 1 ? (perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0) : 0;
+    shadow = perspDivide.z <= 1 ? (perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0) : 0;
 
     fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)) * lightColor, txIn.a);
 

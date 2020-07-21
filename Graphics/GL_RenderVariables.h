@@ -56,9 +56,6 @@ extern GLuint modelLightShaderUniform;
 extern GLuint lsmMainShaderUniform;
 extern GLuint depthMapUniform;
 
-extern GLuint nearPlaneUniform;
-extern GLuint farPlaneUniform;
-
 extern GLuint offlineFBTextureUniform;
 
 extern SquareMatrix projM_V2C;

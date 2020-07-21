@@ -224,47 +224,6 @@ void prepareScreenForOfflineRendering() {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void prepareCardRendering() {
-   glGenVertexArrays(1, &cardVAO);
-   glGenBuffers(1, &cardVBO);
-   glGenBuffers(1, &cardVBO2);
-   glGenBuffers(1, &cardVBO3);
-   glGenBuffers(1, &cardEBO);
-
-   glBindVertexArray(cardVAO);
-
-   glBindBuffer(GL_ARRAY_BUFFER, cardVBO2);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, backUVArray, GL_DYNAMIC_DRAW);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
-   glEnableVertexAttribArray(1);
-
-   glBindBuffer(GL_ARRAY_BUFFER, cardVBO3);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, backUVArray, GL_STATIC_DRAW);
-   glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
-   glEnableVertexAttribArray(3);
-
-   glBindBuffer(GL_ARRAY_BUFFER, cardVBO);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cardEBO);
-
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, cardVertices, GL_DYNAMIC_DRAW);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, vIndices, GL_DYNAMIC_DRAW);
-
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) 0);
-   glEnableVertexAttribArray(0);
-
-   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
-   glEnableVertexAttribArray(2);
-
-   // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-   // Unbind del VAO precedentemente assegnato per evitare sovrascritture non volute
-   glBindVertexArray(0);
-
-   // Da de-bindare dopo poichè VAO contiene i vari bind dell'EBO, se si de-bindasse prima, il VAO non avrebbe l'EBO
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
 bool setupLightMap(Light* light) {
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
    glGenTextures(1, &light->getDepthMapAsReference());
@@ -299,7 +258,7 @@ void prepareSceneLights() {
            Color(1, 1, 1),
            10,
            degree2Radiants(40),
-           degree2Radiants(60))));
+           degree2Radiants(90))));
 
    for (auto& light : lights) {
       if (!setupLightMap(light.get())) {

@@ -183,3 +183,7 @@ SquareMatrix Projection::onAxisOrthogonalProjection(const float& right, const fl
                            0, 0, -2*invFN, -(far + near)*invFN,
                            0, 0, 0, 1});
 }
+
+SquareMatrix Projection::onAxisFOV2ClipOrthogonalMatrix(const Camera &camera) {
+   return onAxisOrthogonalProjection(camera.getRight(), camera.getTop(), camera.getNear(), camera.getFar());
+}

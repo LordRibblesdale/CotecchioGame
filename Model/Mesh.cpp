@@ -1,11 +1,11 @@
 #include "Mesh.h"
 
-Mesh::Mesh(unsigned int preallocSize, bool hasTextures) {
-   vertices.reserve(preallocSize);
-   normals.reserve(preallocSize);
-   indices.reserve(preallocSize);
+Mesh::Mesh(unsigned int vertexPreallocSize, unsigned int indexPreallocSize, bool hasTextures) {
+   vertices.reserve(vertexPreallocSize);
+   normals.reserve(vertexPreallocSize);
+   indices.reserve(indexPreallocSize);
 
-   hasTextures ? textureUnwrap.reserve(preallocSize) : vertexColors.reserve(preallocSize);
+   hasTextures ? textureUnwrap.reserve(vertexPreallocSize) : vertexColors.reserve(vertexPreallocSize);
 }
 
 Mesh::~Mesh() {
@@ -36,6 +36,14 @@ void Mesh::addIndex(unsigned int i) {
    indices.emplace_back(i);
 }
 
+//void Mesh::addTangent(const Float3 &tangent) {
+//   tangents.emplace_back(tangent);
+//}
+//
+//void Mesh::addBitangent(const Float3 &bitangent) {
+//   bitangents.emplace_back(bitangent);
+//}
+
 const vector<Float3> &Mesh::getVertices() const {
    return vertices;
 }
@@ -55,6 +63,14 @@ const vector<Color> &Mesh::getVertexColors() const {
 const vector<unsigned int> &Mesh::getIndices() const {
    return indices;
 }
+
+//const vector<Float3> &Mesh::getTangents() const {
+//   return tangents;
+//}
+//
+//const vector<Float3> &Mesh::getBitangents() const {
+//   return bitangents;
+//}
 
 const Float3 &Mesh::getTangent() const {
    return tangent;

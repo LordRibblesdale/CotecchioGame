@@ -172,7 +172,6 @@ void loadTexture(const std::string &location, const std::string &name, bool load
        * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
        * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
        */
-      // TODO is necessary to flip?
       stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
 
       int width, height, channels;
