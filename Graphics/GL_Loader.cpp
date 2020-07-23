@@ -21,6 +21,9 @@ void refreshWindowSize(GLFWwindow *window, int width, int height) {
 
       glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaOfflineTexture);
       glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MULTISAMPLING_LEVEL, GL_RGB, X_RESOLUTION, Y_RESOLUTION, GL_TRUE);
+
+      glBindTexture(GL_TEXTURE_2D, offlineTexture);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, X_RESOLUTION, Y_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
    } else {
       glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
