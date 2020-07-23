@@ -68,6 +68,9 @@ void renderCardsOnTable();
 
 void cleanMemory();
 
+#define printOpenGLError() printOglError(__FILE__, __LINE__)
+int printOglError(char *file, int line);
+
 static int initialise() {
    initializeGLFW();
 
@@ -76,15 +79,21 @@ static int initialise() {
       return EXIT_FAILURE;
    }
 
+   /*
    if (!setupOfflineRendering()) {
       std::cout << "Error OFFLINE_RENDERING_INITIALIZATION: cannot create framebuffer." << std::endl;
       return EXIT_FAILURE;
    }
+    */
 
    MAX_SIZE_T_VALUE = std::numeric_limits<size_t>::max();
 
    compileShaders();
    loadObjects();
+
+   int max = 0;
+   glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max);
+   std::cout << max << std::endl;
 
    // Chiamate di GLAD e di GLFW: creazione di Render Loop (infinito, finisce quando esce dalla finestra)
    render();

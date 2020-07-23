@@ -103,7 +103,8 @@ void main() {
     shadow = float(numLights)/float(depthMapSize);
     */
 
-    shadow = perspDivide.z <= 1 ? (perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0) : 0;
+    //shadow = perspDivide.z <= 1 ? (perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0) : 0;
+    shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0;
 
     fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)) * lightColor, txIn.a);
 
