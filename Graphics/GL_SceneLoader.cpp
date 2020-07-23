@@ -159,7 +159,6 @@ void generateObjects(Mesh &mesh) {
    glGenVertexArrays(1, &vao);
    // Genera il Vertex Buffer Object
    glGenBuffers(1, &vbo);
-   //glGenBuffers(1, &vbo2);
    glGenBuffers(1, &ebo);
    /* Chiamata per collegare un tipo di buffer noto agli attributi di vertice, l'indice dell'area di memoria creata va intesa come arraybuffer
     * Bind all'inizio delle operazioni riferite al VAO
@@ -204,7 +203,6 @@ void generateObjects(Mesh &mesh) {
                           deltaUV2.getY()*e1.getY() - deltaUV1.getY()*e2.getY(),
                           deltaUV2.getY()*e1.getZ() - deltaUV1.getY()*e2.getZ()));
 
-   // Anche se calcolabile con prodotto vettoriale su GPU, viene precalcolata per ridurre il carico
    mesh.setBitangent(invDet * Float3(-deltaUV2.getX()*e1.getX() + deltaUV1.getX()*e2.getX(),
                                      -deltaUV2.getX()*e1.getY() + deltaUV1.getX()*e2.getY(),
                                      -deltaUV2.getX()*e1.getZ() + deltaUV1.getX()*e2.getZ()));
@@ -236,54 +234,6 @@ void generateObjects(Mesh &mesh) {
 
    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
    glEnableVertexAttribArray(2);
-
-   /*
-   glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-
-   unsigned int tangentSize = mesh.getIndices().size()*6;
-   GLfloat tangentAttributes[tangentSize];
-
-   int tIndex = 0;
-
-   // Insieme di indici di una mesh sempre multipli di 3
-   for (unsigned int i = 0; i < mesh.getIndices().size(); i += 3) {
-      // Impostazione del Tangent Space
-      unsigned int accessIndex1 = mesh.getIndices().at(i);
-      unsigned int accessIndex2 = mesh.getIndices().at(i+1);
-      unsigned int accessIndex3 = mesh.getIndices().at(i+2);
-
-      Float2 deltaUV1(std::move(mesh.getTextureUnwrap().at(accessIndex3) - mesh.getTextureUnwrap().at(accessIndex2)));
-      Float2 deltaUV2(std::move(mesh.getTextureUnwrap().at(accessIndex2) - mesh.getTextureUnwrap().at(accessIndex1)));
-      Float3 e1(std::move(mesh.getVertices().at(accessIndex3) - mesh.getVertices().at(accessIndex2)));
-      Float3 e2(std::move(mesh.getVertices().at(accessIndex2) - mesh.getVertices().at(accessIndex1)));
-
-      float invDet = 1.0f / (deltaUV1.getX()*deltaUV2.getY() - deltaUV2.getX()*deltaUV1.getY());
-
-      Float3 result1(std::move(invDet * Float3(deltaUV2.getY()*e1.getX() - deltaUV1.getY()*e2.getX(),
-                                               deltaUV2.getY()*e1.getY() - deltaUV1.getY()*e2.getY(),
-                                               deltaUV2.getY()*e1.getZ() - deltaUV1.getY()*e2.getZ())));
-
-      Float3 result2(std::move(invDet * Float3(-deltaUV2.getX()*e1.getX() + deltaUV1.getX()*e2.getX(),
-                                               -deltaUV2.getX()*e1.getY() + deltaUV1.getX()*e2.getY(),
-                                               -deltaUV2.getX()*e1.getZ() + deltaUV1.getX()*e2.getZ())));
-
-      tangentAttributes[tIndex++] = result1.getX();
-      tangentAttributes[tIndex++] = result1.getY();
-      tangentAttributes[tIndex++] = result1.getZ();
-
-      tangentAttributes[tIndex++] = result2.getX();
-      tangentAttributes[tIndex++] = result2.getY();
-      tangentAttributes[tIndex++] = result2.getZ();
-   }
-
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * tangentSize, tangentAttributes, GL_STATIC_DRAW);
-
-   glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) 0);
-   glEnableVertexAttribArray(3);
-
-   glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
-   glEnableVertexAttribArray(4);
-    */
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);

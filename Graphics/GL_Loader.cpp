@@ -225,6 +225,10 @@ void prepareScreenForOfflineRendering() {
 }
 
 bool setupLightMap(Light* light) {
+   // Genero il framebuffer per il render della shadowmap
+   glGenFramebuffers(1, &light->getFrameBufferAsReference());
+   glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
+
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
    glGenTextures(1, &light->getDepthMapAsReference());
    glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
@@ -237,9 +241,6 @@ bool setupLightMap(Light* light) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, Color(1, 1, 1, 1).getVector().get());
 
-   // Genero il framebuffer per il render della shadowmap
-   glGenFramebuffers(1, &light->getFrameBufferAsReference());
-   glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light->getDepthMapAsReference(), 0);
    // Disattivo la scrittura e lettura, verrà usato solo per la profondità
    glReadBuffer(GL_NONE);
@@ -257,12 +258,13 @@ void prepareSceneLights() {
            Float3(0, 0, 0),
            Color(1, 1, 1),
            10,
-           degree2Radiants(40),
+           degree2Radiants(60),
            degree2Radiants(90))));
 
+   unsigned int index = 0;
    for (auto& light : lights) {
       if (!setupLightMap(light.get())) {
-         std::cout << "Error SHADOW_MAP_LIGHT "<< 0 <<": Fragment not created." << std::endl;
+         std::cout << "Error SHADOW_MAP_LIGHT "<< index++ <<": Fragment not created." << std::endl;
       }
    }
 }

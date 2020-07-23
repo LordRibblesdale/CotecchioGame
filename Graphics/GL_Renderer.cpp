@@ -80,7 +80,7 @@ void renderShadowMap() {
    skipVertexIndex = 0;
 
    for (unsigned int i = 0; i < lights.size(); ++i) {
-      //glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
+      glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
       glClear(GL_DEPTH_BUFFER_BIT);
       lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipOrthogonalMatrix(*lights.at(i)->getCamera()) *
                                      lights.at(i)->getCamera()->world2ViewMatrix());
@@ -106,7 +106,7 @@ void renderSceneObjects() {
 
    glClearColor(0.2, 0.2, 0.2, 1.0f);
    // Pulizia buffer colore, depth e stencil
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Esempio: appena modificato, agisce in base alle modifiche effettuate (stato del sistema)
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   // Clear dello stato del sistema
 
    // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
    glUseProgram(shaderProgram);
@@ -347,7 +347,7 @@ void renderCards() {
                renderCardsInLoop(pIndex, i, hasSelectedCard, x, y);
             }
          } else {
-            for (size_t i = players.at(pIndex).getCards().size()-1; i >= 0 && i != std::numeric_limits<size_t>::max(); --i) {
+            for (size_t i = players.at(pIndex).getCards().size()-1; i >= 0 && i != MAX_SIZE_T_VALUE; --i) {
                renderCardsInLoop(pIndex, i, hasSelectedCard, x, y);
             }
          }

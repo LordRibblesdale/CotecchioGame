@@ -15,7 +15,7 @@ public:
 
    SpotLight(SpotLight&& light);
 
-   virtual float getIrradiance(float angle) override;
+   float getIrradiance(float angle) override;
 
    float getMaxAngle() const;
 
