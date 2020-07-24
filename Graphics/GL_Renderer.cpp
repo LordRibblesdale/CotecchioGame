@@ -7,55 +7,55 @@ void renderText() {
 
 void setupRenderVariables() {
    // Collezione indici per inviare dati allo shader
-   //projectionMatrixUniform = glGetUniformLocation(shaderProgram, "projection");
-   //viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
-   //modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
+   projectionMatrixUniform = glGetUniformLocation(shaderProgram, "projection");
+   viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
+   modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
-   //texUnif = glGetUniformLocation(shaderProgram, "texture1");
-   //bumpUnif = glGetUniformLocation(shaderProgram, "normalTexture");
+   texUnif = glGetUniformLocation(shaderProgram, "texture1");
+   bumpUnif = glGetUniformLocation(shaderProgram, "normalTexture");
 
-   //tangentUniform = glGetUniformLocation(shaderProgram, "tangent");
-   //bitangentUniform = glGetUniformLocation(shaderProgram, "bitangent");
+   tangentUniform = glGetUniformLocation(shaderProgram, "tangent");
+   bitangentUniform = glGetUniformLocation(shaderProgram, "bitangent");
 
-   //lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
-   //lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
-   //lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
+   lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
+   lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
+   lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
 
-   //ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
-   //diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
-   //specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
-   //specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
-   //eyePosition = glGetUniformLocation(shaderProgram, "eye");
+   ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
+   diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
+   specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
+   specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
+   eyePosition = glGetUniformLocation(shaderProgram, "eye");
 
-   //gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
+   gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
 
-   //fixedColorUniform = glGetUniformLocation(shaderProgram, "color");
+   fixedColorUniform = glGetUniformLocation(shaderProgram, "color");
 
-   //blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
+   blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
 
-   //cardModelMatrix = glGetUniformLocation(cardsShader, "model");
-   //cardViewMatrix = glGetUniformLocation(cardsShader, "view");
-   //cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
-   //playerIndexUniform = glGetUniformLocation(cardsShader, "currentPlayer");
-   //viewPlayerUniform = glGetUniformLocation(cardsShader, "viewPlayer");
+   cardModelMatrix = glGetUniformLocation(cardsShader, "model");
+   cardViewMatrix = glGetUniformLocation(cardsShader, "view");
+   cardProjectionMatrix = glGetUniformLocation(cardsShader, "projection");
+   playerIndexUniform = glGetUniformLocation(cardsShader, "currentPlayer");
+   viewPlayerUniform = glGetUniformLocation(cardsShader, "viewPlayer");
 
-   //cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
-   //backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
+   cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
+   backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
 
-   //deckModelMatrix = glGetUniformLocation(deckShader, "model");
-   //deckViewMatrix = glGetUniformLocation(deckShader, "view");
-   //deckProjectionMatrix = glGetUniformLocation(deckShader, "projection");
+   deckModelMatrix = glGetUniformLocation(deckShader, "model");
+   deckViewMatrix = glGetUniformLocation(deckShader, "view");
+   deckProjectionMatrix = glGetUniformLocation(deckShader, "projection");
 
-   //deckCardTexUnif = glGetUniformLocation(deckShader, "cardTexture");
+   deckCardTexUnif = glGetUniformLocation(deckShader, "cardTexture");
 
-   //colorModelMatrix = glGetUniformLocation(colorShader, "model");
-   //colorViewMatrix = glGetUniformLocation(colorShader, "view");
-   //colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
+   colorModelMatrix = glGetUniformLocation(colorShader, "model");
+   colorViewMatrix = glGetUniformLocation(colorShader, "view");
+   colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
 
    lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
    modelLightShaderUniform = glGetUniformLocation(lightShader, "modelMatrix");
-   //lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
-   //depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
+   lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
+   depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
    offlineFBTextureUniform = glGetUniformLocation(offlineShaderProgram, "offlineRendering");
 
@@ -69,33 +69,21 @@ void renderShadowMap() {
    glUseProgram(lightShader);
 
    // Imposto la viewport per il render della shadow map
-   //glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
-   glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
+   glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
 
    // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
-   //glCullFace(GL_FRONT);
+   glCullFace(GL_FRONT);
    //glFrontFace(GL_CW); // o CCW
 
    // TODO fix shadow mapping
    // TODO optimize calls
    skipVertexIndex = 0;
 
-   /*
-   lights.at(0)->getDepthMapAsReference() = offlineTexture;
-   lights.at(0)->getFrameBufferAsReference() = offlineFrameBuffer;
-
    for (unsigned int i = 0; i < lights.size(); ++i) {
       glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
-      // Imposto la viewport per il render della shadow map
-      glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
-
       glClear(GL_DEPTH_BUFFER_BIT);
-      /*
       lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipOrthogonalMatrix(*lights.at(i)->getCamera()) *
                                      lights.at(i)->getCamera()->world2ViewMatrix());
-                                     * /
-
-      lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipOrthogonalMatrix(camera) * camera.world2ViewMatrix());
 
       glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(i).getArray());
 
@@ -110,66 +98,34 @@ void renderShadowMap() {
          }
       }
    }
-    */
-   char* location = const_cast<char*>(std::string("log.txt").c_str());
-   std::cout << printOglError(location, 114) << std::endl;
-
-   //glUniform1f(glGetUniformLocation(offlineShaderProgram, "near_plane"), camera.getNear());
-   //glUniform1f(glGetUniformLocation(offlineShaderProgram, "far_plane"), camera.getFar());
-
-   glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-   //glEnable(GL_CULL_FACE);
-   glClear(GL_DEPTH_BUFFER_BIT);
-
-   glCullFace(GL_FRONT);
-
-   /*
-   lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipOrthogonalMatrix(*lights.at(i)->getCamera()) *
-                                  lights.at(i)->getCamera()->world2ViewMatrix());
-                                  */
-
-   lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipOrthogonalMatrix(camera) * camera.world2ViewMatrix());
-
-   glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
-
-   for (auto& object : objects) {
-      //modelM_L2W = object.getWorldCoordinates();
-      glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
-
-      for (const auto& mesh : object.getMeshes()) {
-         glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
-         // Chamata di disegno della primitiva
-         glDrawElements(GL_TRIANGLES, mesh.getIndices().size(), GL_UNSIGNED_INT, 0);
-      }
-   }
 }
 
 void renderSceneObjects() {
-glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
+   glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+   glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
 
-glClearColor(0.2, 0.2, 0.2, 1.0f);
-// Pulizia buffer colore, depth e stencil
-glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   // Clear dello stato del sistema
+   glClearColor(0.2, 0.2, 0.2, 1.0f);
+   // Pulizia buffer colore, depth e stencil
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   // Clear dello stato del sistema
 
-// Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
-glUseProgram(shaderProgram);
+   // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
+   glUseProgram(shaderProgram);
 
-// Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
-glCullFace(GL_BACK);
-//glFrontFace(GL_CW); // o CCW
+   // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
+   glCullFace(GL_BACK);
+   //glFrontFace(GL_CW); // o CCW
 
-// Abilito il depth test per il check della profondità per la stampa a video degli oggetti
-glEnable(GL_DEPTH_TEST);
-glDepthFunc(GL_LESS);
+   // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
+   glEnable(GL_DEPTH_TEST);
+   glDepthFunc(GL_LESS);
 
-// Per ora viene disattivata la scrittura sul buffer
-glStencilMask(0x00);
+   // Per ora viene disattivata la scrittura sul buffer
+   glStencilMask(0x00);
 
-/* Scrivere nella location della variabile i valori del colore da assegnare al pixel;
- * Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
- * Quindi attenzione al posizionamento delle chiamate di modifica stato
- */
+   /* Scrivere nella location della variabile i valori del colore da assegnare al pixel;
+    * Essendo macchina di stato, bisogna ricordare che la posizione influisce sull'azione delle chiamate
+    * Quindi attenzione al posizionamento delle chiamate di modifica stato
+    */
 
    projM_V2C = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera));
    viewM_V2W = std::move(camera.view2WorldMatrix());
@@ -196,6 +152,7 @@ glStencilMask(0x00);
 
    glActiveTexture(GL_TEXTURE10);
    glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
+
 
    glUniform1f(gammaUniform, GAMMA_CORRECTION);
 

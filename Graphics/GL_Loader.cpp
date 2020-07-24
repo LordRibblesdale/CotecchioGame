@@ -179,13 +179,10 @@ void compileShaders() {
    * Operazione su valori binari, invia chiamata sulla scheda grafica
    */
 
-   //compileShader("Graphics/Shader Files/texture_vertex.glsl", "Graphics/Shader Files/texture_fragment.glsl", shaderProgram);
-   compileShader("Graphics/Shader Files/light_vertex.glsl", "Graphics/Shader Files/light_fragment.glsl", lightShader);
-   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/debug_fragment.glsl", offlineShaderProgram);
+   compileShader("Graphics/Shader Files/texture_vertex.glsl", "Graphics/Shader Files/texture_fragment.glsl", shaderProgram);
 
    //--------------------------OFFLINE RENDERING--------------------------------//
 
-   /*
    compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_fragment.glsl", offlineShaderProgram);
 
    //---------------------------CARD RENDERING--------------------------------//
@@ -200,7 +197,6 @@ void compileShaders() {
    //----------------------------SHADOW RENDERING--------------------------------//
 
    compileShader("Graphics/Shader Files/light_vertex.glsl", "Graphics/Shader Files/light_fragment.glsl", lightShader);
-    */
 }
 
 void prepareScreenForOfflineRendering() {
@@ -233,14 +229,12 @@ void prepareScreenForOfflineRendering() {
 
 bool setupLightMap(Light* light) {
    // Genero il framebuffer per il render della shadowmap
-   //glGenFramebuffers(1, &light->getFrameBufferAsReference());
-   glGenFramebuffers(1, &offlineFrameBuffer);
-   //glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
-   glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+   glGenFramebuffers(1, &light->getFrameBufferAsReference());
+   glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
 
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
-   glGenTextures(1, &offlineTexture);
-   glBindTexture(GL_TEXTURE_2D, offlineTexture);
+   glGenTextures(1, &light->getDepthMapAsReference());
+   glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
    // Da analizzare come classica texture per l'accesso valori
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -250,7 +244,7 @@ bool setupLightMap(Light* light) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, Color(1, 1, 1, 1).getVector().get());
 
-   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, offlineTexture, 0);
+   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light->getDepthMapAsReference(), 0);
    // Disattivo la scrittura e lettura, verrà usato solo per la profondità
    glReadBuffer(GL_NONE);
    glDrawBuffer(GL_NONE);
@@ -312,15 +306,9 @@ void render() {
       sl->setDirection(sl->getDirection() + tmp);
 
       renderShadowMap();
-      /*
       renderSceneObjects();
       renderCards();
       renderCardsOnTable();
-       */
-
-      glCullFace(GL_BACK);
-
-      glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
 
       // Downsampling del color buffer MSAA per riportarlo a risoluzione non upscalata
       if (ENABLE_MULTISAMPLING) {
@@ -347,9 +335,6 @@ void render() {
       glUniform1i(offlineFBTextureUniform, 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
-
-      glUniform1f(glGetUniformLocation(offlineShaderProgram, "near_plane"), camera.getNear());
-      glUniform1f(glGetUniformLocation(offlineShaderProgram, "far_plane"), camera.getFar());
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
