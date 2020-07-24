@@ -109,18 +109,15 @@ void renderShadowMap() {
    glClear(GL_DEPTH_BUFFER_BIT);
 
    /*
-   lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipOrthogonalMatrix(*lights.at(i)->getCamera()) *
-                                  lights.at(i)->getCamera()->world2ViewMatrix());
+   lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(0)->getCamera()) *
+                                  lights.at(0)->getCamera()->world2ViewMatrix());
                                   */
 
-   Camera ortho(camera.getEye(), camera.getLookAt(), camera.getUp(), camera.getNear(), camera.getFar(), -Y_RESOLUTION/2, Y_RESOLUTION/2, -X_RESOLUTION/2, X_RESOLUTION/2, 0);
-   lightSpaceMs.at(0) = std::move(Projection::onAxisOrthogonalProjectionByCamera(ortho) * ortho.world2ViewMatrix());
-   //lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera) * camera.world2ViewMatrix());
+   lightSpaceMs.at(0) = std::move(Projection::onAxisOrthogonalProjectionByCamera(*lights.at(0)->getCamera()) * lights.at(0)->getCamera()->world2ViewMatrix());
 
    glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
 
    for (auto& object : objects) {
-      //modelM_L2W = object.getWorldCoordinates();
       glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
       for (const auto& mesh : object.getMeshes()) {
@@ -129,9 +126,14 @@ void renderShadowMap() {
          glDrawElements(GL_TRIANGLES, mesh.getIndices().size(), GL_UNSIGNED_INT, 0);
       }
    }
+
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void renderSceneObjects() {
+   glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
+   glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
+
    glClearColor(0.2, 0.2, 0.2, 1.0f);
    // Pulizia buffer colore, depth e stencil
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   // Clear dello stato del sistema
@@ -142,6 +144,10 @@ void renderSceneObjects() {
    // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
    glCullFace(GL_BACK);
    //glFrontFace(GL_CW); // o CCW
+
+   // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
+   glEnable(GL_DEPTH_TEST);
+   glDepthFunc(GL_LESS);
 
    // Per ora viene disattivata la scrittura sul buffer
    glStencilMask(0x00);
@@ -175,8 +181,8 @@ void renderSceneObjects() {
    glUniform1i(depthMapUniform, 10);
 
    glActiveTexture(GL_TEXTURE10);
-   glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
-
+   //glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
+   glBindTexture(GL_TEXTURE_2D, lightTexture);
 
    glUniform1f(gammaUniform, GAMMA_CORRECTION);
 
@@ -442,9 +448,12 @@ void renderCardsOnTable() {
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
    }
+
+   // Da riattivare per permettere le modifiche al buffer (pulizia)
+   glStencilMask(0xFF);
 }
 
-int printOglError(char *file, int line) {
+int printOglError(const char * file, int line) {
    GLenum glErr;
    int    retCode = 0;
 

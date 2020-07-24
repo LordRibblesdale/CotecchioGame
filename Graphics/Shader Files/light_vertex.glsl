@@ -10,4 +10,5 @@ uniform mat4 modelMatrix;
 void main() {
     // Coordinate nello spazio della luce (light space)
     gl_Position = lightSpaceMatrix * modelMatrix * vec4(position, 1.0f);
+    //gl_Position = vec4(vec3(0), 1);
 }

@@ -267,9 +267,9 @@ bool setupLightMap(Light* light) {
 void prepareSceneLights() {
    lights.reserve(1);
    lights.emplace_back(std::move(std::make_unique<SpotLight>(
-           std::move(Float3(0, 0, 15)),
+           std::move(Float3(0, 0, 25)),
            Float3(0, 0, 0),
-           Color(1, 1, 1),
+           Color(0.6, 0.6, 1),
            10,
            degree2Radiants(60),
            degree2Radiants(90))));
@@ -304,6 +304,7 @@ void render() {
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
        * In base all'ordine dei comandi, modifica lo stato del sistema corrente o successivo
        */
+
       prevTime = currTime;
       currTime = glfwGetTime();
 
@@ -311,27 +312,16 @@ void render() {
 
       selectedCardIndex = MAX_SIZE_T_VALUE;
 
-      Float3 tmp(0, 0, 0.05f*sinf(currTime));
-      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + tmp);
+      //Float3 tmp(0, 0, 0.05f*sinf(currTime));
+      //lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + tmp);
 
-      SpotLight* sl(dynamic_cast<SpotLight*>(lights.at(0).get()));
-      sl->setDirection(sl->getDirection() + tmp);
-
-      // Abilito il depth test per il check della profondità per la stampa a video degli oggetti
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_LESS);
+      //SpotLight* sl(dynamic_cast<SpotLight*>(lights.at(0).get()));
+      //sl->setDirection(sl->getDirection() + tmp);
 
       renderShadowMap();
-
-      glCullFace(GL_BACK);
-      glBindFramebuffer(GL_FRAMEBUFFER, offlineFrameBuffer);
-      glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   // Clear dello stato del sistema
-      //renderSceneObjects();
-      //renderCards();
-      //renderCardsOnTable();
-      // Da riattivare per permettere le modifiche al buffer (pulizia)
-      glStencilMask(0xFF);
+      renderSceneObjects();
+      renderCards();
+      renderCardsOnTable();
 
       // Downsampling del color buffer MSAA per riportarlo a risoluzione non upscalata
       if (ENABLE_MULTISAMPLING) {
@@ -344,9 +334,8 @@ void render() {
 
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
       //glUseProgram(offlineShaderProgram);
-      glUseProgram(debugShader);
 
-      glClearColor(1, 1, 1, 1);
+      glClearColor(0, 1, 0, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
       // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
@@ -355,18 +344,68 @@ void render() {
          glUniform1f(blurUniform, blurValue);
       }
 
+      glDisable(GL_CULL_FACE);
+      glDisable(GL_DEPTH_TEST);
+
+      glUseProgram(debugShader);
+      //glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, Transform::scaleMatrix4(1, 1, 1).getArray());
+      //glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, Transform::scaleMatrix4(1, 1, 1).getArray());
+      //glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, Transform::scaleMatrix4(1, 1, 1).getArray());
+
+      //TODO change
+      GLuint tempVAO, tempVBO, tempEBO;
+      glGenVertexArrays(1, &tempVAO);
+      glGenBuffers(1, &tempVBO);
+      glGenBuffers(1, &tempEBO);
+
+      glBindVertexArray(tempVAO);
+      glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tempEBO);
+
+      glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 20, screen2, GL_DYNAMIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, screenIndices, GL_DYNAMIC_DRAW);
+
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
+      glEnableVertexAttribArray(0);
+
+      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+      glEnableVertexAttribArray(1);
+
+      glUniform1i(offlineFBTextureUniform, 2);
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, lightTexture);
+
+      //glUniform3f(glGetUniformLocation(colorShader, "color"), 1, 0, 0);
+
       glUniform1f(glGetUniformLocation(debugShader, "texSize"), SHADOW_QUALITY);
       glUniform1f(glGetUniformLocation(debugShader, "near_plane"), camera.getNear());
       glUniform1f(glGetUniformLocation(debugShader, "far_plane"), camera.getFar());
 
+      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindVertexArray(0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+      glUseProgram(offlineShaderProgram);
       glBindVertexArray(sVAO);
-      //glUniform1i(offlineFBTextureUniform, 2);
-      glUniform1i(glGetUniformLocation(debugShader, "offlineRendering"), 2);
+
+      glUniform1i(offlineFBTextureUniform, 2);
+      std::cout << offlineFBTextureUniform << std::endl;
+      //glUniform1i(glGetUniformLocation(offlineFBTextureUniform, "offlineRendering"), 2);
       glActiveTexture(GL_TEXTURE2);
-      //glBindTexture(GL_TEXTURE_2D, offlineTexture);
-      glBindTexture(GL_TEXTURE_2D, lightTexture);
+      glBindTexture(GL_TEXTURE_2D, offlineTexture);
+      //glBindTexture(GL_TEXTURE_2D, lightTexture);
+
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+      glBindVertexArray(0);
+
+
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_CULL_FACE);
 
       /* Necessità di modificare il buffer prima di inviarlo
        * prima, modifica il buffer B (sul successivo)
@@ -379,10 +418,14 @@ void render() {
        */
       glfwPollEvents();
       // Controlla tutti gli eventi in background (qualunque) OBBLIGATORIO
+
+      glDeleteBuffers(1, &tempVBO);
+      glDeleteBuffers(1, &tempEBO);
+      glDeleteVertexArrays(1, &tempVAO);
+
    }
 
-   char* location = const_cast<char*>(std::string("log.txt").c_str());
-   std::cout << printOglError(location, 372) << std::endl;
+   printOpenGLError();
 }
 
 void cleanMemory() {

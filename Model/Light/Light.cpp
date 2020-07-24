@@ -9,7 +9,7 @@ unsigned int& Light::getDepthMapAsReference() {
 }
 
 float Light::degree2Radiants(float degree) {
-   float inv = 1.0/180;
+   float inv = 1.0f/180.0f;
 
    return degree * inv * M_PI;
 }

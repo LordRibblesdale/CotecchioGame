@@ -76,7 +76,8 @@ void main() {
     //specular = pow(max(0, dot(view, reflection)), specularAlpha) * specularCoefficient;
     specular = pow(max(0, dot(halfway, newNormal)), specularAlpha) * specularCoefficient;
 
-    vec4 txIn = texture(texture1, outTextCoord);
+    //vec4 txIn = texture(texture1, outTextCoord);
+    vec4 txIn = vec4(0.6, 0.6, 0.6, 1);;
 
     // Calcolo distanza tra (1) superficie/vista e (2) superficie/luce (se 1 > 2, è in ombra)
     // Richiesta della depth map precedentemente scritta nei calcoli precedenti

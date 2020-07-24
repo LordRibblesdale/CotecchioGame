@@ -67,6 +67,7 @@ extern GLuint backUVCardBuffer;
 extern GLuint cardEBO;
 
 extern float screen[20];
+extern float screen2[20];
 extern unsigned int screenIndices[6];
 extern GLuint sVAO;
 extern GLuint sVBO;

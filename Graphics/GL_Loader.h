@@ -69,7 +69,7 @@ void renderCardsOnTable();
 void cleanMemory();
 
 #define printOpenGLError() printOglError(__FILE__, __LINE__)
-int printOglError(char *file, int line);
+int printOglError(const char *file, int line);
 
 static int initialise() {
    initializeGLFW();

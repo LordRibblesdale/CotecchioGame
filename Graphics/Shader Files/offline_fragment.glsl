@@ -31,6 +31,7 @@ void main() {
 
     vec4 blurColor = vec4(0.0f);
 
+    /*
     if (blurValue != 1) {
         for (int i = 0; i < 25; ++i) {
             blurColor += texture(offlineRendering, textureUV.st + offsets[i]) * blurKernel[i];
@@ -40,4 +41,7 @@ void main() {
     } else {
         fragColor = texture2D;
     }
+    */
+
+    fragColor = texture2D;
 }
