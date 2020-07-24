@@ -115,6 +115,7 @@ void renderShadowMap() {
 
    Camera ortho(camera.getEye(), camera.getLookAt(), camera.getUp(), camera.getNear(), camera.getFar(), -Y_RESOLUTION/2, Y_RESOLUTION/2, -X_RESOLUTION/2, X_RESOLUTION/2, 0);
    lightSpaceMs.at(0) = std::move(Projection::onAxisOrthogonalProjectionByCamera(ortho) * ortho.world2ViewMatrix());
+   //lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera) * camera.world2ViewMatrix());
 
    glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
 
