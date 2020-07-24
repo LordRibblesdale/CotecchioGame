@@ -7,13 +7,7 @@ layout (location = 2) in vec3 normalVector;
 uniform mat4 lightSpaceMatrix;  // Include la trasformazione World->LightCamera e Camera->Clip
 uniform mat4 modelMatrix;
 
-//DEBUG
-out vec2 outTexCoords;
-
 void main() {
     // Coordinate nello spazio della luce (light space)
     gl_Position = lightSpaceMatrix * modelMatrix * vec4(position, 1.0f);
-
-    //DEBUG
-    outTexCoords = textureCoordinates;
 }

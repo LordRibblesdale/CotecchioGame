@@ -50,7 +50,7 @@ namespace Projection {
                                      const float& bottom);
 
    SquareMatrix onAxisOrthogonalProjection(const float& right, const float& top, const float& near, const float& far);
-   SquareMatrix onAxisFOV2ClipOrthogonalMatrix(const Camera& camera);
+   SquareMatrix onAxisOrthogonalProjectionByCamera(const Camera& camera);
 }
 
 static float degree2Radiants(float degree) {

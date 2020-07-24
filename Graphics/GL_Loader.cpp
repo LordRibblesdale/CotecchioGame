@@ -197,7 +197,7 @@ void compileShaders() {
 
    //------------------------------DEBUG SHADER----------------------------------//
 
-   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/debug_vertex.glsl", debugShader);
+   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/debug_fragment.glsl", debugShader);
 }
 
 void prepareScreenForOfflineRendering() {
@@ -354,6 +354,10 @@ void render() {
       if (MENU_TRANSLATION_CAMERA) {
          glUniform1f(blurUniform, blurValue);
       }
+
+      glUniform1f(glGetUniformLocation(debugShader, "texSize"), SHADOW_QUALITY);
+      glUniform1f(glGetUniformLocation(debugShader, "near_plane"), camera.getNear());
+      glUniform1f(glGetUniformLocation(debugShader, "far_plane"), camera.getFar());
 
       glBindVertexArray(sVAO);
       //glUniform1i(offlineFBTextureUniform, 2);
