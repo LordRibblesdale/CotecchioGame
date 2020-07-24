@@ -3,12 +3,16 @@
 GLFWwindow* window = nullptr;
 std::unique_ptr<Assimp::Importer> importer;
 
+GLuint lightFrameBuffer;
+GLuint lightTexture;
+
 GLuint shaderProgram;
 GLuint offlineShaderProgram;
 GLuint cardsShader;
 GLuint deckShader;
 GLuint colorShader;
 GLuint lightShader;
+GLuint debugShader;
 
 GLuint offlineFrameBuffer;
 GLuint offlineTexture;
