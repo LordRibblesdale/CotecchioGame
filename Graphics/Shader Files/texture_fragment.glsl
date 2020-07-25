@@ -45,7 +45,6 @@ uniform sampler2D depthMap;
 
 uniform vec3 color;
 
-//float bias = 0.005f;
 float bias = 0.001f;
 
 void main() {
@@ -84,10 +83,9 @@ void main() {
     // Necessaria poichè non effettuata al passaggio tra vertex e fragment (non è punto interno allo shader per il calcolo della scena
     // Light Projective/Clip Space -> NDC space
 
-    vec3 perspDivide = lightBasedPos.xyz / lightBasedPos.w;
+    vec3 perspDivide = (lightBasedPos.xyz / lightBasedPos.w)*0.5f + 0.5f;
     // Normalizzazione da [-1, 1] a [0, 1] per il confronto con la profondità
-    perspDivide *= 0.5f;    //[-1, 1] -> [-0.5, 0.5]
-    perspDivide += 0.5f;    //[-0.5, 0.5] -> [0, 1]
+    // [-1, 1] -> [-0.5, 0.5] -> [0, 1]
 
     // Controllo distanze tra camera-punto e luce-punto
     // -> Stiamo confrontando se quel punto effettivamente sia visibile, controllando la distanza tra questo fragment e il calcolo sulla depth map
@@ -108,6 +106,4 @@ void main() {
     shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0;
 
     fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)) * lightColor, txIn.a);
-
-    //fragColor = texture(depthMap, perspDivide.xy);
 }

@@ -146,6 +146,37 @@ void createTextureUniform(GLuint& texture) {
    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void loadTexture(const std::string &location, GLuint& texture) {
+   /* Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
+    * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
+    * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
+    */
+   stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
+
+   int width, height, channels;
+   unsigned char* data;
+
+   data = stbi_load((location).c_str(), &width, &height, &channels, 0);
+
+   if (data) {
+      /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
+       *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
+       *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
+       */
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, texture);
+      glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
+      // Creazione della mipmap della texture bindata
+      glGenerateMipmap(GL_TEXTURE_2D);
+
+      glBindTexture(GL_TEXTURE_2D, 0);
+   } else {
+      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+   }
+
+   stbi_image_free(data);
+}
+
 void loadTexture(const std::string &location, const std::string &name, bool loadFiles) {
    std::unordered_map<std::string, GLuint> map;
    std::unordered_map<std::string, GLuint> bMap;
@@ -174,11 +205,11 @@ void loadTexture(const std::string &location, const std::string &name, bool load
        */
       stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
 
+      GLuint texUniform = 0;
+
       int width, height, channels;
       unsigned char* data;
       char* texFile;
-
-      GLuint texUniform = 0;
 
       for (rapidxml::xml_node<>* position = rootNode->first_node("Material"); position; position = position->next_sibling()) {
          Material material;

@@ -231,12 +231,6 @@ void prepareScreenForOfflineRendering() {
 bool setupLightMap(Light* light) {
    bool status;
 
-   // Genero il framebuffer per il render della shadowmap
-   //glGenFramebuffers(1, &light->getFrameBufferAsReference());
-   glGenFramebuffers(1, &lightFrameBuffer);
-   //glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
-   glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer);
-
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
    //glGenTextures(1, &light->getDepthMapAsReference());
    glGenTextures(1, &lightTexture);
@@ -251,6 +245,12 @@ bool setupLightMap(Light* light) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, Color(1, 1, 1, 1).getVector().get());
 
+   // Genero il framebuffer per il render della shadowmap
+   //glGenFramebuffers(1, &light->getFrameBufferAsReference());
+   glGenFramebuffers(1, &lightFrameBuffer);
+   //glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
+   glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer);
+
    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light->getDepthMapAsReference(), 0);
    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, lightTexture, 0);
    // Disattivo la scrittura e lettura, verrà usato solo per la profondità
@@ -260,7 +260,7 @@ bool setupLightMap(Light* light) {
    status = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-   
+
    return status;
 }
 
@@ -300,6 +300,8 @@ void render() {
    // Abilito back culling face (non si elaborano facce non visibili in base alla normale
    glEnable(GL_CULL_FACE);
 
+   //loadTexture(DATA_ASSETS_LOCATION + "Debug.png", lightTexture);
+
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
        * In base all'ordine dei comandi, modifica lo stato del sistema corrente o successivo
@@ -331,6 +333,7 @@ void render() {
       }
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      //glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
 
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
       //glUseProgram(offlineShaderProgram);
@@ -348,9 +351,10 @@ void render() {
       glDisable(GL_DEPTH_TEST);
 
       glUseProgram(debugShader);
-      //glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, Transform::scaleMatrix4(1, 1, 1).getArray());
-      //glUniformMatrix4fv(colorViewMatrix, 1, GL_TRUE, Transform::scaleMatrix4(1, 1, 1).getArray());
-      //glUniformMatrix4fv(colorProjectionMatrix, 1, GL_TRUE, Transform::scaleMatrix4(1, 1, 1).getArray());
+
+      glUniform1f(glGetUniformLocation(debugShader, "texSize"), SHADOW_QUALITY);
+      glUniform1f(glGetUniformLocation(debugShader, "near_plane"), lights.at(0)->getCamera()->getNear());
+      glUniform1f(glGetUniformLocation(debugShader, "far_plane"), lights.at(0)->getCamera()->getFar());
 
       //TODO change
       GLuint tempVAO, tempVBO, tempEBO;
@@ -371,15 +375,10 @@ void render() {
       glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
       glEnableVertexAttribArray(1);
 
-      glUniform1i(offlineFBTextureUniform, 2);
+      //glUniform1i(offlineFBTextureUniform, 2);
+      glUniform1i(glGetUniformLocation(debugShader, "offlineRendering"), 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, lightTexture);
-
-      //glUniform3f(glGetUniformLocation(colorShader, "color"), 1, 0, 0);
-
-      glUniform1f(glGetUniformLocation(debugShader, "texSize"), SHADOW_QUALITY);
-      glUniform1f(glGetUniformLocation(debugShader, "near_plane"), camera.getNear());
-      glUniform1f(glGetUniformLocation(debugShader, "far_plane"), camera.getFar());
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -392,7 +391,6 @@ void render() {
       glBindVertexArray(sVAO);
 
       glUniform1i(offlineFBTextureUniform, 2);
-      std::cout << offlineFBTextureUniform << std::endl;
       //glUniform1i(glGetUniformLocation(offlineFBTextureUniform, "offlineRendering"), 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
@@ -422,10 +420,9 @@ void render() {
       glDeleteBuffers(1, &tempVBO);
       glDeleteBuffers(1, &tempEBO);
       glDeleteVertexArrays(1, &tempVAO);
-
    }
 
-   printOpenGLError();
+   std::cout << printOpenGLError() << std::endl;
 }
 
 void cleanMemory() {

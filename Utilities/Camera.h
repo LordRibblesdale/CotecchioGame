@@ -20,6 +20,8 @@ class Camera {
    Float3 lookAt;
    Float3 up;
 
+   // TODO if set as orthographic or projective
+
 public:
    Camera(Float3 eye, Float3 lookAt);
 
@@ -29,6 +31,7 @@ public:
    Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float angle, float aspectRatio);
 
    Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left, float right, float angle);
+   Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left, float right);
 
    SquareMatrix world2ViewMatrix();
    SquareMatrix view2WorldMatrix();

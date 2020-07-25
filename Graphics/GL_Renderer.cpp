@@ -67,11 +67,13 @@ void setupRenderVariables() {
 void renderShadowMap() {
    // Rendering shadow map
    glUseProgram(lightShader);
+   //glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
    // Imposto la viewport per il render della shadow map
    glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
 
    // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
+   glEnable(GL_CULL_FACE);
    glCullFace(GL_FRONT);
    //glFrontFace(GL_CW); // o CCW
 
@@ -79,55 +81,39 @@ void renderShadowMap() {
    // TODO optimize calls
    skipVertexIndex = 0;
 
-   /*
-   for (unsigned int i = 0; i < lights.size(); ++i) {
-      glBindFramebuffer(GL_FRAMEBUFFER, lights.at(i)->getFrameBufferAsReference());
-      glClear(GL_DEPTH_BUFFER_BIT);
-      /*
-      lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipOrthogonalMatrix(*lights.at(i)->getCamera()) *
-                                     lights.at(i)->getCamera()->world2ViewMatrix());
-                                     * /
-
-      lightSpaceMs.at(i) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera) * camera.world2ViewMatrix());
-
-      glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(i).getArray());
-
-      for (auto& object : objects) {
-         //modelM_L2W = object.getWorldCoordinates();
-         glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
-
-         for (const auto& mesh : object.getMeshes()) {
-            glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
-            // Chamata di disegno della primitiva
-            glDrawElements(GL_TRIANGLES, mesh.getIndices().size(), GL_UNSIGNED_INT, 0);
-         }
-      }
-   }
-   */
+   //for (unsigned int i = 0; i < lights.size(); ++i) {}
 
    glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   /*
    lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(0)->getCamera()) *
                                   lights.at(0)->getCamera()->world2ViewMatrix());
-                                  */
 
-   lightSpaceMs.at(0) = std::move(Projection::onAxisOrthogonalProjectionByCamera(*lights.at(0)->getCamera()) * lights.at(0)->getCamera()->world2ViewMatrix());
+   //lightSpaceMs.at(0) = std::move(Projection::onAxisOrthogonalProjectionByCamera(*lights.at(0)->getCamera()) * lights.at(0)->getCamera()->world2ViewMatrix());
 
    glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
 
-   for (auto& object : objects) {
+   for (auto & object : objects) {
       glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
-      for (const auto& mesh : object.getMeshes()) {
+      for (auto j = 0; j < object.getMeshes().size(); ++j) {
+         if (object.doesNeedNoCulling()) {
+            glDisable(GL_CULL_FACE);
+         }
+
          glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
          // Chamata di disegno della primitiva
-         glDrawElements(GL_TRIANGLES, mesh.getIndices().size(), GL_UNSIGNED_INT, 0);
+         glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
+
+         if (object.doesNeedNoCulling()) {
+            glEnable(GL_CULL_FACE);
+         }
       }
    }
 
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+   //glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void renderSceneObjects() {
@@ -142,6 +128,7 @@ void renderSceneObjects() {
    glUseProgram(shaderProgram);
 
    // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
+   glEnable(GL_CULL_FACE);
    glCullFace(GL_BACK);
    //glFrontFace(GL_CW); // o CCW
 
@@ -451,6 +438,8 @@ void renderCardsOnTable() {
 
    // Da riattivare per permettere le modifiche al buffer (pulizia)
    glStencilMask(0xFF);
+
+   glDisable(GL_BLEND);
 }
 
 int printOglError(const char * file, int line) {

@@ -16,7 +16,7 @@ float LinearizeDepth(float depth) {
 //https://stackoverflow.com/questions/48091045/accessing-a-gl-depth-component-texture
 void main() {
     float depthValue = texture(offlineRendering, textureUV).r;
-    //float depth = LinearizeDepth(depthValue) / far_plane;
-    //FragColor = vec4(vec3(depth), 1.0);
-    FragColor = vec4(vec3(depthValue), 1.0);
+    float depth = LinearizeDepth(depthValue) / far_plane;
+    FragColor = vec4(vec3(depth), 1.0);
+    //FragColor = vec4(vec3(depthValue), 1.0);
 }

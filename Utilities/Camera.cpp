@@ -49,6 +49,17 @@ Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, floa
    Camera::viewAngle = degree2Radiants(angle);
 }
 
+Camera::Camera(Float3 eye, Float3 lookAt, Float3 up, float near, float far, float bottom, float top, float left,
+               float right) : eye(std::move(eye)), lookAt(std::move(lookAt)), up(std::move(up)) {
+   Camera::near = near;
+   Camera::far = far;
+   Camera::bottom = bottom;
+   Camera::top = top;
+   Camera::left = left;
+   Camera::right = right;
+   Camera::viewAngle = 0;
+}
+
 SquareMatrix Camera::world2ViewMatrix() {
     /* Il problema della matrice non invertibile è risolvibile "spostando" la camera quando si vede che i prodotti vettoriali
      * che si usano per costruirla sono 0. Se considero una camera che guarda lungo z (negativi per esempio) allora xV=UPXzV = 0

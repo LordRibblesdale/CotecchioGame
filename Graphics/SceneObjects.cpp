@@ -4,6 +4,7 @@ GLFWwindow* window = nullptr;
 std::unique_ptr<Assimp::Importer> importer;
 
 GLuint lightFrameBuffer;
+GLuint lightRenderBuffer;
 GLuint lightTexture;
 
 GLuint shaderProgram;

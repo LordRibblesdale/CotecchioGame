@@ -32,6 +32,7 @@ extern std::unique_ptr<Assimp::Importer> importer;
 //--------------------------------------------------------------//
 
 extern GLuint lightFrameBuffer;
+extern GLuint lightRenderBuffer;
 extern GLuint lightTexture;
 
 //--------------------------------------------------------------//
