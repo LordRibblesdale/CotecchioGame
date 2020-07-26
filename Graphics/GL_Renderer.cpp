@@ -67,17 +67,16 @@ void setupRenderVariables() {
 void renderShadowMap() {
    // Rendering shadow map
    glUseProgram(lightShader);
-   //glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
    // Imposto la viewport per il render della shadow map
    glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
 
    // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
-   glEnable(GL_CULL_FACE);
-   glCullFace(GL_FRONT);
+   glEnable(GL_DEPTH_TEST);
+   //glEnable(GL_CULL_FACE);
+   //glCullFace(GL_FRONT);
    //glFrontFace(GL_CW); // o CCW
 
-   // TODO fix shadow mapping
    // TODO optimize calls
    skipVertexIndex = 0;
 
@@ -97,20 +96,21 @@ void renderShadowMap() {
       glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
       for (auto j = 0; j < object.getMeshes().size(); ++j) {
-         if (object.doesNeedNoCulling()) {
-            glDisable(GL_CULL_FACE);
-         }
+         //if (object.doesNeedNoCulling()) {
+         //   glDisable(GL_CULL_FACE);
+         //}
 
          glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
          // Chamata di disegno della primitiva
          glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
 
-         if (object.doesNeedNoCulling()) {
-            glEnable(GL_CULL_FACE);
-         }
+         //if (object.doesNeedNoCulling()) {
+         //   glEnable(GL_CULL_FACE);
+         //}
       }
    }
 
+   glDisable(GL_DEPTH_TEST);
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
    //glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -316,6 +316,7 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
       }
    }
 
+   // Utilizzato per avere shallow copies delle carte, altrimenti sarebbe stato necessario creare VAOs specifici con UV specifici
    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, players.at(pIndex).getCards().at(i).cardUVArray);
 
    glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());

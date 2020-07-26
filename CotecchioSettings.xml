@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Settings>
     <Resolution x="960" y="540"/>
-    <Texture quality="2"/>
-    <Shadows quality="2"/>
+    <Texture quality="1024"/>
+    <Shadows quality="16384"/>
     <MSAA enabled = "0" quality="4"/>
     <Framerate unlock = "1"/>
     <Gamma value = "2.2"/>

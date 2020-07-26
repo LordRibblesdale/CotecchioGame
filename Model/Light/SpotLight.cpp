@@ -8,9 +8,8 @@ SpotLight::SpotLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 
    maxAngle = degree2Radiants(45);
 }
 
-SpotLight::SpotLight(const Float3& origin, const Float3& direction, const Color& color1, float intensity, float midAngle_, float maxAngle_) : Light(origin, color1, intensity) {
-   //camera = std::move(std::make_unique<Camera>(origin, direction, Float3(0, 0, 1), 0.1f, 1000, maxAngle_, 1));
-   camera = std::move(std::make_unique<Camera>(origin, direction, Float3(0, 0, 1), 0.1f, 1000, -10, 10, -10, 10, maxAngle_));
+SpotLight::SpotLight(const Float3& origin, const Float3& lookAt, const Color& color1, float intensity, float midAngle_, float maxAngle_) : Light(origin, color1, intensity) {
+   camera = std::move(std::make_unique<Camera>(origin, lookAt, Float3(0, 0, 1), 0.1f, 1000, -10, 10, -10, 10, maxAngle_));
 
    midAngle = midAngle_;
    maxAngle = maxAngle_;

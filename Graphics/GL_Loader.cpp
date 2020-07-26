@@ -259,6 +259,19 @@ bool setupLightMap(Light* light) {
 
    status = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 
+   /*
+   glGenFramebuffers(1, &lightFrameBuffer2);
+   glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer2);
+
+   glGenRenderbuffers(1, &lightRenderBuffer);
+   glBindRenderbuffer(GL_RENDERBUFFER, lightRenderBuffer);
+
+   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY);
+   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, lightRenderBuffer);
+
+   status = status && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    */
+
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
    return status;
@@ -269,10 +282,10 @@ void prepareSceneLights() {
    lights.emplace_back(std::move(std::make_unique<SpotLight>(
            std::move(Float3(0, 0, 25)),
            Float3(0, 0, 0),
-           Color(0.6, 0.6, 1),
+           Color(1, 1, 1),
            10,
-           degree2Radiants(60),
-           degree2Radiants(90))));
+           degree2Radiants(30),
+           degree2Radiants(45))));
 
    unsigned int index = 0;
    for (auto& light : lights) {
@@ -314,11 +327,11 @@ void render() {
 
       selectedCardIndex = MAX_SIZE_T_VALUE;
 
-      //Float3 tmp(0, 0, 0.05f*sinf(currTime));
-      //lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + tmp);
+      Float3 tmp(0, 0, 0.05f*sinf(currTime));
+      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + tmp);
 
-      //SpotLight* sl(dynamic_cast<SpotLight*>(lights.at(0).get()));
-      //sl->setDirection(sl->getDirection() + tmp);
+      SpotLight* sl(dynamic_cast<SpotLight*>(lights.at(0).get()));
+      sl->setDirection(sl->getDirection() + tmp);
 
       renderShadowMap();
       renderSceneObjects();
@@ -343,16 +356,11 @@ void render() {
 
       // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
 
-      if (MENU_TRANSLATION_CAMERA) {
-         glUniform1f(blurUniform, blurValue);
-      }
-
       glDisable(GL_CULL_FACE);
       glDisable(GL_DEPTH_TEST);
 
       glUseProgram(debugShader);
 
-      glUniform1f(glGetUniformLocation(debugShader, "texSize"), SHADOW_QUALITY);
       glUniform1f(glGetUniformLocation(debugShader, "near_plane"), lights.at(0)->getCamera()->getNear());
       glUniform1f(glGetUniformLocation(debugShader, "far_plane"), lights.at(0)->getCamera()->getFar());
 
@@ -386,8 +394,12 @@ void render() {
       glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-
       glUseProgram(offlineShaderProgram);
+
+      if (MENU_TRANSLATION_CAMERA) {
+         glUniform1f(blurUniform, blurValue);
+      }
+
       glBindVertexArray(sVAO);
 
       glUniform1i(offlineFBTextureUniform, 2);
@@ -396,11 +408,9 @@ void render() {
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
       //glBindTexture(GL_TEXTURE_2D, lightTexture);
 
-
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
       glBindVertexArray(0);
-
 
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_CULL_FACE);

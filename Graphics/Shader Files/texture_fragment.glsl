@@ -29,8 +29,6 @@ vec3 diffuse;
 vec3 specular;
 vec3 halfway;
 
-float shadow;
-
 uniform sampler2D texture1; // Tipo di uniform della texture, array che contiene texture
 uniform sampler2D normalTexture;
 
@@ -42,10 +40,9 @@ uniform sampler2D depthMap[8];
 uniform int depthMapSize;
 */
 uniform sampler2D depthMap;
+vec2 depthDelta = 1.0f / textureSize(depthMap, 0);
 
 uniform vec3 color;
-
-float bias = 0.001f;
 
 void main() {
     /*
@@ -65,7 +62,8 @@ void main() {
     float attenuation = lightIntensity / (pointDistance);
 
     ambiental = ambientCoefficient * attenuation;
-    diffuse = max(0, dot(newNormal, p2l)) * diffusiveCoefficient * attenuation;
+    float dotNormalLight = dot(newNormal, p2l);
+    diffuse = max(0, dotNormalLight) * diffusiveCoefficient * attenuation;
 
     vec3 view = normalize(eye - sPos);
     //Blinn
@@ -102,8 +100,21 @@ void main() {
     shadow = float(numLights)/float(depthMapSize);
     */
 
-    //shadow = perspDivide.z <= 1 ? (perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0) : 0;
-    shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0;
+    float shadow = 0;
+    float bias = max(0.0004f * (1.0f - dotNormalLight), 0.0003f);
+
+    // PCF (Percentage Closer Filtering
+    for (int i = -2; i < 3; ++i) {
+        for (int j = -2; j < 3; ++j) {
+            float pcfShadowSample = texture(depthMap, perspDivide.xy + vec2(i, j)*depthDelta).r;
+            shadow += perspDivide.z - bias > pcfShadowSample ? 1.0 : 0.0;
+        }
+    }
+
+    // Branching?
+    shadow = (perspDivide.z <= 1) ? shadow / 25.0f : 0; //[5x5]
+
+    //shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0.2;
 
     fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)) * lightColor, txIn.a);
 }

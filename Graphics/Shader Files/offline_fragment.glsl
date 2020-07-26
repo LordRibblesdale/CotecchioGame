@@ -3,19 +3,11 @@
 in vec2 textureUV;
 out vec4 fragColor;
 
-uniform float blurValue;
-
 uniform sampler2D offlineRendering;
 
-float delta = 1.0f / 300.0f;   // Offset per spostarsi tra i pixel vicini al pixel sul quale effettuare il blur
+uniform float blurValue;
 
-vec2 offsets[25] = vec2[] (
-    vec2(-2*delta, 2*delta),  vec2(-delta, 2*delta),  vec2(0, 2*delta),  vec2(delta, 2*delta),  vec2(2*delta, 2*delta),
-    vec2(-2*delta, delta),    vec2(-delta, delta),    vec2(0, delta),    vec2(delta, delta),    vec2(-delta, delta),
-    vec2(-2*delta, 0),        vec2(-delta, 0),        vec2(0, 0),        vec2(delta, 0),        vec2(-delta, 0),
-    vec2(-2*delta, -delta),   vec2(-delta, -delta),   vec2(0, -delta),   vec2(delta, -delta),   vec2(-delta, -delta),
-    vec2(-2*delta, -2*delta), vec2(-delta, -2*delta), vec2(0, -2*delta), vec2(delta, -2*delta), vec2(-delta, -2*delta)
-);
+float delta = 1.5f / textureSize(offlineRendering, 0).y;
 
 float blurNorm = 1.0f / 100.0f;
 float blurKernel[25] = float[] (
@@ -31,17 +23,15 @@ void main() {
 
     vec4 blurColor = vec4(0.0f);
 
-    /*
     if (blurValue != 1) {
-        for (int i = 0; i < 25; ++i) {
-            blurColor += texture(offlineRendering, textureUV.st + offsets[i]) * blurKernel[i];
+        for (int i = 0; i < 5; ++i) {
+            for (int j = 0; j < 5; ++j) {
+                blurColor += texture(offlineRendering, textureUV.st + vec2((i -2), (j -2))*delta) * blurKernel[i*5 + j];
+            }
         }
 
         fragColor = mix(blurColor, texture2D, blurValue);
     } else {
         fragColor = texture2D;
     }
-    */
-
-    fragColor = texture2D;
 }
