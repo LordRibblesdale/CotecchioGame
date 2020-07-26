@@ -73,8 +73,8 @@ void renderShadowMap() {
 
    // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
    glEnable(GL_DEPTH_TEST);
-   //glEnable(GL_CULL_FACE);
-   //glCullFace(GL_FRONT);
+   glEnable(GL_CULL_FACE);
+   glCullFace(GL_FRONT);
    //glFrontFace(GL_CW); // o CCW
 
    // TODO optimize calls
@@ -96,24 +96,36 @@ void renderShadowMap() {
       glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
 
       for (auto j = 0; j < object.getMeshes().size(); ++j) {
-         //if (object.doesNeedNoCulling()) {
-         //   glDisable(GL_CULL_FACE);
-         //}
+         if (object.doesNeedNoCulling()) {
+            glDisable(GL_CULL_FACE);
+         }
 
          glBindVertexArray(vertexArrayObjects.at(skipVertexIndex++));
          // Chamata di disegno della primitiva
          glDrawElements(GL_TRIANGLES, object.getMeshes().at(j).getIndices().size(), GL_UNSIGNED_INT, 0);
 
-         //if (object.doesNeedNoCulling()) {
-         //   glEnable(GL_CULL_FACE);
-         //}
+         if (object.doesNeedNoCulling()) {
+            glEnable(GL_CULL_FACE);
+         }
+      }
+   }
+
+   glDisable(GL_CULL_FACE);
+
+   if (!players.empty()) {
+      glBindVertexArray(cardVAO);
+
+      for (Player& player : players) {
+         for (unsigned int i = 0; i < player.getCards().size(); ++i) {
+            cardModelM = std::move(player.getCards().at(i).getWorldCoordinates(i));
+            glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, cardModelM.getArray());
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+         }
       }
    }
 
    glDisable(GL_DEPTH_TEST);
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-   //glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void renderSceneObjects() {

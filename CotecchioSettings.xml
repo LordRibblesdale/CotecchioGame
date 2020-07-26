@@ -2,7 +2,7 @@
 <Settings>
     <Resolution x="960" y="540"/>
     <Texture quality="1024"/>
-    <Shadows quality="16384"/>
+    <Shadows quality="1536"/>
     <MSAA enabled = "0" quality="4"/>
     <Framerate unlock = "1"/>
     <Gamma value = "2.2"/>
