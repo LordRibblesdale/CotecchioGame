@@ -15,12 +15,16 @@ uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform float lightIntensity;
 
+uniform float minAngle;
+uniform float maxAngle;
+
 uniform vec3 ambientCoefficient;
 uniform vec3 diffusiveCoefficient;
 uniform vec3 specularCoefficient;
 uniform float specularAlpha;
 
 uniform vec3 eye;
+uniform vec3 lookAt;
 
 uniform float gammaCorrection;
 
@@ -34,11 +38,6 @@ uniform sampler2D normalTexture;
 
 vec3 newNormal;
 
-/*
-int MAX_SIZE = 8;
-uniform sampler2D depthMap[8];
-uniform int depthMapSize;
-*/
 uniform sampler2D depthMap;
 vec2 depthDelta = 1.0f / textureSize(depthMap, 0);
 
@@ -57,7 +56,6 @@ void main() {
     vec3 p2l = normalize(lightPos - sPos);
 
     // Moltiplico più tardi il fattore comune lightColor
-    // TODO implement multiple types of light attenuation
     float pointDistance = distance(lightPos, sPos);
     float attenuation = lightIntensity / (pointDistance);
 
@@ -84,25 +82,10 @@ void main() {
     // Normalizzazione da [-1, 1] a [0, 1] per il confronto con la profondità
     // [-1, 1] -> [-0.5, 0.5] -> [0, 1]
 
-    // Controllo distanze tra camera-punto e luce-punto
-    // -> Stiamo confrontando se quel punto effettivamente sia visibile, controllando la distanza tra questo fragment e il calcolo sulla depth map
-    /*
-    int numLights = 0;
-    for (int i = 0; i < depthMapSize; ++i) {
-        // Branching ridotto per accesso per tutti i fragment shader alla texture (++ di bassa complessità)
-        // https://en.wikipedia.org/wiki/Cycles_per_instruction#Example_2
-        if (perspDivide.z - bias > texture(depthMap[i], perspDivide.xy).r) {
-            ++numLights;
-        }
-    }
-
-    shadow = float(numLights)/float(depthMapSize);
-    */
-
     float shadow = 0;
     float bias = max(0.004f * (1.0f - dotNormalLight), 0.003f);
 
-    // PCF (Percentage Closer Filtering
+    // PCF (Percentage Closer Filtering)
     for (int i = -2; i < 3; ++i) {
         for (int j = -2; j < 3; ++j) {
             float pcfShadowSample = texture(depthMap, perspDivide.xy + vec2(i, j)*depthDelta).r;
@@ -110,10 +93,14 @@ void main() {
         }
     }
 
-    // Branching?
-    shadow = (perspDivide.z <= 1) ? shadow / 25.0f : 0; //[5x5]
-
+    shadow = (perspDivide.z <= 1) ? shadow / 25.0f : 1; //[5x5]
     //shadow = perspDivide.z - bias > texture(depthMap, perspDivide.xy).r ? 1 : 0.2;
+
+    /*
+    vec3 eye2LookAt = normalize(lookAt - eye);
+    shadow = abs(dot(view, lookAt)) <= 0.7071 ? shadow : 1;
+    */
+
 
     fragColor = vec4(pow(txIn.rgb, vec3(1.0f/gammaCorrection)) * (ambiental + (1 - shadow)*(diffuse + specular)) * lightColor, txIn.a);
 }

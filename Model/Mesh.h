@@ -14,15 +14,10 @@ class Mesh {
    std::vector<Color> vertexColors;
    std::vector<unsigned int> indices;
 
-   //
-   // std::vector<Float3> tangents;
-   //std::vector<Float3> bitangents;
-
    Float3 tangent;
    Float3 bitangent;
 
 public:
-   // TODO rule of 5
    Mesh(unsigned int vertexPreallocSize, unsigned int indexPreallocSize, bool hasTextures);
    ~Mesh();
 
@@ -32,14 +27,16 @@ public:
    void addColor(const Color& color);
    void addIndex(unsigned int i);
 
-   //void addTangent(const Float3& tangent);
-   //void addBitangent(const Float3& bitangent);
-
    const std::vector<Float3> &getVertices() const;
    const vector<Float3> &getNormals() const;
    const vector<Float2> &getTextureUnwrap() const;
    const vector<Color> &getVertexColors() const;
    const vector<unsigned int> &getIndices() const;
+
+   const Float3 &getTangent() const;
+   void setTangent(const Float3 &tangent);
+   const Float3 &getBitangent() const;
+   void setBitangent(const Float3 &bitangent);
 
    const vector<Float3> &getTangents() const;
 
@@ -56,15 +53,6 @@ public:
    bool isPbr() const;
 
    void setPbr(bool pbr);
-
-
-    const Float3 &getTangent() const;
-
-    void setTangent(const Float3 &tangent);
-
-    const Float3 &getBitangent() const;
-
-    void setBitangent(const Float3 &bitangent);
 };
 
 #endif //OBJECT_H

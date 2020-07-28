@@ -11,7 +11,6 @@ class SpotLight : public Light {
    Float3 direction;
 public:
    SpotLight();
-   // TODO change name lookAt
    SpotLight(const Float3& origin, const Float3& lookAt, const Color& color1, float intensity, float midAngle_, float maxAngle_);
 
    SpotLight(SpotLight&& light);

@@ -140,10 +140,7 @@ void SquareMatrix::operator*=(const SquareMatrix& matrix) {
 void SquareMatrix::transpose() {
    Matrix transposed(std::move(Matrix::transpose(*this)));
 
-   //TODO fix "for" calling (more security in modifying matrix values)
-   for (int i = 0; i < getDimension() * getDimension(); ++i) {
-      getArray()[i] = transposed.getArray()[i];
-   }
+   std::move(transposed.getArray(), transposed.getArray() + getDimension()*getDimension(), getArray());
 }
 
 SquareMatrix SquareMatrix::transpose(const SquareMatrix &matrix) {
@@ -162,7 +159,6 @@ float SquareMatrix::calculateDeterminant(const SquareMatrix& matrix) {
    float determinant = 0;
    const float* array = matrix.getArray();
 
-   //TODO optimise here
    //TODO add 0 calculateDeterminant check
    switch (matrix.getDimension()) {
       case 1:
@@ -190,11 +186,11 @@ float SquareMatrix::calculateDeterminant(const SquareMatrix& matrix) {
          }
           */
 
-         //TODO change calculation through first row
-         //TODO implement LU decomposition after 5/6 dimension
+         // Change calculation through first row
+         // Implement LU decomposition after 5/6 dimension
          // Laplace det-> O(n!) ; LU dec-> O(n^3)
          for (int i = 0; i < matrix.getColumns(); ++i) {
-            determinant += matrix.getArray()[i] * (i % 2 == 0 ? 1 : -1) * calculateDeterminant(createSubmatrix(matrix, 0, i));
+            determinant += matrix.getArray()[i] * (i % 2 == 0 ? 1.0f : -1.0f) * calculateDeterminant(createSubmatrix(matrix, 0, i));
          }
    }
 
@@ -208,10 +204,7 @@ float SquareMatrix::calculateCofactor(const SquareMatrix& matrix, unsigned int r
 void SquareMatrix::invert() {
    SquareMatrix inverse(std::move(SquareMatrix::calculateInverse(*this)));
 
-   //TODO fix "for" calling (more security in modifying matrix values)
-   for (int i = 0; i < getRows() * getColumns(); ++i) {
-      getArray()[i] = inverse.getArray()[i];
-   }
+   std::move(inverse.getArray(), inverse.getArray() + getDimension()*getDimension(), getArray());
 }
 
 SquareMatrix SquareMatrix::calculateInverse(const SquareMatrix &matrix) {
@@ -230,11 +223,4 @@ SquareMatrix SquareMatrix::calculateInverse(const SquareMatrix &matrix) {
    }
 
    return SquareMatrix(std::move(newData));
-}
-
-void SquareMatrix::scaleMatrix(float scaleX, float scaleY, float scaleZ) {
-   //TODO automise here
-   data_->getArray().get()[0] *= scaleX;
-   data_->getArray().get()[getDimension()] *= scaleY;
-   data_->getArray().get()[getDimension() * 2] *= scaleZ;
 }

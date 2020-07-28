@@ -82,7 +82,7 @@ GLuint createTextureUniform();
 
 void createTextureUniform(GLuint& texture);
 
-void loadTexture(const std::string& location, GLuint& texture);
+void loadTextureOnGPU(unsigned char*& data, GLuint& texUniform, int& channels, int& width, int& height);
 void loadTexture(const std::string& location, const std::string &name, bool loadFiles);
 
 void loadCardTextures();

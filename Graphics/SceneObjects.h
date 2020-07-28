@@ -61,9 +61,7 @@ extern GLuint cardTexture;
 extern GLuint backCardTexture;
 
 extern GLuint cardVAO;
-extern GLuint cardBuffer;
-extern GLuint editableUVCardBuffer;
-extern GLuint backUVCardBuffer;
+extern GLuint cardVBO;
 extern GLuint cardEBO;
 
 extern float screen[20];
@@ -120,7 +118,7 @@ extern std::vector<unsigned int> materialIndices;
 extern const std::string TABLE_ASSETS_LOCATION;
 extern const std::string DATA_ASSETS_LOCATION;
 
-extern std::vector<std::unique_ptr<Light>> lights;
+extern std::unique_ptr<Light> light;
 
 //--------------------------------------------------------------//
 

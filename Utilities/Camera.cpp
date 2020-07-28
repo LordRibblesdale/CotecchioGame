@@ -73,7 +73,7 @@ SquareMatrix Camera::world2ViewMatrix() {
    Float3 xView(std::move(up.crossProduct(zView)));
 
    if (xView.l2Norm() == 0) {
-      xView = std::move(Float3(0.00015f, 1.00021f, 0.0f).crossProduct(zView));
+      xView = std::move(Float3(0.00005f, 1.00001f, 0.0f).crossProduct(zView));
    }
 
    xView.normalize();

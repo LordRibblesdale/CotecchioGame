@@ -17,8 +17,6 @@ void CardMoving::moveCard(const Float3& direction, double duration) const {
    SquareMatrix rotationX(std::move(Rotation::rotationXAxisMatrix4(((playerIndex % 2 == 0) ? -1.0f : 1.0f) * t*t * (degree2Radiants(90) + angle))));
    card->hand2Table = std::move(std::make_unique<SquareMatrix>(std::move(translation)));
    card->rotationOnTable = std::move(std::make_unique<SquareMatrix>(std::move(rotationX)));
-
-   //std::cout << card->hand2Table->toString() << std::endl;
 }
 
 Card* CardMoving::getCard() const {

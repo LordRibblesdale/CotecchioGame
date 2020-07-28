@@ -146,25 +146,19 @@ void createTextureUniform(GLuint& texture) {
    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void loadTexture(const std::string &location, GLuint& texture) {
+void loadTextureOnGPU(unsigned char*& data, GLuint& texUniform, int& channels, int& width, int& height) {
    /* Ottenimento matrice dei pixel (1 byte, 8 bit per canale) per valori da 0 a 255, come i PNG 8bit per channel, tramite stb_load)
     * ATTENZIONE nella lettura della texture: In base all'orientamento dell'oggetto, bisogna leggere il file in modo diverso
     * Es: oggetto dal basso verso l'alto, e le immagini dall'alto verso il basso, per un corretto riempimento del buffer
     */
-   stbi_set_flip_vertically_on_load(true); // Per leggere il file nell'ordine corretto
-
-   int width, height, channels;
-   unsigned char* data;
-
-   data = stbi_load((location).c_str(), &width, &height, &channels, 0);
 
    if (data) {
       /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
        *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
        *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
        */
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, texture);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, texUniform);
       glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
       // Creazione della mipmap della texture bindata
       glGenerateMipmap(GL_TEXTURE_2D);
@@ -173,8 +167,6 @@ void loadTexture(const std::string &location, GLuint& texture) {
    } else {
       std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
    }
-
-   stbi_image_free(data);
 }
 
 void loadTexture(const std::string &location, const std::string &name, bool loadFiles) {
@@ -214,29 +206,28 @@ void loadTexture(const std::string &location, const std::string &name, bool load
       for (rapidxml::xml_node<>* position = rootNode->first_node("Material"); position; position = position->next_sibling()) {
          Material material;
 
-         // TODO check if that material has been added (use unordered map)
          if (std::string("Wood") == position->first_attribute("name")->value()) {
-            material.setDiffuseCoeff(Float3(
+            material.diffuseCoeff = std::move(Float3(
                     std::stof(position->first_node("Diffuse")->first_attribute("valueR")->value()),
                     std::stof(position->first_node("Diffuse")->first_attribute("valueG")->value()),
                     std::stof(position->first_node("Diffuse")->first_attribute("valueB")->value())
                     ));
 
-            material.setSpecularCoeff(Float3(
+            material.specularCoeff = std::move(Float3(
                     std::stof(position->first_node("Specular")->first_attribute("valueR")->value()),
                     std::stof(position->first_node("Specular")->first_attribute("valueG")->value()),
                     std::stof(position->first_node("Specular")->first_attribute("valueB")->value())
-            ));
+                    ));
 
-            material.setShininess(std::stof(position->first_node("Specular")->first_attribute("specularExp")->value()));
+            material.shininess = std::stof(position->first_node("Specular")->first_attribute("specularExp")->value());
             WOOD_INDEX = materials.size();
          } else if (std::string("Velvet") == position->first_attribute("name")->value()) {
-            material.setDiffuseCoeff(Float3(1, 1, 1));
-            material.setRoughness(std::stof(position->first_node("PBR")->first_attribute("roughness")->value()));
+            material.diffuseCoeff = std::move(Float3(1, 1, 1));
+            material.roughness = std::stof(position->first_node("PBR")->first_attribute("roughness")->value());
 
             VELVET_INDEX = materials.size();
          } else if (std::string("Generic") == position->first_attribute("name")->value()) {
-            material.setDiffuseCoeff(Float3(1, 1, 1));
+            material.diffuseCoeff = std::move(Float3(1, 1, 1));
          }
 
          materials.push_back(material);
@@ -255,22 +246,7 @@ void loadTexture(const std::string &location, const std::string &name, bool load
                   } else {
                      data = stbi_load((location + texFile).c_str(), &width, &height, &channels, 0);
 
-                     if (data) {
-                        /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
-                         *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
-                         *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
-                         */
-                        glActiveTexture(GL_TEXTURE0);
-                        glBindTexture(GL_TEXTURE_2D, texUniform);
-                        glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
-                        // Creazione della mipmap della texture bindata
-                        glGenerateMipmap(GL_TEXTURE_2D);
-
-                        glBindTexture(GL_TEXTURE_2D, 0);
-                     } else {
-                        std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
-                     }
-
+                     loadTextureOnGPU(data, texUniform, channels, width, height);
                      stbi_image_free(data);
 
                      textureUniforms.emplace_back(texUniform);
@@ -289,8 +265,6 @@ void loadTexture(const std::string &location, const std::string &name, bool load
 
             rapidxml::xml_node<>* bumpNode = position->first_node("Bump");
             if (bumpNode) {
-               //thread2 = std::move(std::thread(loadBumpTextureFromFile, std::ref(bumpUniforms), std::ref(bMap), bumpNode, location));
-
                createTextureUniform(texUniform);
                texFile = bumpNode->first_attribute("name")->value();
 
@@ -299,23 +273,7 @@ void loadTexture(const std::string &location, const std::string &name, bool load
                } else {
                   data = stbi_load((location + texFile).c_str(), &width, &height, &channels, 0);
 
-                  if (data) {
-                     /* Analisi dell'immagine, come elaborarla e come farla studiare dalla GPU,
-                      *   con informazioni su livelli, canali (es RGBA), dimensioni immagine, formato e formato interno (che dovranno coincidere)
-                      *   tipo pixel (GL_UNSIGNED_BYTE), array di pixel
-                      */
-                     glActiveTexture(GL_TEXTURE1);
-                     glBindTexture(GL_TEXTURE_2D, texUniform);
-                     glTexImage2D(GL_TEXTURE_2D, 0, channels == 3 ? GL_RGB : GL_RGBA, width, height, 0, channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
-                     // Creazione della mipmap della texture bindata
-                     glGenerateMipmap(GL_TEXTURE_2D);
-
-                     glBindTexture(GL_TEXTURE_2D, 0);
-                  } else {
-                     std::cout << texFile << std::endl;
-                     std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
-                  }
-
+                  loadTextureOnGPU(data, texUniform, channels, width, height);
                   stbi_image_free(data);
 
                   bumpUniforms.emplace_back(texUniform);
@@ -324,17 +282,10 @@ void loadTexture(const std::string &location, const std::string &name, bool load
             } else {
                bumpUniforms.emplace_back(0);
             }
-            /*
-            if (thread1.joinable()) {
-               thread1.join();
-            }
-             */
          }
       } else {
          materialIndices.emplace_back(2);
       }
-
-      //thread2.join();
 
       file.close();
    } else {

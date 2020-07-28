@@ -24,8 +24,6 @@ public:
    void operator+=(const Matrix& matrix);
    Matrix operator-(const Matrix& matrix) const;
    void operator-=(const Matrix& matrix);
-   //TODO complete operator functions
-   //Matrix& operator+(Matrix&& matrix);
    Matrix operator*(const float& scalar) const;
    void operator*=(const float& scalar);
    Matrix operator*(const Matrix& matrix) const;

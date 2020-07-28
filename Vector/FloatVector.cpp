@@ -74,7 +74,6 @@ bool FloatVector::operator!=(const FloatVector &vector) const {
       return true;
    }
 
-   // TODO manage different size
    return true;
 }
 

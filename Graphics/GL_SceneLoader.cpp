@@ -251,33 +251,24 @@ void generateObjects(Mesh &mesh) {
 
 void prepareCardRendering() {
    glGenVertexArrays(1, &cardVAO);
-   glGenBuffers(1, &cardBuffer);
-   glGenBuffers(1, &editableUVCardBuffer);
-   glGenBuffers(1, &backUVCardBuffer);
+   glGenBuffers(1, &cardVBO);
    glGenBuffers(1, &cardEBO);
 
    glBindVertexArray(cardVAO);
 
-   glBindBuffer(GL_ARRAY_BUFFER, editableUVCardBuffer);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, backUVArray, GL_DYNAMIC_DRAW);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
-   glEnableVertexAttribArray(1);
-
-   glBindBuffer(GL_ARRAY_BUFFER, backUVCardBuffer);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, backUVArray, GL_STATIC_DRAW);
-   glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*) 0);
-   glEnableVertexAttribArray(3);
-
-   glBindBuffer(GL_ARRAY_BUFFER, cardBuffer);
+   glBindBuffer(GL_ARRAY_BUFFER, cardVBO);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cardEBO);
 
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, cardVertices, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 32, cardVertices, GL_DYNAMIC_DRAW);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, vIndices, GL_DYNAMIC_DRAW);
 
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) 0);
    glEnableVertexAttribArray(0);
 
-   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glEnableVertexAttribArray(1);
+
+   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
    glEnableVertexAttribArray(2);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)

@@ -7,17 +7,13 @@
 #include "../../Vector/Float4.h"
 #include "../../Matrix/StandardMatrix.h"
 
-extern float cardVertices[24];
-extern float backUVArray[8];
+extern float cardVertices[32];
 extern unsigned int vIndices[6];
 
 struct Card {
    unsigned short int playerID;
 
    unsigned int value;
-   float u = 0,  v = 0;
-
-   float cardUVArray[8];
 
    SquareMatrix local2World;
    std::unique_ptr<SquareMatrix> hand2Table;
@@ -41,7 +37,6 @@ struct Card {
 
    // value è del tipo NM (10, 11, 20, 39, ....)
    Card(unsigned int vaule, unsigned short int playerID);
-   // TODO check if std::moving member from vector to move ctor destroys elements in vector (removes automatically)
    Card(const Card& card);
    ~Card();
 

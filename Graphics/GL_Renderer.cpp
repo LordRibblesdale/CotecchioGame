@@ -26,6 +26,7 @@ void setupRenderVariables() {
    specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
    specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
    eyePosition = glGetUniformLocation(shaderProgram, "eye");
+   lookAtUniform = glGetUniformLocation(shaderProgram, "lookAt");
 
    gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
 
@@ -41,6 +42,8 @@ void setupRenderVariables() {
 
    cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
    backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
+   cardValueUniform = glGetUniformLocation(cardsShader, "cardValue");
+   deckCardValueUniform = glGetUniformLocation(deckShader, "cardValue");
 
    deckModelMatrix = glGetUniformLocation(deckShader, "model");
    deckViewMatrix = glGetUniformLocation(deckShader, "view");
@@ -58,10 +61,6 @@ void setupRenderVariables() {
    depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
    offlineFBTextureUniform = glGetUniformLocation(offlineShaderProgram, "offlineRendering");
-
-   //SquareMatrix modelM_L2W(4, {});
-
-   lightSpaceMs.reserve(lights.size());
 }
 
 void renderShadowMap() {
@@ -77,20 +76,14 @@ void renderShadowMap() {
    glCullFace(GL_FRONT);
    //glFrontFace(GL_CW); // o CCW
 
-   // TODO optimize calls
    skipVertexIndex = 0;
-
-   //for (unsigned int i = 0; i < lights.size(); ++i) {}
 
    glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   lightSpaceMs.at(0) = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*lights.at(0)->getCamera()) *
-                                  lights.at(0)->getCamera()->world2ViewMatrix());
+   lightSpaceMs = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*light->getCamera()) * light->getCamera()->world2ViewMatrix());
 
-   //lightSpaceMs.at(0) = std::move(Projection::onAxisOrthogonalProjectionByCamera(*lights.at(0)->getCamera()) * lights.at(0)->getCamera()->world2ViewMatrix());
-
-   glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
+   glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.getArray());
 
    for (auto & object : objects) {
       glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
@@ -162,21 +155,18 @@ void renderSceneObjects() {
 
    glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, projM_V2C.getArray());
    glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, viewM_W2V.getArray());
-   // TODO fix for multiple lights
-   glUniformMatrix4fv(lsmMainShaderUniform, 1, GL_TRUE, lightSpaceMs.at(0).getArray());
+   glUniformMatrix4fv(lsmMainShaderUniform, 1, GL_TRUE, lightSpaceMs.getArray());
 
    glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
+   glUniform3f(lookAtUniform, camera.getLookAt().getX(), camera.getLookAt().getY(), camera.getLookAt().getZ());
 
-   // TODO set multiple lights
-   glUniform3f(lightPosUniform, lights.at(0).get()->getOrigin().getX(), lights.at(0).get()->getOrigin().getY(), lights.at(0).get()->getOrigin().getZ());
-   glUniform3f(lightColorUniform, lights.at(0).get()->getColor().getRed(), lights.at(0).get()->getColor().getGreen(), lights.at(0).get()->getColor().getBlue());
-   //TODO manage falloff (on CPU or GPU?)
-   glUniform1f(lightIntensity, lights.at(0).get()->getIntensity());
+   glUniform3f(lightPosUniform, light->getOrigin().getX(), light->getOrigin().getY(), light->getOrigin().getZ());
+   glUniform3f(lightColorUniform, light->getColor().getRed(), light->getColor().getGreen(), light->getColor().getBlue());
+   glUniform1f(lightIntensity, light->getIntensity());
 
    // Caricare vertexArrayObject interessato
    glUniform1i(texUnif, 0);
    glUniform1i(bumpUnif, 1);
-   // TODO set multiple lights
    glUniform1i(depthMapUniform, 10);
 
    glActiveTexture(GL_TEXTURE10);
@@ -198,22 +188,18 @@ void renderSceneObjects() {
 
       for (auto j = 0; j < object.getMeshes().size(); ++j) {
          if (object.doesHaveTextures()) {
-            glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).getAmbientCoeff().getX(),
-                        materials.at(materialIndices.at(j)).getAmbientCoeff().getY(),
-                        materials.at(materialIndices.at(j)).getAmbientCoeff().getZ());
-            glUniform3f(diffusiveCoefficient, materials.at(materialIndices.at(j)).getDiffuseCoeff().getX(),
-                        materials.at(materialIndices.at(j)).getDiffuseCoeff().getY(),
-                        materials.at(materialIndices.at(j)).getDiffuseCoeff().getZ());
-            glUniform3f(specularCoefficient, materials.at(materialIndices.at(j)).getSpecularCoeff().getX(),
-                        materials.at(materialIndices.at(j)).getSpecularCoeff().getY(),
-                        materials.at(materialIndices.at(j)).getSpecularCoeff().getZ());
-            glUniform1f(specularAlpha, materials.at(materialIndices.at(j)).getShininess());
+            glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).ambientCoeff.getX(),
+                        materials.at(materialIndices.at(j)).ambientCoeff.getY(),
+                        materials.at(materialIndices.at(j)).ambientCoeff.getZ());
+            glUniform3f(diffusiveCoefficient, materials.at(materialIndices.at(j)).diffuseCoeff.getX(),
+                        materials.at(materialIndices.at(j)).diffuseCoeff.getY(),
+                        materials.at(materialIndices.at(j)).diffuseCoeff.getZ());
+            glUniform3f(specularCoefficient, materials.at(materialIndices.at(j)).specularCoeff.getX(),
+                        materials.at(materialIndices.at(j)).specularCoeff.getY(),
+                        materials.at(materialIndices.at(j)).specularCoeff.getZ());
+            glUniform1f(specularAlpha, materials.at(materialIndices.at(j)).shininess);
 
-            /*
-            if (materialIndices.at(j) == 1) {
-
-            }
-            */
+            // if (materialIndices.at(j) == 1) {}
 
             // Imposto lo uniform interessato con la texture unit in cui è presente la texture
             // Attivazione canale texture (Texture Unit), per poter utilizzare il canale (che dentro è presente una texture)
@@ -232,11 +218,11 @@ void renderSceneObjects() {
                         object.getMeshes().at(j).getBitangent().getY(),
                         object.getMeshes().at(j).getBitangent().getZ());
          } else {
-            glUniform3f(ambientCoefficient, materials.at(materials.size()-1).getAmbientCoeff().getX(),
-                        materials.at(materials.size()-1).getAmbientCoeff().getY(),
-                        materials.at(materials.size()-1).getAmbientCoeff().getZ());
+            glUniform3f(ambientCoefficient, materials.at(materials.size()-1).ambientCoeff.getX(),
+                        materials.at(materials.size()-1).ambientCoeff.getY(),
+                        materials.at(materials.size()-1).ambientCoeff.getZ());
 
-            //glUniform3f(fixedColorUniform, 0.2f, 0.2f, 0.2f);
+            glUniform3f(fixedColorUniform, 0.2f, 0.2f, 0.2f);
          }
 
          if (object.doesNeedNoCulling()) {
@@ -290,10 +276,10 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
                                     Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1))))));
                                     */
 
-            Float4 p0(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1)));
-            Float4 p1(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1)));
-            Float4 p2(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1)));
-            Float4 p3(cardModelM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1)));
+            Float4 p0(std::move(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1))));
+            Float4 p1(std::move(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1))));
+            Float4 p2(std::move(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1))));
+            Float4 p3(std::move(cardModelM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1))));
 
             Triangle cardT1(p0, p1, p2);
             Triangle cardT2(p2, p1, p3);
@@ -303,8 +289,7 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
             float yProj = -(((2.0f*y)/static_cast<float>(Y_RESOLUTION)) -1);  // MINUS per via dell'asse invertito Y SCREEN rispetto a Y CLIP
             float zProj = -camera.getNear();
 
-            // NDC Space -> View Space
-            // ON-AXIS CAMERA
+            // NDC Space -> View Space (ON-AXIS CAMERA)
             Float4 clipPoint(xProj * camera.getRight(), yProj * camera.getTop(), zProj, 1);
 
             // View Space -> World Space
@@ -312,7 +297,6 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
 
             Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
 
-            // Implement multithreading w/ sync for better performance?
             TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
             TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
 
@@ -328,8 +312,7 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
       }
    }
 
-   // Utilizzato per avere shallow copies delle carte, altrimenti sarebbe stato necessario creare VAOs specifici con UV specifici
-   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, players.at(pIndex).getCards().at(i).cardUVArray);
+   glUniform1i(cardValueUniform, players.at(pIndex).getCards().at(i).value);
 
    glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
@@ -346,7 +329,6 @@ void renderCards() {
    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
    glBindVertexArray(cardVAO);
-   glBindBuffer(GL_ARRAY_BUFFER, editableUVCardBuffer);
 
    glUniform1i(cardTexUnif, 3);
    glUniform1i(backTexUnif, 4);
@@ -387,8 +369,7 @@ void renderCards() {
 
             cardModelM = std::move(players.at(playerIndex).getCards().at(selectedCardIndex).getWorldCoordinates(selectedCardIndex));
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, players.at(pIndex).getCards().at(selectedCardIndex).cardUVArray);
-
+            glUniform1i(cardValueUniform, players.at(pIndex).getCards().at(selectedCardIndex).value);
             glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -405,7 +386,6 @@ void renderCards() {
 
       // Verrà stampato qualcosa su schermo solo se supera il controllo sottostante
       // Ovvero quando l'oggetto si trova fuori dalla maschera, ovvero il tratto per l'outlining
-
       glStencilMask(0x00);    // solo in lettura del buffer, non attiva la scrittura
       glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
       glEnable(GL_DEPTH_TEST);
@@ -415,6 +395,7 @@ void renderCards() {
 
       if (selectedCardIndex != MAX_SIZE_T_VALUE) {
          cardModelM = std::move(players.at(playerIndex).getCards().at(selectedCardIndex).getLocal2World() * Transform::scaleMatrix4(1.05, 1.05, 1.05));
+         glUniform1i(cardValueUniform, players.at(playerIndex).getCards().at(selectedCardIndex).value);
          glUniformMatrix4fv(colorModelMatrix, 1, GL_TRUE, cardModelM.getArray());
          glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          players.at(playerIndex).getCards().at(selectedCardIndex).setIsSelected(false);
@@ -428,8 +409,6 @@ void renderCardsOnTable() {
 
    // Needed?
    glBindVertexArray(cardVAO);
-   glBindBuffer(GL_ARRAY_BUFFER, editableUVCardBuffer);
-
    glActiveTexture(GL_TEXTURE3);
    glBindTexture(GL_TEXTURE_2D, cardTexture);
 
@@ -442,8 +421,7 @@ void renderCardsOnTable() {
    for (const Card& card : cardsOnTable) {
       cardModelM = *card.hand2Table * card.local2World * *card.rotationOnTable;
 
-      glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 8, card.cardUVArray);
-
+      glUniform1i(deckCardValueUniform, card.value);
       glUniformMatrix4fv(deckModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

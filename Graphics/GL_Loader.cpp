@@ -259,48 +259,28 @@ bool setupLightMap(Light* light) {
 
    status = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 
-   /*
-   glGenFramebuffers(1, &lightFrameBuffer2);
-   glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer2);
-
-   glGenRenderbuffers(1, &lightRenderBuffer);
-   glBindRenderbuffer(GL_RENDERBUFFER, lightRenderBuffer);
-
-   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY);
-   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, lightRenderBuffer);
-
-   status = status && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
-    */
-
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
    return status;
 }
 
 void prepareSceneLights() {
-   lights.reserve(1);
-   lights.emplace_back(std::move(std::make_unique<SpotLight>(
-           std::move(Float3(0, 0, 25)),
-           Float3(0, 0, 0),
-           Color(1, 1, 1),
-           10,
-           degree2Radiants(30),
-           degree2Radiants(45))));
+   light = std::move(std::make_unique<SpotLight>(
+         std::move(Float3(0, 0, 20)),
+         Float3(0, 0, 0),
+         Color(1, 1, 1),
+         10,
+         // TODO use these angles smartly
+         degree2Radiants(30),
+         degree2Radiants(45)));
 
-   unsigned int index = 0;
-   for (auto& light : lights) {
-      if (!setupLightMap(light.get())) {
-         std::cout << "Error SHADOW_MAP_LIGHT "<< index++ <<": Fragment not created." << std::endl;
-      }
+   if (!setupLightMap(light.get())) {
+      std::cout << "Error SHADOW_MAP_LIGHT 0: Fragment not created." << std::endl;
    }
 }
 
 void render() {
    setupRenderVariables();
-
-   for (auto i = 0; i < lights.size(); ++i) {
-      lightSpaceMs.emplace_back(SquareMatrix(4, {}));
-   }
 
    flipCardRenderingIndex = ceil(players.size()/2.0f);
 
@@ -312,8 +292,6 @@ void render() {
 
    // Abilito back culling face (non si elaborano facce non visibili in base alla normale
    glEnable(GL_CULL_FACE);
-
-   //loadTexture(DATA_ASSETS_LOCATION + "Debug.png", lightTexture);
 
    while (!glfwWindowShouldClose(window)) {  // semmai la finestra dovesse chiudersi
       /* Gestione degli input e render, eseguiti in senso temporale/strutturato nel codice
@@ -327,11 +305,7 @@ void render() {
 
       selectedCardIndex = MAX_SIZE_T_VALUE;
 
-      Float3 tmp(0, 0, 0.05f*sinf(currTime));
-      lights.at(0).get()->setOrigin(lights.at(0).get()->getOrigin() + tmp);
-
-      SpotLight* sl(dynamic_cast<SpotLight*>(lights.at(0).get()));
-      sl->setDirection(sl->getDirection() + tmp);
+      light->getCamera()->setLookAt(Float3(0, 15*sinf(currTime), 0));
 
       renderShadowMap();
       renderSceneObjects();
@@ -346,10 +320,8 @@ void render() {
       }
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      //glViewport(0, 0, X_RESOLUTION, Y_RESOLUTION);
 
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
-      //glUseProgram(offlineShaderProgram);
 
       glClearColor(0, 1, 0, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -361,8 +333,8 @@ void render() {
 
       glUseProgram(debugShader);
 
-      glUniform1f(glGetUniformLocation(debugShader, "near_plane"), lights.at(0)->getCamera()->getNear());
-      glUniform1f(glGetUniformLocation(debugShader, "far_plane"), lights.at(0)->getCamera()->getFar());
+      glUniform1f(glGetUniformLocation(debugShader, "near_plane"), light->getCamera()->getNear());
+      glUniform1f(glGetUniformLocation(debugShader, "far_plane"), light->getCamera()->getFar());
 
       //TODO change
       GLuint tempVAO, tempVBO, tempEBO;
@@ -383,7 +355,6 @@ void render() {
       glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
       glEnableVertexAttribArray(1);
 
-      //glUniform1i(offlineFBTextureUniform, 2);
       glUniform1i(glGetUniformLocation(debugShader, "offlineRendering"), 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, lightTexture);

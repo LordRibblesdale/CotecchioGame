@@ -7,7 +7,7 @@
 #include "../Vector/Float4.h"
 
 class Triangle {
-   std::unique_ptr<Float3[]> points;
+   Float3 points[3];
 
 public:
    Triangle(const Float3& p0, const Float3& p1, const Float3& p2);
@@ -16,7 +16,7 @@ public:
    Triangle(Triangle&& triangle);
    ~Triangle();
 
-   const std::unique_ptr<Float3[]>& getPoints() const;
+   const Float3* getPoints() const;
 
    Float3 getPoint(float u, float v) const;
 };

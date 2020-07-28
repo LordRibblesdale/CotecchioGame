@@ -36,8 +36,6 @@ public:
 
    void invert();
 
-   void scaleMatrix(float scaleX, float scaleY, float scaleZ);
-
    static SquareMatrix calculateInverse(const SquareMatrix& matrix);
 
    inline unsigned int getDimension() const {

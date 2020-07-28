@@ -10,7 +10,6 @@ bool Ray::isIntersecting(const Box &box) const {
 
    for (int i = 0; i < 3; ++i) {
       float inverseDirection = 1/ direction_.getVector().get()[i];
-      //TODO     -V- check this minus sign (tFar < 0?)
       float t1 = -(box.getInitialPoint().getVector().get()[i] - origin_.getVector().get()[i]) * inverseDirection;
       float t2 = -(box.getFinalPoint().getVector().get()[i] - origin_.getVector().get()[i]) * inverseDirection;
 
@@ -66,15 +65,6 @@ TriangleIntersection Ray::getTriangleIntersection(const Triangle &triangle) cons
    }
 
    return intersection;
-}
-
-Ray Ray::getReflectionOn(const Triangle &triangle, const TriangleIntersection &intersection) {
-   return Ray(intersection.getIntersectedPoint(), direction_ - 2 * direction_.dotProduct(intersection.getBarycentricCoordinates()) * intersection.getBarycentricCoordinates());
-}
-
-Ray Ray::getRefractionOn(const Triangle &triangle, const TriangleIntersection &intersection) {
-   //TODO implement refraction
-   return Ray(Float3(), Float3());
 }
 
 const Float3 &Ray::getOrigin() const {

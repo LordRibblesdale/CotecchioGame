@@ -3,8 +3,6 @@
 
 #include "GL_Loader.h"
 
-// TODO setup as private struct (deny any part of the code to edit some of these variables in any way)
-// Use namespaces?
 // Collezione indici per inviare dati allo shader
 extern GLuint projectionMatrixUniform;
 extern GLuint viewMatrixUniform;
@@ -25,6 +23,7 @@ extern GLuint diffusiveCoefficient;
 extern GLuint specularCoefficient;
 extern GLuint specularAlpha;
 extern GLuint eyePosition;
+extern GLuint lookAtUniform;
 
 extern GLuint gammaUniform;
 
@@ -40,6 +39,8 @@ extern GLuint viewPlayerUniform;
 
 extern GLuint cardTexUnif;
 extern GLuint backTexUnif;
+extern GLuint cardValueUniform;
+extern GLuint deckCardValueUniform;
 
 extern GLuint deckModelMatrix;
 extern GLuint deckViewMatrix;
@@ -65,7 +66,7 @@ extern SquareMatrix viewM_V2W;
 
 extern SquareMatrix cardModelM;
 
-extern std::vector<SquareMatrix> lightSpaceMs;
+extern SquareMatrix lightSpaceMs;
 
 extern unsigned int skipVertexIndex;
 extern unsigned int skipTextureIndex;

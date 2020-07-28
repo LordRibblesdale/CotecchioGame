@@ -31,9 +31,7 @@ GLuint cardTexture;
 GLuint backCardTexture;
 
 GLuint cardVAO;
-GLuint cardBuffer;
-GLuint editableUVCardBuffer;
-GLuint backUVCardBuffer;
+GLuint cardVBO;
 GLuint cardEBO;
 
 float screen[20] {
@@ -102,8 +100,7 @@ std::vector<unsigned int> materialIndices;
 const std::string TABLE_ASSETS_LOCATION("DATA_ASSETS\\Table_OBJ\\");
 const std::string DATA_ASSETS_LOCATION("DATA_ASSETS\\");
 
-// TODO setup light decay
-std::vector<std::unique_ptr<Light>> lights;
+std::unique_ptr<Light> light;
 
 std::vector<Player> players;
 

@@ -1,27 +1,11 @@
 #include "Card.h"
 #include "../../Graphics/SceneObjects.h"
 
-/*
 float cardVertices[32] {
         -0.5f, 0, -0.825f, 0, 0, 0, 1, 0,
         0.5f, 0, -0.825f, 1, 0, 0, 1, 0,
         -0.5f, 0, 0.825f, 0, 1, 0, 1, 0,
-        0.5f, 0, 0.825f, 1, 1, 0, 1, 0,
-};
- */
-
-float cardVertices[24] {
-        -0.5f, 0, -0.825f, 0, 1, 0,
-        0.5f, 0, -0.825f, 0, 1, 0,
-        -0.5f, 0, 0.825f, 0, 1, 0,
-        0.5f, 0, 0.825f, 0, 1, 0
-};
-
-float backUVArray[8] {
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1
+        0.5f, 0, 0.825f, 1, 1, 0, 1, 0
 };
 
 unsigned int vIndices[6] {
@@ -38,26 +22,11 @@ Card::Card(unsigned int vaule, unsigned short playerID)
    scale = std::move(Transform::scaleMatrix4(0.4, 0.4, 0.4));
    hand2Table = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
    rotationOnTable = std::move(std::make_unique<SquareMatrix>(std::move(Transform::scaleMatrix4(1, 1, 1))));
-
-   u = (value%10)*0.1f;
-   v = ((value/10)-1)*0.25f;
-
-   cardUVArray[0] = u;
-   cardUVArray[1] = v;
-
-   cardUVArray[2] = u + 0.1f;
-   cardUVArray[3] = v;
-
-   cardUVArray[4] = u;
-   cardUVArray[5] = v + 0.25f;
-
-   cardUVArray[6] = u + 0.1f;
-   cardUVArray[7] = v + 0.25f;
 }
 
 Card::Card(const Card &card) : local2World(card.local2World), translate(card.translate), qRotate(card.qRotate),
                                  rotate(card.rotate), scale(card.scale), partialLocal2World(card.partialLocal2World),
-                                 value(card.value), playerID(card.playerID), u(card.u), v(card.v)  {
+                                 value(card.value), playerID(card.playerID) {
    Card::scale = card.scale;
    Card::t = card.t;
    Card::tmp = card.tmp;
@@ -73,16 +42,11 @@ Card::Card(const Card &card) : local2World(card.local2World), translate(card.tra
    } else {
       rotationOnTable = std::move(std::make_unique<SquareMatrix>(*card.rotationOnTable));
    }
-
-   // Is it the quickest/best optimised/clean way?
-   std::copy(card.cardUVArray, card.cardUVArray+8, cardUVArray);
 }
 
 Card& Card::operator=(const Card &card) {
    Card::value = card.value;
    Card::playerID = card.playerID;
-   Card::u = card.u;
-   Card::v = card.v;
    Card::t = card.t;
    Card::tmp = card.tmp;
 
@@ -105,17 +69,12 @@ Card& Card::operator=(const Card &card) {
       rotationOnTable = std::move(std::make_unique<SquareMatrix>(*card.rotationOnTable));
    }
 
-   // Is it the quickest/best optimised/clean way?
-   std::copy(card.cardUVArray, card.cardUVArray+8, cardUVArray);
-
    return *this;
 }
 
 Card::~Card() {
    playerID = 0;
    value = 0;
-   u = 0;
-   v = 0;
    angle = 0;
    handCards = 0;
 

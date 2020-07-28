@@ -15,8 +15,6 @@ void createPlayerPositions(unsigned short int nPlayers) {
 
    // TODO use dynamic index
    maxZ = objects.at(1).getHighestZPoint();
-   // TODO fix FurthestPoint
-   //maxX = objects.at(0).getFurthestXPoint();
 
    players.reserve(nPlayers);
 
@@ -27,7 +25,6 @@ void createPlayerPositions(unsigned short int nPlayers) {
 }
 
 void pollInput(GLFWwindow *window) {
-   //TODO add time-based input
    float speed = 0.01f + ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.04f : 0);
 
    // Funzione per l'input, esempio via tastiera
@@ -35,9 +32,7 @@ void pollInput(GLFWwindow *window) {
       glfwSetWindowShouldClose(window, true);
    }
 
-   //std::cout << (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) << std::endl;
    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
-      //std::cout << CARD_ANIMATION << " " << selectedCardIndex << " " << cardsOnTable.size() << std::endl;
       if (sumTimeCardAnimationTime == 0 && !CARD_ANIMATION && IS_GAME_STARTED) {
          if (selectedCardIndex != MAX_SIZE_T_VALUE) {
             cardAnimationTime = 1;
@@ -113,7 +108,7 @@ void pollInput(GLFWwindow *window) {
    }
 
    if (CARD_ANIMATION) {
-      if (!BUSY_AT_CARD_ANIMATION/* && selectedCardIndex != MAX_SIZE_T_VALUE*/) {
+      if (!BUSY_AT_CARD_ANIMATION) {
          BUSY_AT_CARD_ANIMATION = true;
 
          if (sumTimeCardAnimationTime == 0) {
@@ -227,8 +222,7 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
          float angle = atanf(diffX/100.0f);
 
          Float3 tmp(move((camera.getLookAt() - camera.getEye()).getNormalized()));
-         // TODO implement methods with reference access (reduce copies)
-         tmp = move(Rotation::axisZRotateVertex3(tmp, -angle));
+         tmp = std::move(Rotation::axisZRotateVertex3(tmp, -angle));
 
          tmp += camera.getEye();
          camera.setLookAt(tmp);
@@ -241,11 +235,9 @@ void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos) {
 
          Float3 tmp(move((camera.getLookAt() - camera.getEye()).getNormalized()));
 
-         //TODO fix angle rotation
-         //tmp = move(Rotation::axisZRotateVertex3(tmp, camera.getYawAngle()*0.5f));
+         // TODO fix camera
          tmp = (tmp.getY() < 0 ? std::move(Rotation::axisXRotateVertex3(tmp, angle)) : std::move(Rotation::axisXRotateVertex3(tmp, -angle)))
-               + (tmp.getX() > 0 ? std::move(Rotation::axisYRotateVertex3(tmp, angle)) : std::move(Rotation::axisYRotateVertex3(tmp, -angle)));// + std::move(Rotation::axisYRotateVertex3(tmp, -angle));
-         //tmp = move(Rotation::axisZRotateVertex3(tmp, -camera.getYawAngle()*0.5f));
+               + (tmp.getX() > 0 ? std::move(Rotation::axisYRotateVertex3(tmp, angle)) : std::move(Rotation::axisYRotateVertex3(tmp, -angle)));
          tmp += camera.getEye();
 
          camera.setLookAt(tmp);

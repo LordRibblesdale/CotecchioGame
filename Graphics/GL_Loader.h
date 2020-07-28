@@ -89,10 +89,6 @@ static int initialise() {
    compileShaders();
    loadObjects();
 
-   int max = 0;
-   glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max);
-   std::cout << max << std::endl;
-
    // Chiamate di GLAD e di GLFW: creazione di Render Loop (infinito, finisce quando esce dalla finestra)
    render();
    cleanMemory();

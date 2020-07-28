@@ -19,6 +19,7 @@ GLuint diffusiveCoefficient;
 GLuint specularCoefficient;
 GLuint specularAlpha;
 GLuint eyePosition;
+GLuint lookAtUniform;
 
 GLuint gammaUniform;
 GLuint fixedColorUniform;
@@ -32,6 +33,8 @@ GLuint viewPlayerUniform;
 
 GLuint cardTexUnif;
 GLuint backTexUnif;
+GLuint cardValueUniform;
+GLuint deckCardValueUniform;
 
 GLuint deckModelMatrix;
 GLuint deckViewMatrix;
@@ -56,7 +59,7 @@ SquareMatrix viewM_V2W(4, {});
 
 SquareMatrix cardModelM(4, {});
 
-std::vector<SquareMatrix> lightSpaceMs;
+SquareMatrix lightSpaceMs(4, {});
 
 unsigned int skipVertexIndex = 0;
 unsigned int skipTextureIndex = 0;
