@@ -27,8 +27,6 @@ extern GLuint lookAtUniform;
 
 extern GLuint gammaUniform;
 
-extern GLuint fixedColorUniform;
-
 extern GLuint blurUniform;
 
 extern GLuint cardModelMatrix;

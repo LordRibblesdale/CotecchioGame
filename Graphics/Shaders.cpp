@@ -29,7 +29,7 @@ void compileShader(const string &vLocation, const string &fLocation,
    char infoLog[512];
 
    std::string source;
-   loadShader(source, vLocation);
+   loadShader(source, DATA_ASSETS_LOCATION + vLocation);
    char* charSource(const_cast<char *>(source.c_str()));
 
    if (!charSource) {
@@ -53,7 +53,7 @@ void compileShader(const string &vLocation, const string &fLocation,
       std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
    }
 
-   loadShader(source, fLocation);
+   loadShader(source, DATA_ASSETS_LOCATION + fLocation);
    charSource = const_cast<char *>(source.c_str());
 
    if (!charSource) {
@@ -101,9 +101,7 @@ void compileShader(const string &vLocation, const string &fLocation,
 
 void loadShader(std::string &string, const std::string& location) {
    std::ifstream file(location);
-   std::string s((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-   string = s.c_str();
+   string = std::move(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
 }
 
 GLuint createTextureUniform() {
@@ -165,7 +163,7 @@ void loadTextureOnGPU(unsigned char*& data, GLuint& texUniform, int& channels, i
 
       glBindTexture(GL_TEXTURE_2D, 0);
    } else {
-      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+      std::cout << "Error IMG_LOAD: image not loaded. " << texUniform << std::endl;
    }
 }
 
@@ -335,6 +333,6 @@ void loadIcon(const std::string& location) {
    if (icon->pixels) {
       glfwSetWindowIcon(window, 1, icon);
    } else {
-      std::cout << "Error IMG_LOAD: image not loaded." << std::endl;
+      std::cout << "Error IMG_LOAD: image not loaded. [ICON]" << std::endl;
    }
 }

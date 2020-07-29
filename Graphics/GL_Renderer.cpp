@@ -30,8 +30,6 @@ void setupRenderVariables() {
 
    gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
 
-   fixedColorUniform = glGetUniformLocation(shaderProgram, "color");
-
    blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
 
    cardModelMatrix = glGetUniformLocation(cardsShader, "model");
@@ -186,9 +184,8 @@ void renderSceneObjects() {
    for (auto & object : objects) {
       //modelM_L2W = object.getWorldCoordinates();
 
-      //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, modelM_L2W.getArray());
-      //glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getLocal2WorldMatrix().getArray());
-      glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getWorldCoordinates().getArray());
+      // Già stata calcolata la matrice nello step dello shadow mapping
+      glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getLocal2WorldMatrix().getArray());
 
       for (auto j = 0; j < object.getMeshes().size(); ++j) {
          if (object.doesHaveTextures()) {
@@ -225,8 +222,6 @@ void renderSceneObjects() {
             glUniform3f(ambientCUniform, materials.at(materials.size() - 1).ambientCoeff.getX(),
                         materials.at(materials.size()-1).ambientCoeff.getY(),
                         materials.at(materials.size()-1).ambientCoeff.getZ());
-
-            //glUniform3f(fixedColorUniform, 0.2f, 0.2f, 0.2f);
          }
 
          if (object.doesNeedNoCulling()) {

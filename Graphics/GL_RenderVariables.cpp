@@ -22,7 +22,6 @@ GLuint eyePositionUniform;
 GLuint lookAtUniform;
 
 GLuint gammaUniform;
-GLuint fixedColorUniform;
 GLuint blurUniform;
 
 GLuint cardModelMatrix;

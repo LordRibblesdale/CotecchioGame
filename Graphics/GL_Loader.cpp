@@ -176,28 +176,28 @@ void compileShaders() {
    * Operazione su valori binari, invia chiamata sulla scheda grafica
    */
 
-   compileShader("Graphics/Shader Files/texture_vertex.glsl", "Graphics/Shader Files/texture_fragment.glsl", shaderProgram);
+   compileShader("Shader Files/texture_vertex.glsl", "Shader Files/texture_fragment.glsl", shaderProgram);
 
    //--------------------------OFFLINE RENDERING--------------------------------//
 
-   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/offline_fragment.glsl", offlineShaderProgram);
+   compileShader("Shader Files/offline_vertex.glsl", "Shader Files/offline_fragment.glsl", offlineShaderProgram);
 
    //---------------------------CARD RENDERING--------------------------------//
 
-   compileShader("Graphics/Shader Files/cards_vertex.glsl", "Graphics/Shader Files/cards_fragment.glsl", cardsShader);
-   compileShader("Graphics/Shader Files/deck_vertex.glsl", "Graphics/Shader Files/deck_fragment.glsl", deckShader);
+   compileShader("Shader Files/cards_vertex.glsl", "Shader Files/cards_fragment.glsl", cardsShader);
+   compileShader("Shader Files/deck_vertex.glsl", "Shader Files/deck_fragment.glsl", deckShader);
 
    //---------------------------STENCIL RENDERING--------------------------------//
 
-   compileShader("Graphics/Shader Files/color_vertex.glsl", "Graphics/Shader Files/color_fragment.glsl", colorShader);
+   compileShader("Shader Files/color_vertex.glsl", "Shader Files/color_fragment.glsl", colorShader);
 
    //----------------------------SHADOW RENDERING--------------------------------//
 
-   compileShader("Graphics/Shader Files/light_vertex.glsl", "Graphics/Shader Files/light_fragment.glsl", lightShader);
+   compileShader("Shader Files/light_vertex.glsl", "Shader Files/light_fragment.glsl", lightShader);
 
    //------------------------------DEBUG SHADER----------------------------------//
 
-   compileShader("Graphics/Shader Files/offline_vertex.glsl", "Graphics/Shader Files/debug_fragment.glsl", debugShader);
+   compileShader("Shader Files/offline_vertex.glsl", "Shader Files/debug_fragment.glsl", debugShader);
 }
 
 void prepareScreenForOfflineRendering() {
