@@ -50,10 +50,12 @@ void pollInput(GLFWwindow *window) {
    }
 
    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-      if (sumTimeTranslCamera == 0) {
-         cameraPlayerPositionTime = 1;
+      if (IS_GAME_STARTED) {
+         if (sumTimeTranslCamera == 0) {
+            cameraPlayerPositionTime = 1;
 
-         PLAYER_TRANSLATION_CAMERA = true;
+            PLAYER_TRANSLATION_CAMERA = true;
+         }
       }
    }
 

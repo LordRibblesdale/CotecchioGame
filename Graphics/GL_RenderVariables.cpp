@@ -4,8 +4,8 @@ GLuint projectionMatrixUniform;
 GLuint viewMatrixUniform;
 GLuint modelMatrixUniform;
 
-GLuint texUnif;
-GLuint bumpUnif;
+GLuint textureUniform;
+GLuint bumpUniform;
 
 GLuint tangentUniform;
 GLuint bitangentUniform;
@@ -14,11 +14,11 @@ GLuint lightPosUniform;
 GLuint lightColorUniform;
 GLuint lightIntensity;
 
-GLuint ambientCoefficient;
-GLuint diffusiveCoefficient;
-GLuint specularCoefficient;
-GLuint specularAlpha;
-GLuint eyePosition;
+GLuint ambientCUniform;
+GLuint diffusiveCUniform;
+GLuint specularCUniform;
+GLuint specularAlphaUniform;
+GLuint eyePositionUniform;
 GLuint lookAtUniform;
 
 GLuint gammaUniform;
@@ -31,8 +31,8 @@ GLuint cardProjectionMatrix;
 GLuint playerIndexUniform;
 GLuint viewPlayerUniform;
 
-GLuint cardTexUnif;
-GLuint backTexUnif;
+GLuint cardTexUniform;
+GLuint backTexUniform;
 GLuint cardValueUniform;
 GLuint deckCardValueUniform;
 
@@ -40,7 +40,7 @@ GLuint deckModelMatrix;
 GLuint deckViewMatrix;
 GLuint deckProjectionMatrix;
 
-GLuint deckCardTexUnif;
+GLuint deckCardTexUniform;
 
 GLuint colorModelMatrix;
 GLuint colorViewMatrix;
@@ -52,6 +52,10 @@ GLuint lsmMainShaderUniform;
 GLuint depthMapUniform;
 
 GLuint offlineFBTextureUniform;
+
+GLuint nearPlaneUniform;
+GLuint farPlaneUniform;
+GLuint debugMapUniform;
 
 SquareMatrix projM_V2C(4, {});
 SquareMatrix viewM_W2V(4, {});

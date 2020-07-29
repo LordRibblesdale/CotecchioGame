@@ -11,8 +11,8 @@ void setupRenderVariables() {
    viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
    modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
 
-   texUnif = glGetUniformLocation(shaderProgram, "texture1");
-   bumpUnif = glGetUniformLocation(shaderProgram, "normalTexture");
+   textureUniform = glGetUniformLocation(shaderProgram, "texture1");
+   bumpUniform = glGetUniformLocation(shaderProgram, "normalTexture");
 
    tangentUniform = glGetUniformLocation(shaderProgram, "tangent");
    bitangentUniform = glGetUniformLocation(shaderProgram, "bitangent");
@@ -21,11 +21,11 @@ void setupRenderVariables() {
    lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
    lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
 
-   ambientCoefficient = glGetUniformLocation(shaderProgram, "ambientCoefficient");
-   diffusiveCoefficient = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
-   specularCoefficient = glGetUniformLocation(shaderProgram, "specularCoefficient");
-   specularAlpha = glGetUniformLocation(shaderProgram, "specularAlpha");
-   eyePosition = glGetUniformLocation(shaderProgram, "eye");
+   ambientCUniform = glGetUniformLocation(shaderProgram, "ambientCoefficient");
+   diffusiveCUniform = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
+   specularCUniform = glGetUniformLocation(shaderProgram, "specularCoefficient");
+   specularAlphaUniform = glGetUniformLocation(shaderProgram, "specularAlpha");
+   eyePositionUniform = glGetUniformLocation(shaderProgram, "eye");
    lookAtUniform = glGetUniformLocation(shaderProgram, "lookAt");
 
    gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
@@ -40,8 +40,8 @@ void setupRenderVariables() {
    playerIndexUniform = glGetUniformLocation(cardsShader, "currentPlayer");
    viewPlayerUniform = glGetUniformLocation(cardsShader, "viewPlayer");
 
-   cardTexUnif = glGetUniformLocation(cardsShader, "cardTexture");
-   backTexUnif = glGetUniformLocation(cardsShader, "backTexture");
+   cardTexUniform = glGetUniformLocation(cardsShader, "cardTexture");
+   backTexUniform = glGetUniformLocation(cardsShader, "backTexture");
    cardValueUniform = glGetUniformLocation(cardsShader, "cardValue");
    deckCardValueUniform = glGetUniformLocation(deckShader, "cardValue");
 
@@ -49,7 +49,7 @@ void setupRenderVariables() {
    deckViewMatrix = glGetUniformLocation(deckShader, "view");
    deckProjectionMatrix = glGetUniformLocation(deckShader, "projection");
 
-   deckCardTexUnif = glGetUniformLocation(deckShader, "cardTexture");
+   deckCardTexUniform = glGetUniformLocation(deckShader, "cardTexture");
 
    colorModelMatrix = glGetUniformLocation(colorShader, "model");
    colorViewMatrix = glGetUniformLocation(colorShader, "view");
@@ -61,6 +61,10 @@ void setupRenderVariables() {
    depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
 
    offlineFBTextureUniform = glGetUniformLocation(offlineShaderProgram, "offlineRendering");
+
+   nearPlaneUniform = glGetUniformLocation(debugShader, "near_plane");
+   farPlaneUniform = glGetUniformLocation(debugShader, "far_plane");
+   debugMapUniform = glGetUniformLocation(debugShader, "depthMap");
 }
 
 void renderShadowMap() {
@@ -157,7 +161,7 @@ void renderSceneObjects() {
    glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, viewM_W2V.getArray());
    glUniformMatrix4fv(lsmMainShaderUniform, 1, GL_TRUE, lightSpaceMs.getArray());
 
-   glUniform3f(eyePosition, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
+   glUniform3f(eyePositionUniform, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
    glUniform3f(lookAtUniform, camera.getLookAt().getX(), camera.getLookAt().getY(), camera.getLookAt().getZ());
 
    glUniform3f(lightPosUniform, light->getOrigin().getX(), light->getOrigin().getY(), light->getOrigin().getZ());
@@ -165,8 +169,8 @@ void renderSceneObjects() {
    glUniform1f(lightIntensity, light->getIntensity());
 
    // Caricare vertexArrayObject interessato
-   glUniform1i(texUnif, 0);
-   glUniform1i(bumpUnif, 1);
+   glUniform1i(textureUniform, 0);
+   glUniform1i(bumpUniform, 1);
    glUniform1i(depthMapUniform, 10);
 
    glActiveTexture(GL_TEXTURE10);
@@ -188,16 +192,16 @@ void renderSceneObjects() {
 
       for (auto j = 0; j < object.getMeshes().size(); ++j) {
          if (object.doesHaveTextures()) {
-            glUniform3f(ambientCoefficient, materials.at(materialIndices.at(j)).ambientCoeff.getX(),
+            glUniform3f(ambientCUniform, materials.at(materialIndices.at(j)).ambientCoeff.getX(),
                         materials.at(materialIndices.at(j)).ambientCoeff.getY(),
                         materials.at(materialIndices.at(j)).ambientCoeff.getZ());
-            glUniform3f(diffusiveCoefficient, materials.at(materialIndices.at(j)).diffuseCoeff.getX(),
+            glUniform3f(diffusiveCUniform, materials.at(materialIndices.at(j)).diffuseCoeff.getX(),
                         materials.at(materialIndices.at(j)).diffuseCoeff.getY(),
                         materials.at(materialIndices.at(j)).diffuseCoeff.getZ());
-            glUniform3f(specularCoefficient, materials.at(materialIndices.at(j)).specularCoeff.getX(),
+            glUniform3f(specularCUniform, materials.at(materialIndices.at(j)).specularCoeff.getX(),
                         materials.at(materialIndices.at(j)).specularCoeff.getY(),
                         materials.at(materialIndices.at(j)).specularCoeff.getZ());
-            glUniform1f(specularAlpha, materials.at(materialIndices.at(j)).shininess);
+            glUniform1f(specularAlphaUniform, materials.at(materialIndices.at(j)).shininess);
 
             // if (materialIndices.at(j) == 1) {}
 
@@ -218,11 +222,11 @@ void renderSceneObjects() {
                         object.getMeshes().at(j).getBitangent().getY(),
                         object.getMeshes().at(j).getBitangent().getZ());
          } else {
-            glUniform3f(ambientCoefficient, materials.at(materials.size()-1).ambientCoeff.getX(),
+            glUniform3f(ambientCUniform, materials.at(materials.size() - 1).ambientCoeff.getX(),
                         materials.at(materials.size()-1).ambientCoeff.getY(),
                         materials.at(materials.size()-1).ambientCoeff.getZ());
 
-            glUniform3f(fixedColorUniform, 0.2f, 0.2f, 0.2f);
+            //glUniform3f(fixedColorUniform, 0.2f, 0.2f, 0.2f);
          }
 
          if (object.doesNeedNoCulling()) {
@@ -277,13 +281,14 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
                                     */
 
             Float4 p0(std::move(cardModelM.multiplyVector(Float4(cardVertices[0], cardVertices[1], cardVertices[2], 1))));
-            Float4 p1(std::move(cardModelM.multiplyVector(Float4(cardVertices[6], cardVertices[7], cardVertices[8], 1))));
-            Float4 p2(std::move(cardModelM.multiplyVector(Float4(cardVertices[12], cardVertices[13], cardVertices[14], 1))));
-            Float4 p3(std::move(cardModelM.multiplyVector(Float4(cardVertices[18], cardVertices[19], cardVertices[20], 1))));
+            Float4 p1(std::move(cardModelM.multiplyVector(Float4(cardVertices[8], cardVertices[9], cardVertices[10], 1))));
+            Float4 p2(std::move(cardModelM.multiplyVector(Float4(cardVertices[16], cardVertices[17], cardVertices[18], 1))));
+            Float4 p3(std::move(cardModelM.multiplyVector(Float4(cardVertices[24], cardVertices[25], cardVertices[26], 1))));
 
             Triangle cardT1(p0, p1, p2);
             Triangle cardT2(p2, p1, p3);
 
+            // ATTENZIONE: questa impostazione vale per le on-axis camera
             // NDC -> Clip Space
             float xProj = (((2.0f*x)/static_cast<float>(X_RESOLUTION)) -1);
             float yProj = -(((2.0f*y)/static_cast<float>(Y_RESOLUTION)) -1);  // MINUS per via dell'asse invertito Y SCREEN rispetto a Y CLIP
@@ -295,7 +300,7 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
             // View Space -> World Space
             clipPoint = std::move(viewM_V2W.multiplyVector(clipPoint));
 
-            Ray ray(camera.getEye(), (Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized());
+            Ray ray(camera.getEye(), std::move((Float3(clipPoint.getFloat3()) - camera.getEye()).getNormalized()));
 
             TriangleIntersection i1(ray.getTriangleIntersection(cardT1));
             TriangleIntersection i2(ray.getTriangleIntersection(cardT2));
@@ -330,8 +335,8 @@ void renderCards() {
 
    glBindVertexArray(cardVAO);
 
-   glUniform1i(cardTexUnif, 3);
-   glUniform1i(backTexUnif, 4);
+   glUniform1i(cardTexUniform, 3);
+   glUniform1i(backTexUniform, 4);
 
    glActiveTexture(GL_TEXTURE3);
    glBindTexture(GL_TEXTURE_2D, cardTexture);
@@ -405,7 +410,7 @@ void renderCards() {
 
 void renderCardsOnTable() {
    glUseProgram(deckShader);
-   glUniform1i(deckCardTexUnif, 3);
+   glUniform1i(deckCardTexUniform, 3);
 
    // Needed?
    glBindVertexArray(cardVAO);

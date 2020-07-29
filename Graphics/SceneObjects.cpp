@@ -56,6 +56,8 @@ GLuint sVAO;
 GLuint sVBO;
 GLuint sEBO;
 
+GLuint tempVAO, tempVBO, tempEBO;
+
 float aspectRatio = 540.0f/960.0f;
 
 Float3 lookAt(0, 0, 5);

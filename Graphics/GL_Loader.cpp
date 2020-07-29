@@ -265,6 +265,24 @@ bool setupLightMap(Light* light) {
 }
 
 void prepareSceneLights() {
+   // Temporary generate shadow map visualizer
+   glGenVertexArrays(1, &tempVAO);
+   glGenBuffers(1, &tempVBO);
+   glGenBuffers(1, &tempEBO);
+
+   glBindVertexArray(tempVAO);
+   glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tempEBO);
+
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 20, screen2, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, screenIndices, GL_DYNAMIC_DRAW);
+
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
+   glEnableVertexAttribArray(0);
+
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glEnableVertexAttribArray(1);
+
    light = std::move(std::make_unique<SpotLight>(
          std::move(Float3(0, 0, 20)),
          Float3(0, 0, 0),
@@ -331,31 +349,12 @@ void render() {
       glDisable(GL_CULL_FACE);
       glDisable(GL_DEPTH_TEST);
 
+
       glUseProgram(debugShader);
 
-      glUniform1f(glGetUniformLocation(debugShader, "near_plane"), light->getCamera()->getNear());
-      glUniform1f(glGetUniformLocation(debugShader, "far_plane"), light->getCamera()->getFar());
-
-      //TODO change
-      GLuint tempVAO, tempVBO, tempEBO;
-      glGenVertexArrays(1, &tempVAO);
-      glGenBuffers(1, &tempVBO);
-      glGenBuffers(1, &tempEBO);
-
-      glBindVertexArray(tempVAO);
-      glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tempEBO);
-
-      glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 20, screen2, GL_DYNAMIC_DRAW);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, screenIndices, GL_DYNAMIC_DRAW);
-
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
-      glEnableVertexAttribArray(0);
-
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
-      glEnableVertexAttribArray(1);
-
-      glUniform1i(glGetUniformLocation(debugShader, "offlineRendering"), 2);
+      glUniform1f(nearPlaneUniform, light->getCamera()->getNear());
+      glUniform1f(farPlaneUniform, light->getCamera()->getFar());
+      glUniform1i(debugMapUniform, 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, lightTexture);
 
@@ -364,6 +363,7 @@ void render() {
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 
       glUseProgram(offlineShaderProgram);
 
@@ -374,10 +374,8 @@ void render() {
       glBindVertexArray(sVAO);
 
       glUniform1i(offlineFBTextureUniform, 2);
-      //glUniform1i(glGetUniformLocation(offlineFBTextureUniform, "offlineRendering"), 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
-      //glBindTexture(GL_TEXTURE_2D, lightTexture);
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -397,19 +395,14 @@ void render() {
        */
       glfwPollEvents();
       // Controlla tutti gli eventi in background (qualunque) OBBLIGATORIO
-
-      glDeleteBuffers(1, &tempVBO);
-      glDeleteBuffers(1, &tempEBO);
-      glDeleteVertexArrays(1, &tempVAO);
    }
 
    std::cout << printOpenGLError() << std::endl;
 }
 
 void cleanMemory() {
-   // TODO complete: adding remaining variables
    // Liberazione della memoria
-   for (int i = 0; i < vertexArrayObjects.size(); ++i) {
+   for (unsigned int i = 0; i < vertexArrayObjects.size(); ++i) {
       glDeleteBuffers(1, &vertexBufferObjects.at(i));
       glDeleteBuffers(1, &elementBufferObjects.at(i));
       glDeleteVertexArrays(1, &vertexArrayObjects.at(i));
@@ -419,6 +412,38 @@ void cleanMemory() {
    glDeleteBuffers(1, &sVBO);
    glDeleteVertexArrays(1, &sVAO);
 
+   glDeleteBuffers(1, &cardVBO);
+   glDeleteBuffers(1, &cardEBO);
+   glDeleteVertexArrays(1, &cardVAO);
+
+   glDeleteBuffers(1, &tempVBO);
+   glDeleteBuffers(1, &tempEBO);
+   glDeleteVertexArrays(1, &tempVAO);
+
    glDeleteProgram(shaderProgram);
+   glDeleteProgram(offlineShaderProgram);
+   glDeleteProgram(cardsShader);
+   glDeleteProgram(deckShader);
+   glDeleteProgram(colorShader);
+   glDeleteProgram(lightShader);
+   glDeleteProgram(debugShader);
+
+   glDeleteRenderbuffers(1, &offlineRenderBufferObject);
+
    glDeleteFramebuffers(1, &offlineFrameBuffer);
+   glDeleteFramebuffers(1, &secondaryFrameBuffer);
+   glDeleteFramebuffers(1, &lightFrameBuffer);
+
+   importer->FreeScene();
+   importer.reset();
+
+   objects.clear();
+   cardsOnTable.clear();
+
+   materialIndices.clear();
+   materials.clear();
+
+   light.reset();
+
+   players.clear();
 }

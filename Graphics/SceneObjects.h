@@ -71,6 +71,8 @@ extern GLuint sVAO;
 extern GLuint sVBO;
 extern GLuint sEBO;
 
+extern GLuint tempVAO, tempVBO, tempEBO;
+
 //--------------------------------------------------------------//
 
 extern float aspectRatio;

@@ -3,7 +3,7 @@
 in vec2 textureUV;
 out vec4 fragColor;
 
-uniform sampler2D offlineRendering;
+uniform sampler2D shadowMap;
 uniform float near_plane;
 uniform float far_plane;
 
@@ -13,7 +13,7 @@ float LinearizeDepth(float depth) {
 }
 
 void main() {
-    float depth = texture(offlineRendering, textureUV).r;
+    float depth = texture(shadowMap, textureUV).r;
     depth = LinearizeDepth(depth) / far_plane;
     fragColor = vec4(vec3(depth), 1.0);
 }
