@@ -13,7 +13,7 @@
 #endif
 #include <assimp/Importer.hpp>
 
-#include "../Utilities/Camera.h"
+#include "../Utilities/Camera/PerspectiveCamera.h"
 #include "../Scripting/CameraRotation.h"
 #include "../Scripting/CameraTranslation.h"
 #include "../Model/Model.h"
@@ -31,23 +31,23 @@ extern std::unique_ptr<Assimp::Importer> importer;
 
 //--------------------------------------------------------------//
 
-extern GLuint lightFrameBuffer;
-extern GLuint lightTexture;
+extern GLuint shadowMapFrameBuffer;
+extern GLuint shadowMapTexture;
 
 //--------------------------------------------------------------//
 
-extern GLuint shaderProgram;
-extern GLuint offlineShaderProgram;
+extern GLuint sceneToOfflineRenderingShader;
+extern GLuint offlineToWindowShader;
 extern GLuint cardsShader;
 extern GLuint deckShader;
-extern GLuint colorShader;
-extern GLuint lightShader;
+extern GLuint outlinerShader;
+extern GLuint shadowMapShader;
 extern GLuint debugShader;
 
 extern GLuint offlineFrameBuffer;
 extern GLuint offlineTexture;
 extern GLuint offlineRenderBufferObject;
-extern GLuint secondaryFrameBuffer;
+extern GLuint msaaSupportFrameBuffer;
 extern GLuint msaaOfflineTexture;
 
 extern std::vector<GLuint> vertexArrayObjects;   // Vertex Buffer Object, buffer per inviare i dettagli per dare dettagli del vertice
@@ -65,30 +65,26 @@ extern GLuint cardVBO;
 extern GLuint cardEBO;
 
 extern float screen[20];
-extern float screen2[20];
+extern float debugScreen[20];
 extern unsigned int screenIndices[6];
-extern GLuint sVAO;
-extern GLuint sVBO;
-extern GLuint sEBO;
+extern GLuint screenVAO;
+extern GLuint screenVBO;
+extern GLuint screenEBO;
 
-extern GLuint tempVAO, tempVBO, tempEBO;
+extern GLuint debugScreenVAO, debugScreenVBO, debugScreenEBO;
 
 //--------------------------------------------------------------//
 
 extern float aspectRatio;
 
-extern Float3 lookAt;
-extern Camera camera;
-extern float maxX;
-extern float maxY;
+extern Float3 defaultLookAt;
+extern PerspectiveCamera camera;
 extern float maxZ;
 
 extern double prevXPos, prevYPos;
 extern double prevTime, currTime, sumTimeTranslCamera;
 
-extern bool TRANSFORM_CAMERA;
 extern std::unique_ptr<CameraRotation> cameraRotation;
-extern double cameraAnimationTime;
 
 extern bool MENU_TRANSLATION_CAMERA;
 extern bool PLAYER_TRANSLATION_CAMERA;
@@ -104,7 +100,6 @@ extern unsigned short int sessionPlayers;
 //--------------------------------------------------------------//
 
 extern std::vector<Model> objects;
-extern std::stack<unsigned int> cardsValue;
 extern std::vector<Card> cardsOnTable;
 extern std::unique_ptr<CardMoving> cardMovingAnimation;
 extern size_t selectedCardIndex;
@@ -120,7 +115,7 @@ extern std::vector<unsigned int> materialIndices;
 extern const std::string TABLE_ASSETS_LOCATION;
 extern const std::string DATA_ASSETS_LOCATION;
 
-extern std::unique_ptr<Light> light;
+extern std::unique_ptr<SpotLight> light;
 
 //--------------------------------------------------------------//
 
@@ -132,5 +127,7 @@ extern std::vector<Player> players;
 extern bool DEVELOPER_MODE;
 extern bool IS_ANIMATION_BUSY;
 extern bool IS_GAME_STARTED;
+extern double backspaceButtonTime;
+extern double sumBSBTime;
 
 #endif //COTECCHIOGAME_SCENEOBJECTS_H

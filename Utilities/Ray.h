@@ -2,7 +2,6 @@
 #define RAY_H
 
 #include <memory>
-#include <utility>
 
 #include "../Vector/Float3.h"
 #include "../Model/Triangle.h"

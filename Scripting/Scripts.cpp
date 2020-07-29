@@ -25,7 +25,7 @@ void createPlayerPositions(unsigned short int nPlayers) {
 }
 
 void pollInput(GLFWwindow *window) {
-   float speed = 0.01f + ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.04f : 0);
+   float speed = (currTime - prevTime) * (5 + ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 15 : 0));
 
    // Funzione per l'input, esempio via tastiera
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -35,7 +35,7 @@ void pollInput(GLFWwindow *window) {
    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
       if (sumTimeCardAnimationTime == 0 && !CARD_ANIMATION && IS_GAME_STARTED) {
          if (selectedCardIndex != MAX_SIZE_T_VALUE) {
-            cardAnimationTime = 1;
+            cardAnimationTime = 0.5f;
 
             CARD_ANIMATION = true;
          }
@@ -60,7 +60,11 @@ void pollInput(GLFWwindow *window) {
    }
 
    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
-      DEVELOPER_MODE = !DEVELOPER_MODE;
+      if (sumBSBTime == 0) {
+         DEVELOPER_MODE = !DEVELOPER_MODE;
+
+         sumBSBTime = currTime - prevTime;
+      }
 
       if (DEVELOPER_MODE) {
          glfwSetCursorPosCallback(window, cursorPositionCallBack);
@@ -69,6 +73,8 @@ void pollInput(GLFWwindow *window) {
          glfwSetCursorPosCallback(window, nullptr);
          glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
       }
+   } else if (glfwGetMouseButton(window, GLFW_KEY_BACKSPACE) == GLFW_RELEASE) {
+      sumBSBTime = 0;
    }
 
    if (DEVELOPER_MODE) {
@@ -127,7 +133,7 @@ void pollInput(GLFWwindow *window) {
          if (sumTimeCardAnimationTime + diff <= cardAnimationTime) {
             sumTimeCardAnimationTime += diff;
 
-            cardMovingAnimation->moveCard(cardMovingAnimation->getCard()->tmp, sumTimeCardAnimationTime);
+            cardMovingAnimation->moveCard(cardMovingAnimation->getCard()->orthogonalTC2H, sumTimeCardAnimationTime);
          } else {
             cardMovingAnimation.reset();
             sumTimeCardAnimationTime = 0;
@@ -156,7 +162,7 @@ void pollInput(GLFWwindow *window) {
             increaseIndex();
 
             cameraRotation = std::move(std::make_unique<CameraRotation>(camera.getEye(), players.at(playerIndex).getPosition(), 0));
-            cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), lookAt));
+            cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), defaultLookAt));
          }
 
          if (sumTimeTranslCamera + diff <= cameraPlayerPositionTime) {
@@ -168,7 +174,7 @@ void pollInput(GLFWwindow *window) {
             cameraRotation.reset();
             cameraTranslation2.reset();
             camera.setEye(players.at(playerIndex).getPosition());
-            camera.setLookAt(lookAt);
+            camera.setLookAt(defaultLookAt);
             sumTimeTranslCamera = 0;
 
             PLAYER_TRANSLATION_CAMERA = false;
@@ -188,7 +194,7 @@ void pollInput(GLFWwindow *window) {
          if (!cameraTranslation) {
             // Quando necessario, 0 diventerà l'indice del giocatore
             cameraTranslation = std::move(std::make_unique<CameraTranslation>(camera.getEye(), players.at(0).getPosition()));
-            cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), lookAt));
+            cameraTranslation2 = std::move(std::make_unique<CameraTranslation>(camera.getLookAt(), defaultLookAt));
          }
 
          if (sumTimeTranslCamera + diff <= cameraPlayerPositionTime) {

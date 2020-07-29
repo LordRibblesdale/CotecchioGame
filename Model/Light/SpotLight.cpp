@@ -5,12 +5,12 @@ SpotLight::SpotLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 
    midAngle = degree2Radiants(35);
    maxAngle = degree2Radiants(45);
 
-   camera = std::move(std::make_unique<Camera>(origin, Float3(0, 0, 0), Float3(0, 0, 1), 2.5f, 100, -3, 3, -3, 3, maxAngle));
+   camera = std::move(std::make_unique<PerspectiveCamera>(origin, Float3(0, 0, 0), Float3(0, 0, 1), 2.5f, 100, -3, 3, -3, 3, maxAngle));
 }
 
 SpotLight::SpotLight(const Float3& origin, const Float3& lookAt, const Color& color1, float intensity, float midAngle_, float maxAngle_) : Light(origin, color1, intensity) {
    // Low-perspective aliasing
-   camera = std::move(std::make_unique<Camera>(origin, lookAt, Float3(0, 0, 1), 2.5f, 100, -3, 3, -3, 3, maxAngle_));
+   camera = std::move(std::make_unique<PerspectiveCamera>(origin, lookAt, Float3(0, 0, 1), 2.5f, 100, -3, 3, -3, 3, maxAngle_));
 
    midAngle = midAngle_;
    maxAngle = maxAngle_;
@@ -39,6 +39,18 @@ float SpotLight::getIrradiance(float angle) {
    }
 
    return intensity * falloff;
+}
+
+std::unique_ptr<PerspectiveCamera>& SpotLight::getCamera() {
+   return camera;
+}
+
+void SpotLight::setOrigin(const Float3 &origin) {
+   if (camera) {
+      camera->setEye(origin);
+   }
+
+   Light::origin = origin;
 }
 
 float SpotLight::getMaxAngle() const {

@@ -47,7 +47,7 @@ void initializeGLFW();
 bool setupWindowEnvironment();
 bool setupOfflineRendering();
 
-void compileShaders();
+bool compileShaders();
 
 void loadObjects();
 void loadCards();
@@ -84,10 +84,14 @@ static int initialise() {
       return EXIT_FAILURE;
    }
 
-   MAX_SIZE_T_VALUE = std::numeric_limits<size_t>::max();
+   if (!compileShaders()) {
+      std::cout << "Error SHADER_COMPILING: cannot compile shaders." << std::endl;
+      return EXIT_FAILURE;
+   }
 
-   compileShaders();
    loadObjects();
+
+   MAX_SIZE_T_VALUE = std::numeric_limits<size_t>::max();
 
    // Chiamate di GLAD e di GLFW: creazione di Render Loop (infinito, finisce quando esce dalla finestra)
    render();

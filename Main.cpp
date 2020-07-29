@@ -1,6 +1,4 @@
 #include "Graphics/GL_Loader.h"
-#include "Graphics/Settings.h"
-#include "Graphics/SceneObjects.h"
 #include <fstream>
 
 #include "rapidxml.hpp"

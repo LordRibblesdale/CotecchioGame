@@ -15,7 +15,7 @@ void refreshWindowSize(GLFWwindow *window, int width, int height) {
    camera.setAspectRatio(aspectRatio);
 
    if (ENABLE_MULTISAMPLING) {
-      glBindFramebuffer(GL_FRAMEBUFFER, secondaryFrameBuffer);
+      glBindFramebuffer(GL_FRAMEBUFFER, msaaSupportFrameBuffer);
       glBindRenderbuffer(GL_RENDERBUFFER, offlineRenderBufferObject);
       glRenderbufferStorageMultisample(GL_RENDERBUFFER, MULTISAMPLING_LEVEL, GL_DEPTH24_STENCIL8, X_RESOLUTION, Y_RESOLUTION);
 
@@ -80,7 +80,6 @@ bool setupWindowEnvironment() {
    }
 
    loadIcon("cotecchio.png");
-   //loadIcon("cotecchio.png", "cotecchio_small.png");
 
    return true;
 }
@@ -134,8 +133,8 @@ bool setupOfflineRendering() {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
       // Nuovo framebuffer per applicare post processing al risultato elaborato da antialiasing
-      glGenFramebuffers(1, &secondaryFrameBuffer);
-      glBindFramebuffer(GL_FRAMEBUFFER, secondaryFrameBuffer);
+      glGenFramebuffers(1, &msaaSupportFrameBuffer);
+      glBindFramebuffer(GL_FRAMEBUFFER, msaaSupportFrameBuffer);
    } else {
       // Utilizzo di Renderbuffer (buffer per il rendering, solo per scrittura ma non come lettura; unicamente assegnabile)
       // Generazione del RenderBufferObject (l'uso del RBO è per la sua ottimizzazione interna a OpenGL nel conservare le informazioni colore
@@ -169,45 +168,35 @@ bool setupOfflineRendering() {
    return status;
 }
 
-void compileShaders() {
-   /* Creazione dello shader (vertex o fragment)
-   * VERTEX SHADER
-   * Restituisce GL unsigned int, indice/puntatore dell'oggetto vertex shader creato dalla GPU
-   * Operazione su valori binari, invia chiamata sulla scheda grafica
-   */
-
-   compileShader("Shader Files/texture_vertex.glsl", "Shader Files/texture_fragment.glsl", shaderProgram);
-
-   //--------------------------OFFLINE RENDERING--------------------------------//
-
-   compileShader("Shader Files/offline_vertex.glsl", "Shader Files/offline_fragment.glsl", offlineShaderProgram);
-
-   //---------------------------CARD RENDERING--------------------------------//
-
-   compileShader("Shader Files/cards_vertex.glsl", "Shader Files/cards_fragment.glsl", cardsShader);
-   compileShader("Shader Files/deck_vertex.glsl", "Shader Files/deck_fragment.glsl", deckShader);
-
-   //---------------------------STENCIL RENDERING--------------------------------//
-
-   compileShader("Shader Files/color_vertex.glsl", "Shader Files/color_fragment.glsl", colorShader);
-
-   //----------------------------SHADOW RENDERING--------------------------------//
-
-   compileShader("Shader Files/light_vertex.glsl", "Shader Files/light_fragment.glsl", lightShader);
-
-   //------------------------------DEBUG SHADER----------------------------------//
-
-   compileShader("Shader Files/offline_vertex.glsl", "Shader Files/debug_fragment.glsl", debugShader);
+bool compileShaders() {
+   if (compileShader("Shader Files/scene_vertex.glsl", "Shader Files/scene_fragment.glsl", sceneToOfflineRenderingShader)
+         //--------------------------OFFLINE RENDERING--------------------------------//
+         && compileShader("Shader Files/window_vertex.glsl", "Shader Files/window_fragment.glsl", offlineToWindowShader)
+         //---------------------------CARD RENDERING--------------------------------//
+         && compileShader("Shader Files/cards_vertex.glsl", "Shader Files/cards_fragment.glsl", cardsShader)
+         && compileShader("Shader Files/deck_vertex.glsl", "Shader Files/deck_fragment.glsl", deckShader)
+         //---------------------------STENCIL RENDERING--------------------------------//
+         && compileShader("Shader Files/outliner_vertex.glsl", "Shader Files/outliner_fragment.glsl", outlinerShader)
+         //----------------------------SHADOW RENDERING--------------------------------//
+         && compileShader("Shader Files/shadow_map_vertex.glsl", "Shader Files/shadow_map_fragment.glsl", shadowMapShader)
+         //------------------------------DEBUG SHADER----------------------------------//
+         && compileShader("Shader Files/window_vertex.glsl", "Shader Files/debug_fragment.glsl", debugShader))
+   {
+      return true;
+   } else {
+      std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
+      return false;
+   }
 }
 
 void prepareScreenForOfflineRendering() {
-   glGenVertexArrays(1, &sVAO);
-   glGenBuffers(1, &sVBO);
-   glGenBuffers(1, &sEBO);
-   glBindVertexArray(sVAO);
+   glGenVertexArrays(1, &screenVAO);
+   glGenBuffers(1, &screenVBO);
+   glGenBuffers(1, &screenEBO);
+   glBindVertexArray(screenVAO);
 
-   glBindBuffer(GL_ARRAY_BUFFER, sVBO);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sEBO);
+   glBindBuffer(GL_ARRAY_BUFFER, screenVBO);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, screenEBO);
 
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 20, screen, GL_DYNAMIC_DRAW);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, screenIndices, GL_DYNAMIC_DRAW);
@@ -228,14 +217,14 @@ void prepareScreenForOfflineRendering() {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-bool setupLightMap(Light* light) {
+bool setupLightMap() {
    bool status;
 
    // Genero il buffer per il calcolo della profondità (confronto tra profondità)
    //glGenTextures(1, &light->getDepthMapAsReference());
-   glGenTextures(1, &lightTexture);
+   glGenTextures(1, &shadowMapTexture);
    //glBindTexture(GL_TEXTURE_2D, light->getDepthMapAsReference());
-   glBindTexture(GL_TEXTURE_2D, lightTexture);
+   glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_QUALITY, SHADOW_QUALITY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); // Ancora da non assegnare
    // Da analizzare come classica texture per l'accesso valori
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -247,12 +236,12 @@ bool setupLightMap(Light* light) {
 
    // Genero il framebuffer per il render della shadowmap
    //glGenFramebuffers(1, &light->getFrameBufferAsReference());
-   glGenFramebuffers(1, &lightFrameBuffer);
+   glGenFramebuffers(1, &shadowMapFrameBuffer);
    //glBindFramebuffer(GL_FRAMEBUFFER, light->getFrameBufferAsReference());
-   glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer);
+   glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFrameBuffer);
 
    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light->getDepthMapAsReference(), 0);
-   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, lightTexture, 0);
+   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMapTexture, 0);
    // Disattivo la scrittura e lettura, verrà usato solo per la profondità
    glReadBuffer(GL_NONE);
    glDrawBuffer(GL_NONE);
@@ -266,15 +255,15 @@ bool setupLightMap(Light* light) {
 
 void prepareSceneLights() {
    // Temporary generate shadow map visualizer
-   glGenVertexArrays(1, &tempVAO);
-   glGenBuffers(1, &tempVBO);
-   glGenBuffers(1, &tempEBO);
+   glGenVertexArrays(1, &debugScreenVAO);
+   glGenBuffers(1, &debugScreenVBO);
+   glGenBuffers(1, &debugScreenEBO);
 
-   glBindVertexArray(tempVAO);
-   glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tempEBO);
+   glBindVertexArray(debugScreenVAO);
+   glBindBuffer(GL_ARRAY_BUFFER, debugScreenVBO);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, debugScreenEBO);
 
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 20, screen2, GL_DYNAMIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 20, debugScreen, GL_DYNAMIC_DRAW);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, screenIndices, GL_DYNAMIC_DRAW);
 
    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
@@ -282,6 +271,10 @@ void prepareSceneLights() {
 
    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
+
+   glBindVertexArray(0);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
    light = std::move(std::make_unique<SpotLight>(
          std::move(Float3(0, 0, 20)),
@@ -292,7 +285,7 @@ void prepareSceneLights() {
          degree2Radiants(30),
          degree2Radiants(45)));
 
-   if (!setupLightMap(light.get())) {
+   if (!setupLightMap()) {
       std::cout << "Error SHADOW_MAP_LIGHT 0: Fragment not created." << std::endl;
    }
 }
@@ -333,18 +326,15 @@ void render() {
       // Downsampling del color buffer MSAA per riportarlo a risoluzione non upscalata
       if (ENABLE_MULTISAMPLING) {
          glBindFramebuffer(GL_READ_FRAMEBUFFER, offlineFrameBuffer);
-         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, secondaryFrameBuffer);
+         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, msaaSupportFrameBuffer);
          glBlitFramebuffer(0, 0, X_RESOLUTION, Y_RESOLUTION, 0, 0, X_RESOLUTION, Y_RESOLUTION, GL_COLOR_BUFFER_BIT, GL_NEAREST);
       }
 
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
       // Al cambio di framebuffer, è necessario reimpostarlo, come un normale ciclo
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
       glClearColor(0, 1, 0, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-      // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
 
       glDisable(GL_CULL_FACE);
       glDisable(GL_DEPTH_TEST);
@@ -352,27 +342,26 @@ void render() {
 
       glUseProgram(debugShader);
 
+      glBindVertexArray(debugScreenVAO);
       glUniform1f(nearPlaneUniform, light->getCamera()->getNear());
       glUniform1f(farPlaneUniform, light->getCamera()->getFar());
       glUniform1i(debugMapUniform, 2);
       glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_2D, lightTexture);
+      glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      // -------------------------------------------------------------- //
 
-
-      glUseProgram(offlineShaderProgram);
+      glUseProgram(offlineToWindowShader);
 
       if (MENU_TRANSLATION_CAMERA) {
          glUniform1f(blurUniform, blurValue);
       }
 
-      glBindVertexArray(sVAO);
+      glBindVertexArray(screenVAO);
 
+      // Accediamo alla texture che adesso è il nostro colore, e la assegneremo a schermo
       glUniform1i(offlineFBTextureUniform, 2);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, offlineTexture);
@@ -408,31 +397,31 @@ void cleanMemory() {
       glDeleteVertexArrays(1, &vertexArrayObjects.at(i));
    }
 
-   glDeleteBuffers(1, &sEBO);
-   glDeleteBuffers(1, &sVBO);
-   glDeleteVertexArrays(1, &sVAO);
+   glDeleteBuffers(1, &screenEBO);
+   glDeleteBuffers(1, &screenVBO);
+   glDeleteVertexArrays(1, &screenVAO);
 
    glDeleteBuffers(1, &cardVBO);
    glDeleteBuffers(1, &cardEBO);
    glDeleteVertexArrays(1, &cardVAO);
 
-   glDeleteBuffers(1, &tempVBO);
-   glDeleteBuffers(1, &tempEBO);
-   glDeleteVertexArrays(1, &tempVAO);
+   glDeleteBuffers(1, &debugScreenVBO);
+   glDeleteBuffers(1, &debugScreenEBO);
+   glDeleteVertexArrays(1, &debugScreenVAO);
 
-   glDeleteProgram(shaderProgram);
-   glDeleteProgram(offlineShaderProgram);
+   glDeleteProgram(sceneToOfflineRenderingShader);
+   glDeleteProgram(offlineToWindowShader);
    glDeleteProgram(cardsShader);
    glDeleteProgram(deckShader);
-   glDeleteProgram(colorShader);
-   glDeleteProgram(lightShader);
+   glDeleteProgram(outlinerShader);
+   glDeleteProgram(shadowMapShader);
    glDeleteProgram(debugShader);
 
    glDeleteRenderbuffers(1, &offlineRenderBufferObject);
 
    glDeleteFramebuffers(1, &offlineFrameBuffer);
-   glDeleteFramebuffers(1, &secondaryFrameBuffer);
-   glDeleteFramebuffers(1, &lightFrameBuffer);
+   glDeleteFramebuffers(1, &msaaSupportFrameBuffer);
+   glDeleteFramebuffers(1, &shadowMapFrameBuffer);
 
    importer->FreeScene();
    importer.reset();

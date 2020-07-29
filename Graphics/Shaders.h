@@ -74,9 +74,9 @@
  * Branching è tecnica erronea per la scrittura, poichè causa tempi asincroni per i pixel
  */
 
-void compileShader(const std::string& vLocation, const std::string& fLocation, GLuint& program);
+bool compileShader(const std::string& vLocation, const std::string& fLocation, GLuint& program);
 
-void loadShader(std::string& string, const std::string& location);
+void loadShader(std::string &string, const std::string& location);
 
 GLuint createTextureUniform();
 

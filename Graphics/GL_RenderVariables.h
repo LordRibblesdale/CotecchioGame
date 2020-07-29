@@ -23,7 +23,6 @@ extern GLuint diffusiveCUniform;
 extern GLuint specularCUniform;
 extern GLuint specularAlphaUniform;
 extern GLuint eyePositionUniform;
-extern GLuint lookAtUniform;
 
 extern GLuint gammaUniform;
 

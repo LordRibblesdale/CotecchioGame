@@ -27,10 +27,6 @@ const Float3 &Light::getOrigin() const {
 }
 
 void Light::setOrigin(const Float3 &origin) {
-   if (camera) {
-      camera->setEye(origin);
-   }
-
    Light::origin = origin;
 }
 
@@ -44,8 +40,4 @@ float Light::getIntensity() const {
 
 void Light::setIntensity(float intensity) {
    Light::intensity = intensity;
-}
-
-std::unique_ptr<Camera>& Light::getCamera() {
-   return camera;
 }

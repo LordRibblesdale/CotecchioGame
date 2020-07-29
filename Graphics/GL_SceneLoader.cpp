@@ -13,12 +13,13 @@
 void loadCards() {
    std::vector<unsigned short> values;
    // emplace_back duplica dimensioni della capacità originale se necessita riallocazione
-   // Il minimo di carte è 35, un possibile riallocamento restituisce 70 di capacity (30 * 4byte aggiuntivi e O(35))
+   // Il minimo di carte è 35, un possibile riallocamento restituisce 70 di capacity (30 * 4byte aggiuntivi e O(n) nello spostamento)
    // https://stackoverflow.com/questions/200384/constant-amortized-time
    // http://www.cplusplus.com/reference/vector/vector/emplace_back/
    values.reserve(40);
 
-   mt19937_64 gen(glfwGetTime());
+   std::stack<unsigned int> cardsValue;
+   mt19937_64 gen;
 
    for (auto i = 10; i < 50; ++i) {
       switch (PLAYERS) {
@@ -39,11 +40,10 @@ void loadCards() {
       values.emplace_back(i);
    }
 
-   std::shuffle(values.begin(), values.end(), gen);
-   gen.seed(glfwGetTime());
-   std::shuffle(values.begin(), values.end(), gen);
-   gen.seed(glfwGetTime());
-   std::shuffle(values.begin(), values.end(), gen);
+   for(unsigned int i = 0; i < 3; ++i) {
+      gen.seed(glfwGetTime());
+      std::shuffle(values.begin(), values.end(), gen);
+   }
 
    for (auto& value : values) {
       cardsValue.push(value);
@@ -93,8 +93,9 @@ void loadObjects() {
    // TODO initial translation, rotation and scale
    importer = std::move(std::make_unique<Assimp::Importer>());
 
-   loadObject(DATA_ASSETS_LOCATION, "World", WORLD_TYPE);
+   objects.reserve(2);
 
+   loadObject(DATA_ASSETS_LOCATION, "World", WORLD_TYPE);
    loadObject(TABLE_ASSETS_LOCATION, "Table", TABLE_TYPE);
 
    unsigned long verticesLenght = 0;
@@ -120,11 +121,11 @@ void loadObjects() {
       }
 
       /* Richiesta della posizione della texture
-       * Ricerca dello uniform nello shaderProgram necessario, laddove serve caricarlo
-         GLuint textureUniform = glGetUniformLocation(shaderProgram, "texture1");
+       * Ricerca dello uniform nello sceneToOfflineRenderingShader necessario, laddove serve caricarlo
+         GLuint textureUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "texture1");
        * Assegnazione e modifica uniform a prescindere
        * Uso glUseProgram per assegnare texture
-         glUseProgram(shaderProgram);
+         glUseProgram(sceneToOfflineRenderingShader);
        * Assegnazione valore della texture a uno specifico canale di OpenGL
        * Canali limitati, massimo un certo numero di texture contemporaneamente
          glUniform1i(textureUniform, 0);
@@ -152,7 +153,6 @@ void generateObjects(Mesh &mesh) {
    */
    GLuint vao;
    GLuint vbo;
-   //GLuint vbo2;
    GLuint ebo;
 
    // Genera il Vertex Array Object

@@ -7,7 +7,7 @@ CardMoving::CardMoving(Card* card, double totalDuration) : card(card), totalDura
    angle = card->angle;
 
    height = std::move(Float3(0, 0, maxZ));
-   dir = std::move(card->t - height);
+   dir = std::move(card->tableCenterToHand - height);
 }
 
 void CardMoving::moveCard(const Float3& direction, double duration) const {

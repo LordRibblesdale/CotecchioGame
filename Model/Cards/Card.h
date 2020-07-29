@@ -19,12 +19,12 @@ struct Card {
    std::unique_ptr<SquareMatrix> hand2Table;
    std::unique_ptr<SquareMatrix> rotationOnTable;
 
-   Float3 t;                  // Vettore distanziatore tra il centro del tavolo e le carte
-   Float3 tmp;                // Vettore ortogonale al vettore distanziatore
-   SquareMatrix translate;    // Matrice di traslazione di ogni carta
-   SquareMatrix qRotate;      // Matrice di rotazione della carta in mano
-   SquareMatrix rotate;       // Matrice di rotazione della mano rispetto al giocatore
-   SquareMatrix scale;        // Matrice di scala delle carte
+   Float3         tableCenterToHand;   // Vettore distanziatore tra il centro del tavolo e le carte
+   Float3         orthogonalTC2H;      // Vettore ortogonale al vettore distanziatore
+   SquareMatrix   translate;           // Matrice di traslazione di ogni carta
+   SquareMatrix   qRotate;             // Matrice di rotazione della carta in mano
+   SquareMatrix   rotate;              // Matrice di rotazione della mano rispetto al giocatore
+   SquareMatrix   scale;               // Matrice di scala delle carte
 
    SquareMatrix partialLocal2World;
 
@@ -47,7 +47,6 @@ struct Card {
 
     void setupCard();
 
-   // Scritta appositamente per crearla come copia
    const SquareMatrix& getLocal2World() const;
 
    Float4 getWorldCardCenter();

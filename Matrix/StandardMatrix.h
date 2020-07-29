@@ -3,7 +3,7 @@
 
 #include "../Vector/Float4.h"
 #include "SquareMatrix.h"
-#include "../Utilities/Camera.h"
+#include "../Utilities/Camera/Camera.h"
 #include <cmath>
 
 #define M_PI		3.14159265358979323846
@@ -37,20 +37,6 @@ namespace Transform {
    SquareMatrix translateMatrix4(float x, float y, float z);
 
    Float3 scaleVector3(const Float3& vector, float scaleX, float scaleY, float scaleZ);
-}
-
-namespace Projection {
-   SquareMatrix view2ClipProjectiveMatrix(const float& right, const float& left, const float& near, const float& far, const float& top,
-                                          const float& bottom);
-
-   SquareMatrix onAxisView2ClipProjectiveMatrix(const float& right, const float& top, const float& near, const float& far);
-   SquareMatrix onAxisFOV2ClipProjectiveMatrix(const Camera& camera);
-
-   SquareMatrix orthogonalProjection(const float& right, const float& left, const float& near, const float& far, const float& top,
-                                     const float& bottom);
-
-   SquareMatrix onAxisOrthogonalProjection(const float& right, const float& top, const float& near, const float& far);
-   SquareMatrix onAxisOrthogonalProjectionByCamera(const Camera& camera);
 }
 
 static float degree2Radiants(float degree) {

@@ -5,39 +5,41 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
-//#include <thread>
-//#include <mutex>
 #include "SceneObjects.h"
-
 #include "rapidxml.hpp"
 
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "../IO/stb-master/stb_image.h"
 
-//std::mutex mutex;
-
 int report;
 
-unsigned int WOOD_INDEX = -1;
-unsigned int VELVET_INDEX = -1;
+void loadShader(std::string &string, const std::string& location) {
+   std::ifstream file(location);
+   string = std::move(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
+}
 
-void compileShader(const string &vLocation, const string &fLocation,
-                   GLuint &program) {
+bool compileShader(const string &vLocation, const string &fLocation, GLuint &program) {
+   /* Creazione dello shader (vertex o fragment)
+    * VERTEX SHADER
+    * Restituisce GL unsigned int, indice/puntatore dell'oggetto vertex shader creato dalla GPU
+    * Operazione su valori binari, invia chiamata sulla scheda grafica
+    */
+
    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
    // Variabili per il controllo di errori
    char infoLog[512];
 
-   std::string source;
-   loadShader(source, DATA_ASSETS_LOCATION + vLocation);
-   char* charSource(const_cast<char *>(source.c_str()));
+   std::string charSource;
+   loadShader(charSource, DATA_ASSETS_LOCATION + vLocation);
 
-   if (!charSource) {
+   if (charSource.empty()) {
       std::cout << "Error VERTEX_FILE_IMPORT" << std::endl;
+      return false;
    }
 
    // Assegnazione codice allo shader (handle), assegnazione char* (codice GLSL da compilare)
-   glShaderSource(vertexShader, 1, &charSource, nullptr);
+   glShaderSource(vertexShader, 1, &charSource.begin().base(), nullptr);
    // Compilazione shader
    glCompileShader(vertexShader);
 
@@ -51,20 +53,21 @@ void compileShader(const string &vLocation, const string &fLocation,
       glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
 
       std::cout << "Error INFOLOG_COMPILE_VERTEX" << std::endl;
+      return false;
    }
 
-   loadShader(source, DATA_ASSETS_LOCATION + fLocation);
-   charSource = const_cast<char *>(source.c_str());
+   loadShader(charSource, DATA_ASSETS_LOCATION + fLocation);
 
-   if (!charSource) {
+   if (charSource.empty()) {
       std::cout << "Error FRAGMENT_FILE_IMPORT" << std::endl;
+      return false;
    }
 
    /* FRAGMENT SHADER
     * Restituisce GL unsigned int, indice dell'oggetto fragment shader creato dalla GPU
     */
    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragmentShader, 1, &charSource, nullptr);
+   glShaderSource(fragmentShader, 1, &charSource.begin().base(), nullptr);
    glCompileShader(fragmentShader);
 
    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &report);
@@ -73,6 +76,7 @@ void compileShader(const string &vLocation, const string &fLocation,
       glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
 
       std::cout << "Error INFOLOG_COMPILE_FRAGMENT: " << infoLog << std::endl;
+      return false;
    }
 
    // Creazione contenitore (program), rappresenta la pipeline di rendering (nel senso delle possibilità programmabili dall'utente)
@@ -92,16 +96,14 @@ void compileShader(const string &vLocation, const string &fLocation,
       glGetProgramInfoLog(program, 512, nullptr, infoLog);
 
       std::cout << "Error INFOLOG_LINK_PROGRAM: " << infoLog << std::endl;
+      return false;
    }
 
    // Pulizia memoria dopo la compilazione e link
    glDeleteShader(vertexShader);
    glDeleteShader(fragmentShader);
-}
 
-void loadShader(std::string &string, const std::string& location) {
-   std::ifstream file(location);
-   string = std::move(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
+   return true;
 }
 
 GLuint createTextureUniform() {
@@ -218,12 +220,9 @@ void loadTexture(const std::string &location, const std::string &name, bool load
                     ));
 
             material.shininess = std::stof(position->first_node("Specular")->first_attribute("specularExp")->value());
-            WOOD_INDEX = materials.size();
          } else if (std::string("Velvet") == position->first_attribute("name")->value()) {
             material.diffuseCoeff = std::move(Float3(1, 1, 1));
             material.roughness = std::stof(position->first_node("PBR")->first_attribute("roughness")->value());
-
-            VELVET_INDEX = materials.size();
          } else if (std::string("Generic") == position->first_attribute("name")->value()) {
             material.diffuseCoeff = std::move(Float3(1, 1, 1));
          }

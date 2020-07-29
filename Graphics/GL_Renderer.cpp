@@ -7,30 +7,29 @@ void renderText() {
 
 void setupRenderVariables() {
    // Collezione indici per inviare dati allo shader
-   projectionMatrixUniform = glGetUniformLocation(shaderProgram, "projection");
-   viewMatrixUniform = glGetUniformLocation(shaderProgram, "view");
-   modelMatrixUniform = glGetUniformLocation(shaderProgram, "model");
+   projectionMatrixUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "projection");
+   viewMatrixUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "view");
+   modelMatrixUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "model");
 
-   textureUniform = glGetUniformLocation(shaderProgram, "texture1");
-   bumpUniform = glGetUniformLocation(shaderProgram, "normalTexture");
+   textureUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "texture1");
+   bumpUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "normalTexture");
 
-   tangentUniform = glGetUniformLocation(shaderProgram, "tangent");
-   bitangentUniform = glGetUniformLocation(shaderProgram, "bitangent");
+   tangentUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "tangent");
+   bitangentUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "bitangent");
 
-   lightPosUniform = glGetUniformLocation(shaderProgram, "lightPos");
-   lightColorUniform = glGetUniformLocation(shaderProgram, "lightColor");
-   lightIntensity = glGetUniformLocation(shaderProgram, "lightIntensity");
+   lightPosUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "lightPos");
+   lightColorUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "lightColor");
+   lightIntensity = glGetUniformLocation(sceneToOfflineRenderingShader, "lightIntensity");
 
-   ambientCUniform = glGetUniformLocation(shaderProgram, "ambientCoefficient");
-   diffusiveCUniform = glGetUniformLocation(shaderProgram, "diffusiveCoefficient");
-   specularCUniform = glGetUniformLocation(shaderProgram, "specularCoefficient");
-   specularAlphaUniform = glGetUniformLocation(shaderProgram, "specularAlpha");
-   eyePositionUniform = glGetUniformLocation(shaderProgram, "eye");
-   lookAtUniform = glGetUniformLocation(shaderProgram, "lookAt");
+   ambientCUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "ambientCoefficient");
+   diffusiveCUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "diffusiveCoefficient");
+   specularCUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "specularCoefficient");
+   specularAlphaUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "specularAlpha");
+   eyePositionUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "eye");
 
-   gammaUniform = glGetUniformLocation(shaderProgram, "gammaCorrection");
+   gammaUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "gammaCorrection");
 
-   blurUniform = glGetUniformLocation(offlineShaderProgram, "blurValue");
+   blurUniform = glGetUniformLocation(offlineToWindowShader, "blurValue");
 
    cardModelMatrix = glGetUniformLocation(cardsShader, "model");
    cardViewMatrix = glGetUniformLocation(cardsShader, "view");
@@ -49,25 +48,25 @@ void setupRenderVariables() {
 
    deckCardTexUniform = glGetUniformLocation(deckShader, "cardTexture");
 
-   colorModelMatrix = glGetUniformLocation(colorShader, "model");
-   colorViewMatrix = glGetUniformLocation(colorShader, "view");
-   colorProjectionMatrix = glGetUniformLocation(colorShader, "projection");
+   colorModelMatrix = glGetUniformLocation(outlinerShader, "model");
+   colorViewMatrix = glGetUniformLocation(outlinerShader, "view");
+   colorProjectionMatrix = glGetUniformLocation(outlinerShader, "projection");
 
-   lightSpaceMatrixUniform = glGetUniformLocation(lightShader, "lightSpaceMatrix");
-   modelLightShaderUniform = glGetUniformLocation(lightShader, "modelMatrix");
-   lsmMainShaderUniform = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
-   depthMapUniform = glGetUniformLocation(shaderProgram, "depthMap");
+   lightSpaceMatrixUniform = glGetUniformLocation(shadowMapShader, "lightSpaceMatrix");
+   modelLightShaderUniform = glGetUniformLocation(shadowMapShader, "modelMatrix");
+   lsmMainShaderUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "lightSpaceMatrix");
+   depthMapUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "depthMap");
 
-   offlineFBTextureUniform = glGetUniformLocation(offlineShaderProgram, "offlineRendering");
+   offlineFBTextureUniform = glGetUniformLocation(offlineToWindowShader, "offlineRendering");
 
    nearPlaneUniform = glGetUniformLocation(debugShader, "near_plane");
    farPlaneUniform = glGetUniformLocation(debugShader, "far_plane");
-   debugMapUniform = glGetUniformLocation(debugShader, "depthMap");
+   debugMapUniform = glGetUniformLocation(debugShader, "shadowMap");
 }
 
 void renderShadowMap() {
    // Rendering shadow map
-   glUseProgram(lightShader);
+   glUseProgram(shadowMapShader);
 
    // Imposto la viewport per il render della shadow map
    glViewport(0, 0, SHADOW_QUALITY, SHADOW_QUALITY);
@@ -80,10 +79,10 @@ void renderShadowMap() {
 
    skipVertexIndex = 0;
 
-   glBindFramebuffer(GL_FRAMEBUFFER, lightFrameBuffer);
+   glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFrameBuffer);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   lightSpaceMs = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(*light->getCamera()) * light->getCamera()->world2ViewMatrix());
+   lightSpaceMs = std::move(light->getCamera()->onAxisView2ClipProjectiveMatrix() * light->getCamera()->world2ViewMatrix());
 
    glUniformMatrix4fv(lightSpaceMatrixUniform, 1, GL_TRUE, lightSpaceMs.getArray());
 
@@ -107,9 +106,9 @@ void renderShadowMap() {
 
    glDisable(GL_CULL_FACE);
 
-   if (!players.empty()) {
-      glBindVertexArray(cardVAO);
+   glBindVertexArray(cardVAO);
 
+   if (!players.empty()) {
       for (Player& player : players) {
          for (unsigned int i = 0; i < player.getCards().size(); ++i) {
             cardModelM = std::move(player.getCards().at(i).getWorldCoordinates(i));
@@ -117,6 +116,14 @@ void renderShadowMap() {
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          }
       }
+   }
+
+   for (const Card& card : cardsOnTable) {
+      cardModelM = std::move(*card.hand2Table * card.local2World * *card.rotationOnTable);
+
+      glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, cardModelM.getArray());
+
+      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
    }
 
    glDisable(GL_DEPTH_TEST);
@@ -131,8 +138,8 @@ void renderSceneObjects() {
    // Pulizia buffer colore, depth e stencil
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   // Clear dello stato del sistema
 
-   // Imposta tutte le chiamate tramite shaderProgram, iniziando la pipeline
-   glUseProgram(shaderProgram);
+   // Imposta tutte le chiamate tramite sceneToOfflineRenderingShader, iniziando la pipeline
+   glUseProgram(sceneToOfflineRenderingShader);
 
    // Definisce la normale da calcolare in base all'ordine dei vertici (se come orari o antiorari)
    glEnable(GL_CULL_FACE);
@@ -151,16 +158,15 @@ void renderSceneObjects() {
     * Quindi attenzione al posizionamento delle chiamate di modifica stato
     */
 
-   projM_V2C = std::move(Projection::onAxisFOV2ClipProjectiveMatrix(camera));
-   viewM_V2W = std::move(camera.view2WorldMatrix());
-   viewM_W2V = std::move(SquareMatrix::calculateInverse(viewM_V2W));
+   camera.onAxisView2ClipProjectiveMatrix(projM_V2C);
+   camera.view2WorldMatrix(viewM_V2W);
+   camera.world2ViewMatrix(viewM_W2V);
 
    glUniformMatrix4fv(projectionMatrixUniform, 1, GL_TRUE, projM_V2C.getArray());
    glUniformMatrix4fv(viewMatrixUniform, 1, GL_TRUE, viewM_W2V.getArray());
    glUniformMatrix4fv(lsmMainShaderUniform, 1, GL_TRUE, lightSpaceMs.getArray());
 
    glUniform3f(eyePositionUniform, camera.getEye().getX(), camera.getEye().getY(), camera.getEye().getZ());
-   glUniform3f(lookAtUniform, camera.getLookAt().getX(), camera.getLookAt().getY(), camera.getLookAt().getZ());
 
    glUniform3f(lightPosUniform, light->getOrigin().getX(), light->getOrigin().getY(), light->getOrigin().getZ());
    glUniform3f(lightColorUniform, light->getColor().getRed(), light->getColor().getGreen(), light->getColor().getBlue());
@@ -173,7 +179,7 @@ void renderSceneObjects() {
 
    glActiveTexture(GL_TEXTURE10);
    //glBindTexture(GL_TEXTURE_2D, lights.at(0)->getDepthMapAsReference());
-   glBindTexture(GL_TEXTURE_2D, lightTexture);
+   glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
 
    glUniform1f(gammaUniform, GAMMA_CORRECTION);
 
@@ -182,8 +188,6 @@ void renderSceneObjects() {
    skipBumpIndex = 0;
 
    for (auto & object : objects) {
-      //modelM_L2W = object.getWorldCoordinates();
-
       // Già stata calcolata la matrice nello step dello shadow mapping
       glUniformMatrix4fv(modelMatrixUniform, 1, GL_TRUE, object.getLocal2WorldMatrix().getArray());
 
@@ -379,7 +383,7 @@ void renderCards() {
       }
 
       // Genero outlining tramite Stencil test
-      glUseProgram(colorShader);
+      glUseProgram(outlinerShader);
 
       // Disabilito il Depth Test per poter aggiungere varie informazioni o effetti a schermo
       glDisable(GL_DEPTH_TEST);
@@ -407,7 +411,6 @@ void renderCardsOnTable() {
    glUseProgram(deckShader);
    glUniform1i(deckCardTexUniform, 3);
 
-   // Needed?
    glBindVertexArray(cardVAO);
    glActiveTexture(GL_TEXTURE3);
    glBindTexture(GL_TEXTURE_2D, cardTexture);

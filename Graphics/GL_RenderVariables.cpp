@@ -19,7 +19,6 @@ GLuint diffusiveCUniform;
 GLuint specularCUniform;
 GLuint specularAlphaUniform;
 GLuint eyePositionUniform;
-GLuint lookAtUniform;
 
 GLuint gammaUniform;
 GLuint blurUniform;

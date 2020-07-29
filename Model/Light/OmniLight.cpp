@@ -1,7 +1,5 @@
 #include "OmniLight.h"
 
-#include <utility>
-
 OmniLight::OmniLight() : Light(std::move(Float3(0, 0, 0)), std::move(Color(1)), 10) {
    nearFalloffDistance = intensity; // As distance in meters
    farFalloffDistance = 1.5f*intensity;

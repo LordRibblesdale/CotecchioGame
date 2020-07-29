@@ -1,12 +1,11 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include <utility>
 #include <cmath>
 
 #include "../../Vector/Float3.h"
 #include "../../Utilities/Color.h"
-#include "../../Utilities/Camera.h"
+#include "../../Utilities/Camera/Camera.h"
 
 class Light {
 protected:
@@ -16,8 +15,6 @@ protected:
 
    unsigned int frameBuffer;
    unsigned int depthMap;
-
-   std::unique_ptr<Camera> camera;
 
    Light(Float3 o, Color c, float i) : origin(std::move(o)), intensity(i), color(std::move(c)) {}
 
@@ -33,18 +30,13 @@ public:
    unsigned int& getDepthMapAsReference();
 
    const Color & getColor() const;
-
-   const Float3 &getOrigin() const;
-
-   void setOrigin(const Float3 &origin);
-
    void setColor(const Color &color);
 
+   const Float3 &getOrigin() const;
+   virtual void setOrigin(const Float3 &origin);
+
    float getIntensity() const;
-
    void setIntensity(float intensity);
-
-   std::unique_ptr<Camera>& getCamera();
 };
 
 #endif //LIGHT_H
