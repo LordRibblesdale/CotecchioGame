@@ -169,7 +169,7 @@ void loadTextureOnGPU(unsigned char*& data, GLuint& texUniform, int& channels, i
    }
 }
 
-void loadTexture(const std::string &location, const std::string &name, bool loadFiles) {
+void loadSettingsNTextures(const std::string &location, const std::string &name, Model& model) {
    std::unordered_map<std::string, GLuint> map;
    std::unordered_map<std::string, GLuint> bMap;
    std::unordered_map<std::string, unsigned int> materialMap;
@@ -203,7 +203,10 @@ void loadTexture(const std::string &location, const std::string &name, bool load
       unsigned char* data;
       char* texFile;
 
-      for (rapidxml::xml_node<>* position = rootNode->first_node("Material"); position; position = position->next_sibling()) {
+      rapidxml::xml_node<>* position;
+
+      // LOADING MATERIALS...
+      for (position = rootNode->first_node("Material"); position; position = position->next_sibling()) {
          Material material;
 
          if (std::string("Wood") == position->first_attribute("name")->value()) {
@@ -230,8 +233,30 @@ void loadTexture(const std::string &location, const std::string &name, bool load
          materials.push_back(material);
       }
 
-      if (loadFiles) {
-         for (rapidxml::xml_node<>* position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
+      // LOADING SPACE SETTINGS...
+      position = rootNode->first_node("Properties");
+
+      model.setTexturesEnabled(std::stoi(position->first_node("NeedsTextures")->first_attribute("bool")->value()));
+      model.setNeedsNoCulling(std::stoi(position->first_node("NeedsNoCullFace")->first_attribute("bool")->value()));
+
+      rapidxml::xml_node<>* subPosition = position->first_node("Translation");
+      model.setXTranslation(std::stof(subPosition->first_attribute("x")->value()));
+      model.setYTranslation(std::stof(subPosition->first_attribute("y")->value()));
+      model.setZTranslation(std::stof(subPosition->first_attribute("z")->value()));
+
+      subPosition = position->first_node("Scale");
+      model.setXScale(std::stof(subPosition->first_attribute("x")->value()));
+      model.setYScale(std::stof(subPosition->first_attribute("y")->value()));
+      model.setZScale(std::stof(subPosition->first_attribute("z")->value()));
+
+      subPosition = position->first_node("Rotation");
+      model.setXRotation(degree2Radiants(std::stof(subPosition->first_attribute("x")->value())));
+      model.setYRotation(degree2Radiants(std::stof(subPosition->first_attribute("y")->value())));
+      model.setZRotation(degree2Radiants(std::stof(subPosition->first_attribute("z")->value())));
+
+      // LOADING TEXTURES...
+      if (model.doesHaveTextures()) {
+         for (position = rootNode->first_node("Texture"); position; position = position->next_sibling()) {
             if (std::string("Texture") == position->name()) {
                if (std::string("Empty") != position->value()) {
                   createTextureUniform(texUniform);

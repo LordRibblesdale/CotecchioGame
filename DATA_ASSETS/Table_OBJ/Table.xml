@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Table>
+	<Properties>
+		<Translation x="0" y="0" z="0"/>
+		<Scale x="1" y="1" z="1"/>
+        <!--90 default rotation-->
+		<Rotation x="90" y="0" z="0"/>
+		
+		<NeedsNoCullFace bool="0"/>
+        <NeedsTextures bool="1"/>
+    </Properties>
+
     <!--phong1SG3-->
     <Texture name="wood1-nurbsToPoly1.png" material="Wood">
         <Bump name="bump3d1-nurbsToPoly1.png">

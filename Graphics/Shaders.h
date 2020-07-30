@@ -4,6 +4,8 @@
 #ifdef _WIN32
 
 #include "glfw3.h"
+#include "../Model/Model.h"
+
 #endif
 
 #ifdef linux
@@ -83,7 +85,7 @@ GLuint createTextureUniform();
 void createTextureUniform(GLuint& texture);
 
 void loadTextureOnGPU(unsigned char*& data, GLuint& texUniform, int& channels, int& width, int& height);
-void loadTexture(const std::string& location, const std::string &name, bool loadFiles);
+void loadSettingsNTextures(const std::string& location, const std::string &name, Model& model);
 
 void loadCardTextures();
 

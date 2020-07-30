@@ -1,5 +1,4 @@
 #include "GL_RenderVariables.h"
-#include "GL_Loader.h"
 #include <random>
 
 #if (_MSC_VER >= 1500)
@@ -19,7 +18,7 @@ void loadCards() {
    values.reserve(40);
 
    std::stack<unsigned int> cardsValue;
-   mt19937_64 gen;
+   mt19937_64 gen(glfwGetTime());
 
    for (auto i = 10; i < 50; ++i) {
       switch (PLAYERS) {
@@ -41,7 +40,7 @@ void loadCards() {
    }
 
    for(unsigned int i = 0; i < 3; ++i) {
-      gen.seed(glfwGetTime());
+      // Problema di seed?
       std::shuffle(values.begin(), values.end(), gen);
    }
 
@@ -73,16 +72,6 @@ void loadObject(const std::string& location, const std::string& objName, const u
       Model table(location, objName);
       table.processNode(scene->mRootNode, scene);
 
-      if (objType == TABLE_TYPE) {
-         table.setTexturesEnabled(true);
-         table.setXRotation(degree2Radiants(90));
-      } else if (objType == WORLD_TYPE) {
-         table.setTexturesEnabled(false);
-         table.setNeedsNoCulling(true);
-         table.setXTranslation(1);
-         table.setXRotation(degree2Radiants(90));
-      }
-
       objects.emplace_back(std::move(table));
    }
 
@@ -90,7 +79,6 @@ void loadObject(const std::string& location, const std::string& objName, const u
 }
 
 void loadObjects() {
-   // TODO initial translation, rotation and scale
    importer = std::move(std::make_unique<Assimp::Importer>());
 
    objects.reserve(2);
@@ -115,7 +103,7 @@ void loadObjects() {
    vertexBufferObjects.reserve(verticesLenght);
    textureUniforms.reserve(texturesLength);
 
-   for (const auto& object : objects) {
+   for (auto& object : objects) {
       for (const auto& mesh : object.getMeshes()) {
          generateObjects(const_cast<Mesh&>(mesh));
       }
@@ -132,7 +120,7 @@ void loadObjects() {
          glUseProgram(0);
        */
 
-      loadTexture(object.getLocation(), object.getName(), object.doesHaveTextures());
+      loadSettingsNTextures(object.getLocation(), object.getName(), object);
    }
 
    createPlayerPositions(PLAYERS);

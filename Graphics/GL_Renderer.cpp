@@ -119,6 +119,7 @@ void renderShadowMap() {
    }
 
    for (const Card& card : cardsOnTable) {
+      // Optimize product here after animation?
       cardModelM = std::move(*card.hand2Table * card.local2World * *card.rotationOnTable);
 
       glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, cardModelM.getArray());
@@ -247,8 +248,7 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
    //std::vector<SquareMatrix> matrices;
    //matrices.reserve(4);
 
-   //players.at(pIndex).getCards().at(i).getWorldCoordinates(i, matrices);
-
+   // Call overwrite less times?
    cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
 
    if (pIndex == playerIndex) {

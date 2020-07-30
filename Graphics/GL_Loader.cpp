@@ -170,47 +170,47 @@ bool setupOfflineRendering() {
 
 bool compileShaders() {
    // TODO check optimization
-   if (compileShader("Shader Files/scene_vertex.glsl", "Shader Files/scene_fragment.glsl", sceneToOfflineRenderingShader)) {
+   if (!compileShader("Shader Files/scene_vertex.glsl", "Shader Files/scene_fragment.glsl", sceneToOfflineRenderingShader)) {
       std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
       return false;
    }
 
    //--------------------------OFFLINE RENDERING--------------------------------//
-   if (compileShader("Shader Files/window_vertex.glsl", "Shader Files/window_fragment.glsl", offlineToWindowShader)) {
+   if (!compileShader("Shader Files/window_vertex.glsl", "Shader Files/window_fragment.glsl", offlineToWindowShader)) {
       std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
       return false;
    }
 
    //---------------------------CARD RENDERING--------------------------------//
-   if (compileShader("Shader Files/cards_vertex.glsl", "Shader Files/cards_fragment.glsl", cardsShader)) {
+   if (!compileShader("Shader Files/cards_vertex.glsl", "Shader Files/cards_fragment.glsl", cardsShader)) {
       std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
       return false;
    }
 
-   if (compileShader("Shader Files/deck_vertex.glsl", "Shader Files/deck_fragment.glsl", deckShader)) {
+   if (!compileShader("Shader Files/deck_vertex.glsl", "Shader Files/deck_fragment.glsl", deckShader)) {
       std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
       return false;
    }
 
    //---------------------------STENCIL RENDERING--------------------------------//
-   if (compileShader("Shader Files/outliner_vertex.glsl", "Shader Files/outliner_fragment.glsl", outlinerShader)) {
+   if (!compileShader("Shader Files/outliner_vertex.glsl", "Shader Files/outliner_fragment.glsl", outlinerShader)) {
       std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
       return false;
    }
 
    //----------------------------SHADOW RENDERING--------------------------------//
-   if (compileShader("Shader Files/shadow_map_vertex.glsl", "Shader Files/shadow_map_fragment.glsl", shadowMapShader)) {
+   if (!compileShader("Shader Files/shadow_map_vertex.glsl", "Shader Files/shadow_map_fragment.glsl", shadowMapShader)) {
       std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
       return false;
    }
 
    //------------------------------DEBUG SHADER----------------------------------//
-   if (compileShader("Shader Files/window_vertex.glsl", "Shader Files/debug_fragment.glsl", debugShader)) {
+   if (!compileShader("Shader Files/window_vertex.glsl", "Shader Files/debug_fragment.glsl", debugShader)) {
       std::cout << "Error COMPILE_SHADER_FUNCTION: look above for errors." << std::endl;
       return false;
    }
 
-   return false;
+   return true;
 }
 
 void prepareScreenForOfflineRendering() {
@@ -339,8 +339,6 @@ void render() {
       pollInput(window);
 
       selectedCardIndex = MAX_SIZE_T_VALUE;
-
-      light->getCamera()->setLookAt(Float3(0, 15*sinf(currTime), 0));
 
       renderShadowMap();
       renderSceneObjects();
