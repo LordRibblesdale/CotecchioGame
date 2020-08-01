@@ -4,3 +4,8 @@ GL_Loader.cpp
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, Color(1, 1, 1, 1).getVector().get());
+
+   // emplace_back duplica dimensioni della capacità originale se necessita riallocazione
+   // Il minimo di carte è 35, un possibile riallocamento restituisce 70 di capacity (30 * 4byte aggiuntivi e O(n) nello spostamento)
+   // https://stackoverflow.com/questions/200384/constant-amortized-time
+   // http://www.cplusplus.com/reference/vector/vector/emplace_back/

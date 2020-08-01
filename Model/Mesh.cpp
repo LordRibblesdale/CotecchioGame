@@ -5,6 +5,9 @@ Mesh::Mesh(unsigned int vertexPreallocSize, unsigned int indexPreallocSize, bool
    normals.reserve(vertexPreallocSize);
    indices.reserve(indexPreallocSize);
 
+   tangents.resize(vertexPreallocSize);
+   bitangents.resize(vertexPreallocSize);
+
    hasTextures ? textureUnwrap.reserve(vertexPreallocSize) : vertexColors.reserve(vertexPreallocSize);
 }
 
@@ -14,6 +17,9 @@ Mesh::~Mesh() {
    indices.clear();
    textureUnwrap.clear();
    vertexColors.clear();
+
+   tangents.clear();
+   bitangents.clear();
 }
 
 void Mesh::addVertex(const Float3& vertex) {
@@ -36,13 +42,17 @@ void Mesh::addIndex(unsigned int i) {
    indices.emplace_back(i);
 }
 
-//void Mesh::addTangent(const Float3 &tangent) {
-//   tangents.emplace_back(tangent);
-//}
-//
-//void Mesh::addBitangent(const Float3 &bitangent) {
-//   bitangents.emplace_back(bitangent);
-//}
+void Mesh::addTangent(const Float3 &tangent, unsigned int index1, unsigned int index2, unsigned int index3) {
+   tangents.at(index1) += tangent;
+   tangents.at(index2) += tangent;
+   tangents.at(index3) += tangent;
+}
+
+void Mesh::addBitangent(const Float3 &bitangent, unsigned int index1, unsigned int index2, unsigned int index3) {
+   bitangents.at(index1) += bitangent;
+   bitangents.at(index2) += bitangent;
+   bitangents.at(index3) += bitangent;
+}
 
 const vector<Float3> &Mesh::getVertices() const {
    return vertices;
@@ -64,26 +74,10 @@ const vector<unsigned int> &Mesh::getIndices() const {
    return indices;
 }
 
-//const vector<Float3> &Mesh::getTangents() const {
-//   return tangents;
-//}
-//
-//const vector<Float3> &Mesh::getBitangents() const {
-//   return bitangents;
-//}
-
-const Float3 &Mesh::getTangent() const {
-   return tangent;
+const vector<Float3> &Mesh::getTangents() const {
+   return tangents;
 }
 
-void Mesh::setTangent(const Float3 &tangent) {
-   Mesh::tangent = tangent;
-}
-
-const Float3 &Mesh::getBitangent() const {
-   return bitangent;
-}
-
-void Mesh::setBitangent(const Float3 &bitangent) {
-   Mesh::bitangent = bitangent;
+const vector<Float3> &Mesh::getBitangents() const {
+   return bitangents;
 }

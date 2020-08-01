@@ -9,16 +9,19 @@
 #include <assimp/postprocess.h>
 #endif
 
+// TODO fix for Unix users
+#include <windows.h>
+
+
 void loadCards() {
    std::vector<unsigned short> values;
-   // emplace_back duplica dimensioni della capacità originale se necessita riallocazione
-   // Il minimo di carte è 35, un possibile riallocamento restituisce 70 di capacity (30 * 4byte aggiuntivi e O(n) nello spostamento)
-   // https://stackoverflow.com/questions/200384/constant-amortized-time
-   // http://www.cplusplus.com/reference/vector/vector/emplace_back/
    values.reserve(40);
 
    std::stack<unsigned int> cardsValue;
-   mt19937_64 gen(glfwGetTime());
+
+   SYSTEMTIME time;
+   GetSystemTime(&time);
+   mt19937_64 gen(time.wMilliseconds + time.wSecond*1000);
 
    for (auto i = 10; i < 50; ++i) {
       switch (PLAYERS) {
@@ -161,7 +164,9 @@ void generateObjects(Mesh &mesh) {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
    unsigned int size = 3*mesh.getVertices().size()    //3
            + 2*mesh.getTextureUnwrap().size()         //5
-           + 3*mesh.getNormals().size();              //8
+           + 3*mesh.getNormals().size()               //8
+           + 3*mesh.getTangents().size()              //11
+           + 3*mesh.getBitangents().size();           //14
 
    GLfloat attributes[size];
 
@@ -177,23 +182,15 @@ void generateObjects(Mesh &mesh) {
       attributes[index++] = mesh.getNormals().at(i).getX();
       attributes[index++] = mesh.getNormals().at(i).getY();
       attributes[index++] = mesh.getNormals().at(i).getZ();
+
+      attributes[index++] = mesh.getTangents().at(i).getX();
+      attributes[index++] = mesh.getTangents().at(i).getY();
+      attributes[index++] = mesh.getTangents().at(i).getZ();
+
+      attributes[index++] = mesh.getBitangents().at(i).getX();
+      attributes[index++] = mesh.getBitangents().at(i).getY();
+      attributes[index++] = mesh.getBitangents().at(i).getZ();
    }
-
-   // Impostazione del Tangent Space
-   Float2 deltaUV1(std::move(mesh.getTextureUnwrap().at(2) - mesh.getTextureUnwrap().at(1)));
-   Float2 deltaUV2(std::move(mesh.getTextureUnwrap().at(1) - mesh.getTextureUnwrap().at(0)));
-   Float3 e1(std::move(mesh.getVertices().at(2) - mesh.getVertices().at(1)));
-   Float3 e2(std::move(mesh.getVertices().at(1) - mesh.getVertices().at(0)));
-
-   float invDet = 1.0f / (deltaUV1.getX()*deltaUV2.getY() - deltaUV2.getX()*deltaUV1.getY());
-
-   mesh.setTangent(invDet * Float3(deltaUV2.getY()*e1.getX() - deltaUV1.getY()*e2.getX(),
-                          deltaUV2.getY()*e1.getY() - deltaUV1.getY()*e2.getY(),
-                          deltaUV2.getY()*e1.getZ() - deltaUV1.getY()*e2.getZ()));
-
-   mesh.setBitangent(invDet * Float3(-deltaUV2.getX()*e1.getX() + deltaUV1.getX()*e2.getX(),
-                                     -deltaUV2.getX()*e1.getY() + deltaUV1.getX()*e2.getY(),
-                                     -deltaUV2.getX()*e1.getZ() + deltaUV1.getX()*e2.getZ()));
 
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, attributes, GL_STATIC_DRAW);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.getIndices().size(), mesh.getIndices().data(), GL_STATIC_DRAW);
@@ -214,14 +211,20 @@ void generateObjects(Mesh &mesh) {
     * Abilita gli attributi passatigli
     *
     */
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) 0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) 0);
    glEnableVertexAttribArray(0);
 
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) (3*sizeof(GLfloat)));
    glEnableVertexAttribArray(1);
 
-   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
+   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) (5*sizeof(GLfloat)));
    glEnableVertexAttribArray(2);
+
+   glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) (8*sizeof(GLfloat)));
+   glEnableVertexAttribArray(3);
+
+   glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) (11*sizeof(GLfloat)));
+   glEnableVertexAttribArray(4);
 
    // Imposta il nuovo buffer a 0, ovvero slega il bind dall'array (per evitare di sovrascrivere)
    glBindBuffer(GL_ARRAY_BUFFER, 0);

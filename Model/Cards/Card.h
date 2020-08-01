@@ -43,7 +43,7 @@ struct Card {
    Card& operator=(const Card& card);
 
    SquareMatrix getWorldCoordinates(unsigned int cardIndex);
-   void getWorldCoordinates(unsigned int cardIndex, std::vector<SquareMatrix>& matrices);
+   void getWorldCoordinates(unsigned int cardIndex, SquareMatrix& matrix);
 
     void setupCard();
 

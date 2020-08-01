@@ -11,9 +11,6 @@ extern GLuint modelMatrixUniform;
 extern GLuint textureUniform;
 extern GLuint bumpUniform;
 
-extern GLuint tangentUniform;
-extern GLuint bitangentUniform;
-
 extern GLuint lightPosUniform;
 extern GLuint lightColorUniform;
 extern GLuint lightIntensity;

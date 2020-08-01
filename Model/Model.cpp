@@ -50,6 +50,28 @@ void Model::processMesh(aiMesh *mesh) {
       }
    }
 
+   for (int i = 0; i < mesh->mNumFaces; ++i) {
+      for (int j = 0; j < mesh->mFaces[i].mNumIndices; j += 3) {
+         // Impostazione del Tangent Space
+         Float2 deltaUV1(std::move(mesh1.getTextureUnwrap().at(mesh->mFaces[i].mIndices[j+2]) - mesh1.getTextureUnwrap().at(mesh->mFaces[i].mIndices[j+1])));
+         Float2 deltaUV2(std::move(mesh1.getTextureUnwrap().at(mesh->mFaces[i].mIndices[j+1]) - mesh1.getTextureUnwrap().at(mesh->mFaces[i].mIndices[j])));
+         Float3 e1(std::move(mesh1.getVertices().at(mesh->mFaces[i].mIndices[j+2]) - mesh1.getVertices().at(mesh->mFaces[i].mIndices[j+1])));
+         Float3 e2(std::move(mesh1.getVertices().at(mesh->mFaces[i].mIndices[j+1]) - mesh1.getVertices().at(mesh->mFaces[i].mIndices[j])));
+
+         float invDet = 1.0f / (deltaUV1.getX()*deltaUV2.getY() - deltaUV2.getX()*deltaUV1.getY());
+
+         mesh1.addTangent(invDet * Float3(deltaUV2.getY()*e1.getX() - deltaUV1.getY()*e2.getX(),
+               deltaUV2.getY()*e1.getY() - deltaUV1.getY()*e2.getY(),
+               deltaUV2.getY()*e1.getZ() - deltaUV1.getY()*e2.getZ()),
+                     mesh->mFaces[i].mIndices[j], mesh->mFaces[i].mIndices[j+1], mesh->mFaces[i].mIndices[j+2]);
+
+         mesh1.addBitangent(invDet * Float3(-deltaUV2.getX()*e1.getX() + deltaUV1.getX()*e2.getX(),
+               -deltaUV2.getX()*e1.getY() + deltaUV1.getX()*e2.getY(),
+               -deltaUV2.getX()*e1.getZ() + deltaUV1.getX()*e2.getZ()),
+                     mesh->mFaces[i].mIndices[j], mesh->mFaces[i].mIndices[j+1], mesh->mFaces[i].mIndices[j+2]);
+      }
+   }
+
    meshes.push_back(std::move(mesh1));
 }
 

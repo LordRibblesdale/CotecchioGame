@@ -14,8 +14,8 @@ class Mesh {
    std::vector<Color> vertexColors;
    std::vector<unsigned int> indices;
 
-   Float3 tangent;
-   Float3 bitangent;
+   std::vector<Float3> tangents;
+   std::vector<Float3> bitangents;
 
 public:
    Mesh(unsigned int vertexPreallocSize, unsigned int indexPreallocSize, bool hasTextures);
@@ -26,21 +26,16 @@ public:
    void addTextureUnwrap(const Float2 &uv);
    void addColor(const Color& color);
    void addIndex(unsigned int i);
+   void addTangent(const Float3& tangent, unsigned int index1, unsigned int index2, unsigned int index3);
+   void addBitangent(const Float3& bitangent, unsigned int index1, unsigned int index2, unsigned int index3);
 
    const std::vector<Float3> &getVertices() const;
-   const vector<Float3> &getNormals() const;
-   const vector<Float2> &getTextureUnwrap() const;
-   const vector<Color> &getVertexColors() const;
-   const vector<unsigned int> &getIndices() const;
-
-   const Float3 &getTangent() const;
-   void setTangent(const Float3 &tangent);
-   const Float3 &getBitangent() const;
-   void setBitangent(const Float3 &bitangent);
-
-   const vector<Float3> &getTangents() const;
-
-   const vector<Float3> &getBitangents() const;
+   const std::vector<Float3> &getNormals() const;
+   const std::vector<Float2> &getTextureUnwrap() const;
+   const std::vector<Color> &getVertexColors() const;
+   const std::vector<unsigned int> &getIndices() const;
+   const std::vector<Float3>& getTangents() const;
+   const std::vector<Float3>& getBitangents() const;
 
    const Float3 &getDiffusive() const;
 

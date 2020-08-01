@@ -3,6 +3,8 @@
 layout (location = 0) in vec3 position; // Variabile in ingresso di 3 float (vettore), layout da posizione sulla memoria
 layout (location = 1) in vec2 textureCoordinates;
 layout (location = 2) in vec3 normalVector;
+layout (location = 3) in vec3 tangent;
+layout (location = 4) in vec3 bitangent;
 
 // IMPORTANTE: i nomi delle variabili tra i due shader devono essere uguali se li si vogliono passare da vertex a fragment
 out vec2 outTextCoord;
@@ -21,9 +23,6 @@ uniform mat4 view;
 uniform mat4 model;
 // Light Space Matrix
 uniform mat4 lightSpaceMatrix;
-
-uniform vec3 tangent;
-uniform vec3 bitangent;
 
 mat3 normalMatrix;
 

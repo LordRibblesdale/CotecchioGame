@@ -107,7 +107,7 @@ void Card::setupCard() {
    tableCenterToHand = std::move(players.at(playerID).getPosition() - 4.0f * (players.at(playerID).getPosition() - defaultLookAt).getNormalized());
    orthogonalTC2H = std::move(Float3(-tableCenterToHand.getY() * 0.2f + 0.001f, tableCenterToHand.getX() * 0.2f + 0.001f, 0));
    rotate = std::move(Rotation::rotationZAxisMatrix4(M_PI_2 - ((M_PI/static_cast<float>(sessionPlayers))*(sessionPlayers-2)*playerID)));
-   qRotate = std::move(Rotation::rotationByQuaternion(Float4(orthogonalTC2H.getX(), orthogonalTC2H.getY(), 0, 1), angle));
+   qRotate = std::move(Rotation::rotationByQuaternion(Float3(orthogonalTC2H.getX(), orthogonalTC2H.getY(), 0), angle));
 
    partialLocal2World = std::move((qRotate * (rotate * scale)));
 }
@@ -129,19 +129,21 @@ SquareMatrix Card::getWorldCoordinates(unsigned int cardIndex) {
    return local2World;
 }
 
-void Card::getWorldCoordinates(unsigned int cardIndex, std::vector<SquareMatrix>& matrices) {
-   /*
-   unsigned int handCards = players.at(playerID).getCards().size();
-   Float3 tableCenterToHand(std::move(players.at(playerID).getPosition() - 2.5f*(players.at(playerID).getPosition() - defaultLookAt).getNormalized()));
-   Float3 orthogonalTC2H(-tableCenterToHand.getY()*0.2f - 0.1f*cardIndex / static_cast<float>(handCards), tableCenterToHand.getX()*0.2f, 0);
-   matrices.emplace_back(std::move(Transform::translateMatrix4(
-           tableCenterToHand.getX() - orthogonalTC2H.getX() * (1 - 2.25f*cardIndex / static_cast<float>(handCards)),
-           tableCenterToHand.getY() - orthogonalTC2H.getY() * (1 - 2.25f*cardIndex / static_cast<float>(handCards)),
-           tableCenterToHand.getZ() - 0.5f)));
-   matrices.emplace_back(std::move(Rotation::rotationByQuaternion(Float4(orthogonalTC2H.getX(), orthogonalTC2H.getY(), 0, 1), degree2Radiants(-10))));
-   matrices.emplace_back(std::move(Rotation::rotationZAxisMatrix4(M_PI_2 - ((M_PI/static_cast<float>(sessionPlayers))*(sessionPlayers-2)*playerID))));
-   matrices.emplace_back(std::move(Transform::scaleMatrix4(0.4, 0.4, 0.4)));
-    */
+void Card::getWorldCoordinates(unsigned int cardIndex, SquareMatrix& matrix) {
+   if (!isCardSetup) {
+      setupCard();
+
+      isCardSetup = true;
+   }
+
+   translate = (std::move(Transform::translateMatrix4(
+         tableCenterToHand.getX() - orthogonalTC2H.getX() * (1.75f - 3.25f * (cardIndex + 1) / static_cast<float>(handCards)) - 0.10f,
+         tableCenterToHand.getY() - orthogonalTC2H.getY() * (1.0f - 3.25f * (cardIndex) / static_cast<float>(handCards)) - 0.10f,
+         tableCenterToHand.getZ() - 0.4f)));
+
+   local2World = std::move(translate * partialLocal2World);
+
+   matrix = local2World;
 }
 
 const SquareMatrix& Card::getLocal2World() const {

@@ -14,9 +14,6 @@ void setupRenderVariables() {
    textureUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "texture1");
    bumpUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "normalTexture");
 
-   tangentUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "tangent");
-   bitangentUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "bitangent");
-
    lightPosUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "lightPos");
    lightColorUniform = glGetUniformLocation(sceneToOfflineRenderingShader, "lightColor");
    lightIntensity = glGetUniformLocation(sceneToOfflineRenderingShader, "lightIntensity");
@@ -111,7 +108,7 @@ void renderShadowMap() {
    if (!players.empty()) {
       for (Player& player : players) {
          for (unsigned int i = 0; i < player.getCards().size(); ++i) {
-            cardModelM = std::move(player.getCards().at(i).getWorldCoordinates(i));
+            player.getCards().at(i).getWorldCoordinates(i, cardModelM);
             glUniformMatrix4fv(modelLightShaderUniform, 1, GL_TRUE, cardModelM.getArray());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          }
@@ -215,14 +212,6 @@ void renderSceneObjects() {
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, bumpUniforms.at(skipBumpIndex++));
-
-            glUniform3f(tangentUniform, object.getMeshes().at(j).getTangent().getX(),
-                        object.getMeshes().at(j).getTangent().getY(),
-                        object.getMeshes().at(j).getTangent().getZ());
-
-            glUniform3f(bitangentUniform, object.getMeshes().at(j).getBitangent().getX(),
-                        object.getMeshes().at(j).getBitangent().getY(),
-                        object.getMeshes().at(j).getBitangent().getZ());
          } else {
             glUniform3f(ambientCUniform, materials.at(materials.size() - 1).ambientCoeff.getX(),
                         materials.at(materials.size()-1).ambientCoeff.getY(),
@@ -248,8 +237,7 @@ void renderCardsInLoop(unsigned int& pIndex, size_t& i, bool& hasSelectedCard, d
    //std::vector<SquareMatrix> matrices;
    //matrices.reserve(4);
 
-   // Call overwrite less times?
-   cardModelM = std::move(players.at(pIndex).getCards().at(i).getWorldCoordinates(i));
+   cardModelM = players.at(pIndex).getCards().at(i).getLocal2World();
 
    if (pIndex == playerIndex) {
       if (!hasSelectedCard) {
@@ -371,7 +359,7 @@ void renderCards() {
          if (hasSelectedCard && (playerIndex == pIndex)) {
             glDisable(GL_DEPTH_TEST);
 
-            cardModelM = std::move(players.at(playerIndex).getCards().at(selectedCardIndex).getWorldCoordinates(selectedCardIndex));
+            cardModelM = players.at(playerIndex).getCards().at(selectedCardIndex).getLocal2World();
 
             glUniform1i(cardValueUniform, players.at(pIndex).getCards().at(selectedCardIndex).value);
             glUniformMatrix4fv(cardModelMatrix, 1, GL_TRUE, cardModelM.getArray());

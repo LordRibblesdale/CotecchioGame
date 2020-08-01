@@ -7,9 +7,6 @@ GLuint modelMatrixUniform;
 GLuint textureUniform;
 GLuint bumpUniform;
 
-GLuint tangentUniform;
-GLuint bitangentUniform;
-
 GLuint lightPosUniform;
 GLuint lightColorUniform;
 GLuint lightIntensity;
