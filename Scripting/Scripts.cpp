@@ -135,6 +135,8 @@ void pollInput(GLFWwindow *window) {
 
             cardMovingAnimation->moveCard(cardMovingAnimation->getCard()->orthogonalTC2H, sumTimeCardAnimationTime);
          } else {
+            cardMovingAnimation->moveCard(cardMovingAnimation->getCard()->orthogonalTC2H, cardAnimationTime);
+
             cardMovingAnimation.reset();
             sumTimeCardAnimationTime = 0;
             CardMoving::heightBias += 0.0025f;

@@ -1,5 +1,4 @@
 #include "CameraTranslation.h"
-#include "../Matrix/StandardMatrix.h"
 
 CameraTranslation::CameraTranslation(const Float3& initialPosition, const Float3& finalPosition) : initialPosition(initialPosition), finalPosition(finalPosition) {}
 

@@ -7,7 +7,7 @@
 #include "../Model/Triangle.h"
 #include "../Model/Box.h"
 
-const float EPSILON = 0.00001;
+const float EPSILON = 0.00001f;
 
 struct Intersection {
 private:

@@ -96,6 +96,7 @@ extern float blurValue;
 
 extern unsigned int playerIndex;
 extern unsigned short int sessionPlayers;
+extern unsigned int totalCards;
 
 //--------------------------------------------------------------//
 
@@ -127,7 +128,6 @@ extern std::vector<Player> players;
 extern bool DEVELOPER_MODE;
 extern bool IS_ANIMATION_BUSY;
 extern bool IS_GAME_STARTED;
-extern double backspaceButtonTime;
 extern double sumBSBTime;
 
 #endif //COTECCHIOGAME_SCENEOBJECTS_H

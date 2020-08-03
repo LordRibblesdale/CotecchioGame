@@ -1,5 +1,8 @@
+#include <random>
 #include "GL_Loader.h"
 #include "GL_RenderVariables.h"
+
+#include <windows.h>
 
 void renderText() {
 
@@ -416,6 +419,36 @@ void renderCardsOnTable() {
       glUniformMatrix4fv(deckModelMatrix, 1, GL_TRUE, cardModelM.getArray());
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+   }
+
+   if (cardsOnTable.size() == totalCards) {
+      std::stack<Card> dealer;
+
+      SYSTEMTIME time;
+      GetSystemTime(&time);
+      mt19937_64 gen(time.wMilliseconds + time.wSecond*1000);
+
+      for (auto i = 0; i < 3; ++i) {
+         std::shuffle(cardsOnTable.begin(), cardsOnTable.end(), gen);
+      }
+
+      for (auto& value : cardsOnTable) {
+         dealer.push(value);
+      }
+
+      int playerID = 0;
+      for (auto& player : players) {
+         for (unsigned int i = 0; i < 40/sessionPlayers; ++i) {
+            dealer.top().playerID = playerID;
+
+            player.getCards().emplace_back(dealer.top());
+            dealer.pop();
+         }
+
+         ++playerID;
+      }
+
+      cardsOnTable.clear();
    }
 
    // Da riattivare per permettere le modifiche al buffer (pulizia)

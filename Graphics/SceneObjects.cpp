@@ -80,6 +80,7 @@ float blurValue;
 
 unsigned int playerIndex = 0;
 unsigned short int sessionPlayers = 0;
+unsigned int totalCards = 0;
 
 std::vector<Model> objects;
 std::vector<Card> cardsOnTable;
@@ -104,5 +105,4 @@ std::vector<Player> players;
 bool DEVELOPER_MODE = false;
 bool IS_ANIMATION_BUSY = false;
 bool IS_GAME_STARTED = false;
-double backspaceButtonTime = 1;
 double sumBSBTime = 0;

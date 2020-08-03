@@ -12,7 +12,6 @@
 // TODO fix for Unix users
 #include <windows.h>
 
-
 void loadCards() {
    std::vector<unsigned short> values;
    values.reserve(40);
@@ -41,6 +40,8 @@ void loadCards() {
 
       values.emplace_back(i);
    }
+
+   totalCards = values.size();
 
    for(unsigned int i = 0; i < 3; ++i) {
       // Problema di seed?

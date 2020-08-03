@@ -11,7 +11,6 @@ class CardMoving {
    double totalDuration;
 
    Float3 dir;
-   Float3 height;
 
 public:
     static float heightBias;
